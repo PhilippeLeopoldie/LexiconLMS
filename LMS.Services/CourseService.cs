@@ -2,7 +2,7 @@
 
 namespace LMS.Services;
 
-public class CourseService(IMapper mapper)
+public class CourseService(IMapper mapper) : ICourseService
 {
     public Task<IEnumerable<CourseDto>> GetAllCoursesAsync()
     {
