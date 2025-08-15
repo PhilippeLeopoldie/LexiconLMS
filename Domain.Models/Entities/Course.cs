@@ -2,7 +2,7 @@
 
 namespace Domain.Models.Entities;
 
-public class Cource : ILinkBase
+public class Course : ILinkBase
 {
     public int Id { get; set; }
     public string Name { get; set; }
