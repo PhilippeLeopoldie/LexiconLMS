@@ -27,5 +27,8 @@ namespace LMS.Infractructure.Data
 
 
         }
+
+        public DbSet<Module> Modules { get; set; } = default!;
+
     }
 }
