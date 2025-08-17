@@ -2,7 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.AuthDtos;
 
-namespace LMS.Infractructure.Data;
+namespace LMS.Infrastructure.Data;
 
 public class MapperProfile : Profile
 {
