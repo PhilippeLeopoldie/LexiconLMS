@@ -146,10 +146,10 @@ public class AuthService : IAuthService
             throw new TokenValidationException("User not found", StatusCodes.Status400BadRequest);
 
         if (user!.RefreshToken != token.RefreshToken)
-            throw new TokenValidationException("Refreshtoken do not match");
+            throw new TokenValidationException("Refresh token do not match");
 
         if (user.RefreshTokenExpireTime <= DateTime.Now)
-            throw new TokenValidationException("Refreshtoken has expired");
+            throw new TokenValidationException("Refresh token has expired");
 
         this.user = user;
 

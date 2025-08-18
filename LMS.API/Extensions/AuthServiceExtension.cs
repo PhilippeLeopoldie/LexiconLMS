@@ -1,5 +1,5 @@
 ﻿using Domain.Models.Configurations;
-using LMS.Infractructure.Data;
+using LMS.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -9,14 +9,6 @@ namespace LMS.API.Extensions;
 
 public static class AuthServiceExtension
 {
-    //User Secrets Json
-    //Important to have secretkey inside same key "JwtSettings" as used in appsettings.json for get both sections!!!!
-    //{
-    //     "password": "YourSecretPasswordHere",
-    //     "JwtSettings": {
-    //        "secretkey": "ThisMustBeReallyLong!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    //        }
-    //}
     public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration

@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Shared", "LMS.Shared\LM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Models", "Domain.Models\Domain.Models.csproj", "{37686FA2-E778-4F5F-9A7F-398327EAFB61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Infractructure", "LMS.Infractructure\LMS.Infractructure.csproj", "{B095FB97-18E5-447A-80AB-2F4164CD2A36}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Infrastructure", "LMS.Infractructure\LMS.Infrastructure.csproj", "{B095FB97-18E5-447A-80AB-2F4164CD2A36}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Contracts", "Domain.Contracts\Domain.Contracts.csproj", "{AF13264F-288F-401C-BB29-E14658DB93B3}"
 EndProject
