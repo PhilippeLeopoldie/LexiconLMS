@@ -25,7 +25,7 @@ public class ModuleRepository : RepositoryBase<Module>
     {
         var query = FindByCondition(module => module.Id.Equals(id), trackChanges);
 
-        if (includeActivities) query = query.Include(module => module.activities);
+        if (includeActivities) query = query.Include(module => module.Activities);
         return await query.FirstOrDefaultAsync();
     }
 
