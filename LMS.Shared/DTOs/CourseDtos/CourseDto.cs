@@ -1,4 +1,4 @@
-﻿namespace LMS.Services;
+﻿namespace LMS.Shared.DTOs.CourseDtos;
 
 public record CourseDto
 {
