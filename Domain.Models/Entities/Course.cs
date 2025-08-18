@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Entities;
+﻿using Service.Contracts;
+
+namespace Domain.Models.Entities;
 
 public class Course : BaseModel
 {
