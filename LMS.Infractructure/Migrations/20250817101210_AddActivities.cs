@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Companies.Infractructure.Migrations
+namespace Companies.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class AddActivities : Migration
