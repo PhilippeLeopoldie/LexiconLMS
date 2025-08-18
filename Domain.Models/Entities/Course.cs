@@ -1,6 +1,4 @@
-﻿using Service.Contracts;
-
-namespace Domain.Models.Entities;
+﻿namespace Domain.Models.Entities;
 
 public class Course : BaseModel
 {
@@ -8,8 +6,7 @@ public class Course : BaseModel
     public DateTime Starts { get; set; }
     public DateTime Ends { get; set; }
 
-    public string StudentId { get; set; } = null!;
-    public ApplicationUser Student { get; set; } = null!;
+    public ICollection<ApplicationUser> Students { get; set; } = [];
 
     public ICollection<Module> Modules { get; set; } = [];
 }
