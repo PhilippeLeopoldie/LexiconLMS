@@ -5,10 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.API.Services;
 
-//Add in secret.json
-//{
-//   "password" :  "YourSecretPasswordHere"
-//}
 public class DataSeedHostingService : IHostedService
 {
     private readonly IServiceProvider serviceProvider;
@@ -47,21 +43,50 @@ public class DataSeedHostingService : IHostedService
             await AddRolesAsync([TeacherRole, StudentRole]);
             await AddDemoUsersAsync();
             await AddUsersAsync(20);
+            await AddActivityTypesAsync(context);
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)
         {
-            logger.LogError($"Data seed fail with error: {ex.Message}");
+            var message = ex.Message;
+            logger.LogError("Data seed fail with error: {message}", message);
             throw;
         }
     }
 
-    private async Task AddRolesAsync(string[] rolenames)
+    private async Task AddActivityTypesAsync(ApplicationDbContext context)
     {
-        foreach (string rolename in rolenames)
+        var activityTypesToSeed = new List<Tuple<string, string>>
         {
-            if (await roleManager.RoleExistsAsync(rolename)) continue;
-            var role = new IdentityRole { Name = rolename };
+            new("Föreläsning","En lärarledd presentation som introducerar nya ämnen, teorier eller koncept för studenterna" ),
+            new("E-learning", "En aktivitet där studenter får tillgång till digitalt kursmaterial, såsom videor, interaktiva moduler eller läsmaterial, för självstudier i egen takt"),
+            new("Övningspass", "En handledd session där studenter arbetar med praktiska uppgifter eller problem för att tillämpa kunskapen från föreläsningar och e-learning."),
+            new("Inlämningsuppgift", "En aktivitet där studenter ska lämna in ett skriftligt eller digitalt arbete för bedömning.")
+        };
+
+        foreach (var (activityTypeName, activityTypeDescription) in activityTypesToSeed)
+        {
+            if (!await context.ActivityTypes.AnyAsync(at => at.Name.Equals(activityTypeName)))
+            {
+                var newActivityType = new ActivityType
+                {
+                    Name = activityTypeName,
+                    Description = activityTypeDescription
+                };
+                context.ActivityTypes.Add(newActivityType);
+                logger.LogInformation(message: "Adding activity type: {activityTypeName}", activityTypeName);
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private async Task AddRolesAsync(string[] roleNames)
+    {
+        foreach (string roleName in roleNames)
+        {
+            if (await roleManager.RoleExistsAsync(roleName)) continue;
+            var role = new IdentityRole { Name = roleName };
             var res = await roleManager.CreateAsync(role);
 
             if (!res.Succeeded) throw new Exception(string.Join("\n", res.Errors));
@@ -74,7 +99,7 @@ public class DataSeedHostingService : IHostedService
             UserName = "teacher@test.com",
             Email = "teacher@test.com"
         };
-        
+
         var student = new ApplicationUser
         {
             UserName = "student@test.com",
