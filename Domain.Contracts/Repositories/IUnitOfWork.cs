@@ -2,5 +2,6 @@
 
 public interface IUnitOfWork
 {
+    IActivityRepository ActivityRepository { get; }
     Task CompleteAsync();
 }

@@ -31,6 +31,15 @@ public static class ExceptionMiddlewareExtensions
                                     detail: tokenValidationException.Message,
                                     instance: context.Request.Path);
                             break;
+                        case NotFoundException notFoundException:
+                            statusCode = StatusCodes.Status404NotFound;
+                            problemDetails = problemDetailsFactory.CreateProblemDetails(
+                                context,
+                                statusCode,
+                                title: notFoundException.Title,
+                                detail: notFoundException.Message,
+                                instance: context.Request.Path);
+                            break;
                         default:
                             statusCode = StatusCodes.Status500InternalServerError;
                             problemDetails = problemDetailsFactory.CreateProblemDetails(

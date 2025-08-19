@@ -38,10 +38,15 @@ public class Program
             {
                 opt.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             });
+
+            app.UseCors("AllowAll");
+        }
+        else
+        {
+            app.UseCors();
         }
 
         app.UseHttpsRedirection();
-        app.UseCors("AllowAll");
 
         app.UseAuthentication();
         app.UseAuthorization();

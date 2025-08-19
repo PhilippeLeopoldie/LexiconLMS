@@ -7,10 +7,12 @@ namespace LMS.Infrastructure.Repositories;
 public abstract class RepositoryBase<T> : IRepositoryBase<T>, IInternalRepositoryBase<T> where T : class //Do Entitybase
 {
     protected DbSet<T> DbSet { get; }
+    protected ApplicationDbContext Context { get; }
 
     public RepositoryBase(ApplicationDbContext context)
     {
         DbSet = context.Set<T>();
+        Context = context;
     }
 
     public IQueryable<T> FindAll(bool trackChanges = false) =>
