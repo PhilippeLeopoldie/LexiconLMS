@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,7 @@ public class DataSeedHostingService : IHostedService
             await AddRolesAsync([TeacherRole, StudentRole]);
             await AddDemoUsersAsync();
             await AddUsersAsync(20);
+//            await AddCoursesAsync(5);
             await AddActivityTypesAsync(context);
             logger.LogInformation("Seed complete");
         }
@@ -52,6 +54,41 @@ public class DataSeedHostingService : IHostedService
             logger.LogError("Data seed fail with error: {message}", message);
             throw;
         }
+    }
+
+    private async Task AddCoursesAsync(int noOfCourses)
+    {
+        var users = (await userManager.GetUsersInRoleAsync(StudentRole)).ToList();
+
+        var faker = new Faker<Course>("sv").Rules((f, c) =>
+        {
+            c.Name = f.Commerce.ProductName();
+            c.Description = f.Rant.Review(c.Name);
+            c.Starts = DateTime.UtcNow.AddDays(f.IndexFaker * 10);
+            c.Ends = DateTime.UtcNow.AddDays(f.IndexFaker * 10 + 30);
+            for (int j = 0; j < f.Random.Int(1, users.Count); j++)
+            {
+                c.Students.Add(f.PickRandom(users));
+            }
+            logger.LogInformation("Added course: {courseName}", c.Name);
+        });
+
+        await AddCoursesToDatabase(faker.Generate(noOfCourses));
+    }
+
+    private async Task AddCoursesToDatabase(IEnumerable<Course> courses)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        foreach (var course in courses)
+        {
+            if (!await context.Courses.AnyAsync(c => c.Name.Equals(course.Name)))
+            {
+                context.Courses.Add(course);
+                logger.LogInformation("Adding course: {courseName}", course.Name);
+            }
+        }
+        await context.SaveChangesAsync();
     }
 
     private async Task AddActivityTypesAsync(ApplicationDbContext context)
@@ -106,7 +143,7 @@ public class DataSeedHostingService : IHostedService
             Email = "student@test.com"
         };
 
-        await AddUserToDb([teacher, student]);
+        await AddUsersToDb([teacher, student]);
 
         var teacherRoleResult = await userManager.AddToRoleAsync(teacher, TeacherRole);
         if (!teacherRoleResult.Succeeded) throw new Exception(string.Join("\n", teacherRoleResult.Errors));
@@ -123,10 +160,10 @@ public class DataSeedHostingService : IHostedService
             e.UserName = f.Person.Email;
         });
 
-        await AddUserToDb(faker.Generate(nrOfUsers));
+        await AddUsersToDb(faker.Generate(nrOfUsers));
     }
 
-    private async Task AddUserToDb(IEnumerable<ApplicationUser> users)
+    private async Task AddUsersToDb(IEnumerable<ApplicationUser> users)
     {
         var passWord = configuration["password"];
         ArgumentNullException.ThrowIfNull(passWord, nameof(passWord));
