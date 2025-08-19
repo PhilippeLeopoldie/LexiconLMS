@@ -72,6 +72,13 @@ public class ModuleService
         return _mapper.Map<ModuleDto>(module);
     }
 
+    public async Task DeleteModuleAsync(int id)
+    {
+        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: true, trackChanges: true);
+        _uow.ModuleRepository.Delete(module);
+        await _uow.CompleteAsync();
+    }
+
     private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int id, bool includeActivities, bool trackChanges)
     {
         var module = await _uow.ModuleRepository.GetModuleByIdAsync(id, includeActivities, trackChanges);
