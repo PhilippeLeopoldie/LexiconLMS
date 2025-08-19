@@ -51,6 +51,18 @@ public class ModuleService
         await _uow.CompleteAsync();
     }
 
+    public async Task<(Module, ModuleUpdateDto)> ModuleToPatchAsync(int id)
+    {
+        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: true, trackChanges: true);
+        var dto = _mapper.Map<ModuleUpdateDto>(module);
+        return (module, dto);
+    }
+
+    public async Task SavePatchModuleAsync(Module module, ModuleUpdateDto dto)
+    {
+        _mapper.Map(dto, module);
+        await _uow.CompleteAsync();
+    }
 
 
     private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int id, bool includeActivities, bool trackChanges)
