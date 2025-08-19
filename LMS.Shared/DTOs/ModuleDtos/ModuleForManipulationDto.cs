@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Shared.DTOs.ModuleDtos;
 
-public class ModuleForManipulationDto
+public record ModuleForManipulationDto
 {
     [Required(ErrorMessage = "The Name is required")]
     public required string Name { get; init; }
