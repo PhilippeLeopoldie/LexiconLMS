@@ -14,19 +14,19 @@ public static class ServiceExtensions
     {
         services.AddCors(options =>
         {
-            //ToDo: Restrict access to your BlazorApp only!
+            //Restrict access to your BlazorApp only!
             options.AddDefaultPolicy(policy =>
             {
-                //..
-                //..
-                //..
+                policy.WithOrigins("https://localhost:7224")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
             });
 
             //Can be used during development
-            options.AddPolicy("AllowAll", p =>
-               p.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader());
+            options.AddPolicy("AllowAll", policy =>
+               policy.AllowAnyOrigin()
+                     .AllowAnyMethod()
+                     .AllowAnyHeader());
         });
     }
 
@@ -64,11 +64,11 @@ public static class ServiceExtensions
     public static void ConfigureControllers(this IServiceCollection services)
     {
         services.AddControllers(opt =>
-        {
-            opt.ReturnHttpNotAcceptable = true;
-            opt.Filters.Add(new ProducesAttribute("application/json"));
+                {
+                    opt.ReturnHttpNotAcceptable = true;
+                    opt.Filters.Add(new ProducesAttribute("application/json"));
 
-        })
+                })
                 .AddNewtonsoftJson()
                 .AddApplicationPart(typeof(AssemblyReference).Assembly);
     }
@@ -82,6 +82,12 @@ public static class ServiceExtensions
     public static void AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<IActivityRepository, ActivityRepository>();
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+
+        services.AddLazy<IActivityRepository>();
+        services.AddLazy<IModuleRepository>();
     }
 
     public static void AddServiceLayer(this IServiceCollection services)
@@ -89,6 +95,10 @@ public static class ServiceExtensions
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
+        services.AddScoped<IActivityService, ActivityService>();
+
+
+        services.AddLazy<IAuthService>();
+        services.AddLazy<IActivityService>();
     }
 }
