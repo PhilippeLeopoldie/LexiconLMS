@@ -3,7 +3,7 @@ using LMS.Infrastructure.Data.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
+
 
 namespace LMS.Infrastructure.Data
 {
