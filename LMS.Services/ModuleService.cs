@@ -22,7 +22,7 @@ public class ModuleService
         ModuleRequestParams requestParams,
         int courseId,
         bool sortByName = false,
-         bool trackChanges = false
+        bool trackChanges = false
         )
     {
         var pagedList = await _uow.ModuleRepository.GetModulesAsync(requestParams, courseId ,sortByName, trackChanges);
@@ -30,9 +30,9 @@ public class ModuleService
         return (ModulesDto, pagedList.MetaData);
     }
 
-    public async Task<ModuleDto> GetTournamentByIdAsync(int id, bool includeGames)
+    public async Task<ModuleDto> GetModuleByIdAsync(int id, bool includeActivities)
     {
-        var module = await GetTournamentByIdOrThrowExceptionAsync(id, includeGames, trackChanges: false);
+        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities, trackChanges: false);
         return _mapper.Map<ModuleDto>(module);
     }
 
@@ -40,11 +40,11 @@ public class ModuleService
 
 
 
-    private async Task<Module> GetTournamentByIdOrThrowExceptionAsync(int id, bool includeGames, bool trackChanges)
+    private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int id, bool includeActivities, bool trackChanges)
     {
-        var tournament = await _uow.ModuleRepository.GetModuleByIdAsync(id, includeGames, trackChanges);
-        if (tournament is null) throw new ModuleNotFoundException(id);
-        return tournament;
+        var module = await _uow.ModuleRepository.GetModuleByIdAsync(id, includeActivities, trackChanges);
+        if (module is null) throw new ModuleNotFoundException(id);
+        return module;
     }
 
 }
