@@ -7,3 +7,14 @@ public class NotFoundException : Exception
         Title = title;
     }
 }
+
+public class ModuleNotFoundException : NotFoundException
+{
+    public ModuleNotFoundException(int id) : base($"The Module with id: {id} is not found!")
+    {
+    }
+
+    public ModuleNotFoundException(string name) : base($"The Module '{name}' is not found!")
+    {
+    }
+}
