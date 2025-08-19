@@ -6,11 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infrastructure.Repositories;
 
-public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
+public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Module>(context), IModuleRepository
 {
-    public ModuleRepository(ApplicationDbContext context) : base(context)
-    {
-    }
 
     public async Task<Module?> GetModulesAsync(int courseId, bool trackChanges = false)
     {
