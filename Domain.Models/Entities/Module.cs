@@ -9,6 +9,6 @@ public class Module: BaseModel
     public required Course Course { get; set; }
     public int CourseId { get; set; }
 
-    public IEnumerable<Activity> Activities { get; set; }
+    public ICollection<Activity> Activities { get; set; }
 
 }
