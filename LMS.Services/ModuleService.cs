@@ -43,6 +43,14 @@ public class ModuleService
         return _mapper.Map<ModuleDto>(module);
     }
 
+    public async Task PutModuleAsync(int id, ModuleUpdateDto dto)
+    {
+        if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
+        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: false, trackChanges: true);
+        _mapper.Map(dto, module);
+        await _uow.CompleteAsync();
+    }
+
 
 
     private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int id, bool includeActivities, bool trackChanges)
