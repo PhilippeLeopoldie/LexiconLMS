@@ -36,7 +36,12 @@ public class ModuleService
         return _mapper.Map<ModuleDto>(module);
     }
 
-
+    public async Task<ModuleDto> GetModuleByNameAsync(string name)
+    {
+        var module = await _uow.ModuleRepository.GetModuleByNameAsync(name, trackChanges: false);
+        if (module is null) throw new ModuleNotFoundException(name);
+        return _mapper.Map<ModuleDto>(module);
+    }
 
 
 
