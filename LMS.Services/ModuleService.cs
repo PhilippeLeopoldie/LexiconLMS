@@ -64,6 +64,13 @@ public class ModuleService
         await _uow.CompleteAsync();
     }
 
+    public async Task<ModuleDto> PostModuleAsync(ModuleCreateDto dto)
+    {
+        var module = _mapper.Map<Module>(dto);
+        _uow.ModuleRepository.Create(module);
+        await _uow.CompleteAsync();
+        return _mapper.Map<ModuleDto>(module);
+    }
 
     private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int id, bool includeActivities, bool trackChanges)
     {
