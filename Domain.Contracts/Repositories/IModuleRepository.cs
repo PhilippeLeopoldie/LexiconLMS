@@ -5,7 +5,7 @@ namespace Domain.Contracts.Repositories;
 
 public interface IModuleRepository
 {
-    Task<Module> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges);
+    Task<Module?> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges);
     Task<PagedList<Module>> GetModulesAsync(
         ModuleRequestParams requestParams,
         int courseId,
