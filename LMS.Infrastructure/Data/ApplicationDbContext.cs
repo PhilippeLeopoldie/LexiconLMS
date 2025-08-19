@@ -11,7 +11,9 @@ namespace LMS.Infrastructure.Data
     {
         public DbSet<Activity> Activities { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
+
         public DbSet<Module> Modules { get; set; } = default!;
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
