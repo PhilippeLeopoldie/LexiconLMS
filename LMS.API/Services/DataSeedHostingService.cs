@@ -44,7 +44,7 @@ public class DataSeedHostingService : IHostedService
             await AddRolesAsync([TeacherRole, StudentRole]);
             await AddDemoUsersAsync();
             await AddUsersAsync(20);
-            await AddCoursesAsync(5);
+//            await AddCoursesAsync(5);
             await AddActivityTypesAsync(context);
             logger.LogInformation("Seed complete");
         }
