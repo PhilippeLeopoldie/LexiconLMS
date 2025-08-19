@@ -4,10 +4,11 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ModuleDtos;
+using Services.Contracts;
 
 namespace LMS.Services;
 
-public class ModuleService
+public class ModuleService : IModuleService
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
@@ -25,7 +26,7 @@ public class ModuleService
         bool trackChanges = false
         )
     {
-        var pagedList = await _uow.ModuleRepository.GetModulesAsync(requestParams, courseId ,sortByName, trackChanges);
+        var pagedList = await _uow.ModuleRepository.GetModulesAsync(requestParams, courseId, sortByName, trackChanges);
         var ModulesDto = _mapper.Map<IEnumerable<ModuleDto>>(pagedList.Items);
         return (ModulesDto, pagedList.MetaData);
     }
