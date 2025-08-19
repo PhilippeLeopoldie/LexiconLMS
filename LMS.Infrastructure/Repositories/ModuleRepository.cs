@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
+using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -9,9 +10,22 @@ namespace LMS.Infrastructure.Repositories;
 public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Module>(context), IModuleRepository
 {
 
-    public async Task<Module?> GetModulesAsync(int courseId, bool trackChanges = false)
+    public async Task<PagedList<Module>> GetModulesAsync(
+        ModuleRequestParams requestParams,
+        int courseId,
+        bool sortByName =false,
+        bool trackChanges = false
+        )
     {
-        return await FindByCondition(module => module.CourseId.Equals(courseId), trackChanges).FirstOrDefaultAsync();
+        var query = FindByCondition(module => module.CourseId.Equals(courseId), trackChanges);
+
+        if(requestParams.IncludeActivities)
+            query = query.Include(module => module.Activities);
+
+        if(sortByName)
+            query = query.OrderBy(module => module.Name);
+
+        return await PagedList<Module>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
     public async Task<Module> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges)
