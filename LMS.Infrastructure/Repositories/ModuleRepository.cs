@@ -1,11 +1,12 @@
-﻿using Domain.Models.Entities;
+﻿using Domain.Contracts.Repositories;
+using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace LMS.Infrastructure.Repositories;
 
-public class ModuleRepository : RepositoryBase<Module>
+public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
 {
     public ModuleRepository(ApplicationDbContext context) : base(context)
     {
