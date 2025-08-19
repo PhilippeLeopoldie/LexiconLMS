@@ -38,4 +38,9 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await query.FirstOrDefaultAsync();
     }
 
+    public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
+    {
+        return await FindByCondition(Tournament => string.Equals(Tournament.Name, name), trackChanges)
+            .FirstOrDefaultAsync();
+    }
 }

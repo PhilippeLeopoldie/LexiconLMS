@@ -12,4 +12,5 @@ public interface IModuleRepository
         bool sortByName = false,
         bool trackChanges = false
         );
+    Task<Module?> GetModuleByNameAsync(string name, bool trackChanges);
 }
