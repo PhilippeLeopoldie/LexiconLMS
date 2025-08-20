@@ -23,10 +23,10 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         return Ok(courses);
     }
 
-    [HttpGet]
+    [HttpGet("{userId}")]
     [Authorize(Roles = "Teacher, Student")]  // NOTE: Not really needed
     public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
-        [FromQuery] string userId, 
+        string userId, 
         [FromQuery] bool includeModules = false,
         [FromQuery] bool includeActivities = false, 
         [FromQuery] RequestParams requestParams = null!
