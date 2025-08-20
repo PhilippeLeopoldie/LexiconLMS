@@ -1,10 +1,10 @@
 ﻿namespace Domain.Models.Exceptions;
 
 
-public abstract class BadRequestException : Exception
+public  class BadRequestException : Exception
 {
     public string Title { get; set; }
-    protected BadRequestException(string message, string title = "Bad request") : base(message)
+    public BadRequestException(string message, string title = "Bad request") : base(message)
     {
         Title = title;
     }

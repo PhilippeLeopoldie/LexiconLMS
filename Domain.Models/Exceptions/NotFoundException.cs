@@ -1,5 +1,5 @@
 ﻿namespace Domain.Models.Exceptions;
-public abstract class NotFoundException : Exception
+public  class NotFoundException : Exception
 {
     public string Title { get; }
     public NotFoundException(string message, string title = "Not Found") : base(message)
