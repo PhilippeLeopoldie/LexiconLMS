@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Companies.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250820134125_AddDocumentEntity")]
+    [Migration("20250820172605_AddDocumentEntity")]
     partial class AddDocumentEntity
     {
         /// <inheritdoc />
@@ -221,6 +221,9 @@ namespace Companies.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
 
                     b.Property<string>("StoragePath")
                         .IsRequired()

@@ -43,6 +43,7 @@ namespace Companies.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StoragePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Size = table.Column<int>(type: "int", nullable: false),
                     UploadedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CourseId = table.Column<int>(type: "int", nullable: true),
                     ModuleId = table.Column<int>(type: "int", nullable: true),

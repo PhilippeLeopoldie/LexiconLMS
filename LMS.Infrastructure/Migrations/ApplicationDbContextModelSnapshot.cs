@@ -219,6 +219,9 @@ namespace Companies.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
                     b.Property<string>("StoragePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
