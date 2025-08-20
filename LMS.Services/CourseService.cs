@@ -31,14 +31,25 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         return mapper.Map<CourseDto>(result);
     }
 
-    public async Task<CourseDto?> GetCourseForUserAsync(string userId)
+    public async Task<(CourseDto?, MetaData)> GetCourseForUserAsync(string userId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
             throw new ArgumentException("User not found", nameof(userId));
-        return await unitOfWork.CourseRepository
-            .FindByCondition(c => c.Id == user.CourseId)
-            .ProjectTo<CourseDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+
+        var query = unitOfWork.CourseRepository
+            .FindByCondition(c => c.Id == user.CourseId, trackChanges);
+        if (includeModules)
+        {
+            query = query.Include(c => c.Modules);
+            if (includeActivities)
+                query = query.Include(c => c.Modules).ThenInclude(m => m.Activities);
+        }
+        MetaData meta = new(1, 1, 1, 1);
+        return (await unitOfWork.CourseRepository
+        .FindByCondition(c => c.Id == user.CourseId)
+        .ProjectTo<CourseDto>(mapper.ConfigurationProvider)
+        .FirstOrDefaultAsync(),
+        meta);
     }
 }

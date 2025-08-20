@@ -8,5 +8,5 @@ public interface ICourseService
 {
     Task<(IEnumerable<CourseDto>, MetaData metaData)> GetAllCoursesAsync(RequestParams requestParams, bool trackChanges = false);
     Task<CourseDto?> GetCourseByIdAsync(int courseId);
-    Task<CourseDto?> GetCourseForUserAsync(string userId);
+    Task<(CourseDto?, MetaData)> GetCourseForUserAsync(string userId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false);
 }

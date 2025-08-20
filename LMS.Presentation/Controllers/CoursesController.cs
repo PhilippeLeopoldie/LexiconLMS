@@ -22,4 +22,22 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(courses);
     }
+
+    [HttpGet]
+    [Authorize(Roles = "Teacher, Student")]  // NOTE: Not really needed
+    public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
+        [FromQuery] string userId, 
+        [FromQuery] bool includeModules = false,
+        [FromQuery] bool includeActivities = false, 
+        [FromQuery] RequestParams requestParams = null!
+    )
+    {
+        ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
+
+        var (course, metaData) = await serviceManager.CourseService.GetCourseForUserAsync(userId, includeModules, includeActivities, requestParams);
+        if (course == null)
+            return NotFound($"No course found for user {userId}.");
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
+        return Ok(course);
+    }
 }
