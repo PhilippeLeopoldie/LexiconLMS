@@ -44,7 +44,7 @@ public class ModuleService : IModuleService
         return _mapper.Map<ModuleDto>(module);
     }
 
-    public async Task PutModuleAsync(int id, ModuleUpdateDto dto)
+    public async Task UpdateModuleAsync(int id, ModuleUpdateDto dto)
     {
         if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
         var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: false, trackChanges: true);
@@ -52,20 +52,20 @@ public class ModuleService : IModuleService
         await _uow.CompleteAsync();
     }
 
-    public async Task<(Module, ModuleUpdateDto)> ModuleToPatchAsync(int id)
+    public async Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int id)
     {
         var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: true, trackChanges: true);
         var dto = _mapper.Map<ModuleUpdateDto>(module);
         return (module, dto);
     }
 
-    public async Task SavePatchModuleAsync(Module module, ModuleUpdateDto dto)
+    public async Task ApplyModulePatchAsync(Module module, ModuleUpdateDto dto)
     {
         _mapper.Map(dto, module);
         await _uow.CompleteAsync();
     }
 
-    public async Task<ModuleDto> PostModuleAsync(ModuleCreateDto dto)
+    public async Task<ModuleDto> CreateModuleAsync(ModuleCreateDto dto)
     {
         var module = _mapper.Map<Module>(dto);
         _uow.ModuleRepository.Create(module);
