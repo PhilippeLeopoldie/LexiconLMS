@@ -11,4 +11,5 @@ public class Activity : BaseModel
     public required Module Module { get; set; }
     public int ModuleId { get; set; }
 
+    public ICollection<Document> Documents { get; set; } = [];
 }

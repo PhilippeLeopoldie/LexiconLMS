@@ -11,4 +11,5 @@ public class Module : BaseModel
 
     public ICollection<Activity> Activities { get; set; } = [];
 
+    public ICollection<Document> Documents { get; set; } = [];
 }
