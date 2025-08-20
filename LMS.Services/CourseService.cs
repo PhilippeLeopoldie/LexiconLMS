@@ -26,7 +26,7 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         return mapper.Map<CourseDto>(result);
     }
 
-    public async Task<CourseDto> GetCourseForUserAsync(string userId)
+    public async Task<CourseDto?> GetCourseForUserAsync(string userId)
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
