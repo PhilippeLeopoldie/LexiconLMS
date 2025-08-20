@@ -98,10 +98,12 @@ public static class ServiceExtensions
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IActivityService, ActivityService>();
 
 
         services.AddLazy<IAuthService>();
+        services.AddLazy<ICourseService>();
         services.AddLazy<IActivityService>();
     }
 }
