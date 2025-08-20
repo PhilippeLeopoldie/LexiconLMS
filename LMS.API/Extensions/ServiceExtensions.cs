@@ -102,5 +102,6 @@ public static class ServiceExtensions
 
         services.AddLazy<IAuthService>();
         services.AddLazy<IActivityService>();
+        services.AddLazy<IModuleService>();
     }
 }
