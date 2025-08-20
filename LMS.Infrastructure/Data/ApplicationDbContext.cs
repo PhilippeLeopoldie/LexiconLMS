@@ -12,8 +12,8 @@ namespace LMS.Infrastructure.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
-
         public DbSet<Module> Modules { get; set; } = default!;
+        public DbSet<Document> Documents { get; set; }
 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -31,7 +31,34 @@ namespace LMS.Infrastructure.Data
                 .WithOne(a => a.Type)
                 .HasForeignKey(a => a.ActivityTypeId);
 
+            builder.Entity<ApplicationUser>()
+                .HasOne(u => u.Course)
+                .WithMany(c => c.Students)
+                .HasForeignKey(u => u.CourseId);
 
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.Courses)
+                .WithMany(c => c.Teachers);
+
+            builder.Entity<Document>()
+                .HasOne(d => d.Course)
+                .WithMany(c => c.Documents)
+                .HasForeignKey(d => d.CourseId);
+
+            builder.Entity<Document>()
+                .HasOne(d => d.Module)
+                .WithMany(m => m.Documents)
+                .HasForeignKey(d => d.ModuleId);
+
+            builder.Entity<Document>()
+                .HasOne(d => d.Activity)
+                .WithMany(a => a.Documents)
+                .HasForeignKey(d => d.ActivityId);
+
+            builder.Entity<Document>()
+                .HasOne(d => d.User)
+                .WithMany(u => u.Documents)
+                .HasForeignKey(d => d.UploadedByUserId);
         }
     }
 }
