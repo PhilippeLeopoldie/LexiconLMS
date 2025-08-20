@@ -8,4 +8,7 @@ public class Activity : BaseModel
     public required ActivityType Type { get; set; }
     public int ActivityTypeId { get; set; }
 
+    public required Module Module { get; set; }
+    public int ModuleId { get; set; }
+
 }
