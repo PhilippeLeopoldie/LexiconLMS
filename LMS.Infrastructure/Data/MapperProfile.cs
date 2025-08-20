@@ -19,6 +19,7 @@ public class MapperProfile : Profile
             .ReverseMap();
         CreateMap<ActivityEditDto, Activity>()
             //.ForMember(target => target.Documents, config => config.AllowNull())
+            //.ForMember(target => target.Id, config => config.Ignore())
             .ForMember(target => target.StartsAt,
                         opt => opt.MapFrom((src, destination) =>
                                              src.StartsAt == default
@@ -43,7 +44,7 @@ public class MapperProfile : Profile
                                              ? destination.StartsAt
                                              : src.StartsAt))
             .ReverseMap();
-        CreateMap<ModuleCreateDto,Module>()
+        CreateMap<ModuleCreateDto, Module>()
             .ForMember(target => target.StartsAt,
                         options => options.MapFrom((src, destination) =>
                                              src.StartsAt == default

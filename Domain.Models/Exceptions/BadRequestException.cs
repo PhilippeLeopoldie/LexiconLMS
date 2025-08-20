@@ -1,5 +1,6 @@
 ﻿namespace Domain.Models.Exceptions;
 
+
 public abstract class BadRequestException : Exception
 {
     public string Title { get; set; }
@@ -18,3 +19,4 @@ public class InvalidEntryBadRequestException : BadRequestException
     {
     }
 }
+
