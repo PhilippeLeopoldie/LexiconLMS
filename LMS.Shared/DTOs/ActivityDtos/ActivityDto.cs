@@ -5,5 +5,5 @@ public record ActivityDto
     public string? Description { get; init; }
     public required DateTime StartsAt { get; init; }
     public required DateTime EndsAt { get; init; }
-    public required ActivityTypeDto Type { get; init; }
+    public int ActivityTypeId { get; init; }
 }

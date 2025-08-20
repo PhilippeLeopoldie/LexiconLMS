@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Shared.Common;
 
@@ -14,6 +9,9 @@ public class RequestParams
 
     [Range(2, 100)]
     public int PageSize { get; set; } = 5;
+
+    public string? OrderBy { get; set; }
+    public string? SearchTerm { get; set; }
 }
 
 public class ModuleRequestParams : RequestParams

@@ -76,7 +76,8 @@ public static class ServiceExtensions
     public static void ConfigureSql(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("ApplicationDbContext") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")));
+                options.UseSqlServer(configuration.GetConnectionString("ApplicationDbContext")
+                ?? throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")));
     }
 
     public static void AddRepositories(this IServiceCollection services)
