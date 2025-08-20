@@ -1,24 +1,34 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Domain.Contracts.Repositories;
 using LMS.Shared.DTOs.CourseDtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Services;
 
-public class CourseService(IMapper mapper) : ICourseService
+public class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseService
 {
-    public Task<IEnumerable<CourseDto>> GetAllCoursesAsync()
+    public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync() =>
+        await unitOfWork.CourseRepository
+            .FindAll()
+            .ProjectTo<CourseDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+
+    public async Task<CourseDto?> GetCourseByIdAsync(int courseId)
     {
-        // Implementation to get all courses
-        throw new NotImplementedException();
+        var result = await unitOfWork.CourseRepository
+            .FindByCondition(c => c.Id == courseId)
+            .FirstOrDefaultAsync();
+        if (result == null)
+            return null;
+        return mapper.Map<CourseDto>(result);
     }
 
-    public Task<CourseDto> GetCourseByIdAsync(int courseId)
+    public async Task<CourseDto> GetCourseForUserAsync(string userId)
     {
-        // Implementation to get a course by ID
-        throw new NotImplementedException();
-    }
-
-    public Task<CourseDto> GetCourseForUserAsync(string userId)
-    {
+        //var result = await unitOfWork.CourseRepository
+        //    .FindByCondition(c => c.Users.Any(u => u.Id == userId))
+        //    .FirstOrDefaultAsync();
         // Implementation to create a new course
         throw new NotImplementedException();
     }
