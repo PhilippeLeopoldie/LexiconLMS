@@ -28,12 +28,19 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await PagedList<Module>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
-    public async Task<Module> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges)
+    public async Task<Module?> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges)
     {
         var query = FindByCondition(module => module.Id.Equals(id), trackChanges);
 
-        if (includeActivities) query = query.Include(module => module.Activities);
+        if (includeActivities) 
+            query = query.Include(module => module.Activities);
+
         return await query.FirstOrDefaultAsync();
     }
 
+    public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
+    {
+        return await FindByCondition(module => string.Equals(module.Name, name), trackChanges)
+            .FirstOrDefaultAsync();
+    }
 }

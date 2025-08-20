@@ -1,11 +1,22 @@
 ﻿namespace Domain.Models.Exceptions;
 
-public class BadRequestException : Exception
+
+public abstract class BadRequestException : Exception
 {
-    public string Title { get; }
-    public BadRequestException(string? message, string title = "Bad Request") : base(message)
+    public string Title { get; set; }
+    protected BadRequestException(string message, string title = "Bad request") : base(message)
     {
         Title = title;
     }
-
 }
+
+public class InvalidEntryBadRequestException : BadRequestException
+{
+    public InvalidEntryBadRequestException(int id) : base($"Invalid Id: '{id}'")
+    {
+    }
+    public InvalidEntryBadRequestException() : base($"No patchDocument")
+    {
+    }
+}
+
