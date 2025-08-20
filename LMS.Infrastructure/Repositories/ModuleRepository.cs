@@ -40,7 +40,7 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
 
     public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
     {
-        return await FindByCondition(Tournament => string.Equals(Tournament.Name, name), trackChanges)
+        return await FindByCondition(module => string.Equals(module.Name, name), trackChanges)
             .FirstOrDefaultAsync();
     }
 }
