@@ -4,6 +4,7 @@ public class Document : BaseModel
     public DateTime UploadedAt { get; set; }
     public required string StoragePath { get; set; }
     public int Size { get; set; }
+    public string? FileType { get; set; }
 
     public required string UploadedByUserId { get; set; }
     public required ApplicationUser User { get; set; }
