@@ -1,5 +1,4 @@
 ﻿using LMS.Shared.Common;
-using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -51,4 +50,17 @@ public class ModuleController : ControllerBase
         return Ok(module);
     }
 
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Update module", Description = "Updates an existing module within a course.")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Module updated successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid module data")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<IActionResult> PutModule(int courseId, int id, ModuleUpdateDto moduleDto)
+    {
+        await _serviceManager.ModuleService.UpdateModuleAsync(courseId, id, moduleDto);
+        return NoContent();
+    }
 }
