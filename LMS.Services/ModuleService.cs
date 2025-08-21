@@ -30,33 +30,37 @@ public class ModuleService : IModuleService
         return (ModulesDto, pagedList.MetaData);
     }
 
-    public async Task<ModuleDto> GetModuleByIdAsync(int id, bool includeActivities)
+    public async Task<ModuleDto> GetModuleByIdAsync(int courseId,int id, bool includeActivities)
     {
-        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities, trackChanges: false);
+        var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities, trackChanges: false);
         return _mapper.Map<ModuleDto>(module);
     }
 
-    public async Task<ModuleDto> GetModuleByNameAsync(string name)
+    public async Task<ModuleDto> GetModuleByNameAsync(int courseId, string name, bool includeActivities)
     {
-        var module = await _uow.ModuleRepository.GetModuleByNameAsync(name, trackChanges: false);
+        var module = await _uow.ModuleRepository.GetModuleByConditionAsync(
+            module => module.Name == name && module.CourseId == courseId,
+            includeActivities,
+            trackChanges: false
+            );
         if (module is null) throw new ModuleNotFoundException(name);
         return _mapper.Map<ModuleDto>(module);
     }
 
-    public async Task UpdateModuleAsync(int id, ModuleUpdateDto dto)
+    public async Task UpdateModuleAsync(int courseId, int id, ModuleUpdateDto dto)
     {
         if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
         await HasAnyOverlapping(dto, id);
-        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: false, trackChanges: true);
+        var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities: false, trackChanges: true);
         _mapper.Map(dto, module);
         await _uow.CompleteAsync();
     }
 
     
 
-    public async Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int id)
+    public async Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int courseId, int id)
     {
-        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: true, trackChanges: true);
+        var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities: true, trackChanges: true);
         var dto = _mapper.Map<ModuleUpdateDto>(module);
         return (module, dto);
     }
@@ -77,16 +81,20 @@ public class ModuleService : IModuleService
         return _mapper.Map<ModuleDto>(module);
     }
 
-    public async Task DeleteModuleAsync(int id)
+    public async Task DeleteModuleAsync(int courseId, int id)
     {
-        var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: true, trackChanges: true);
+        var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities: true, trackChanges: true);
         _uow.ModuleRepository.Delete(module);
         await _uow.CompleteAsync();
     }
 
-    private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int id, bool includeActivities, bool trackChanges)
+    private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int courseId, int id, bool includeActivities, bool trackChanges)
     {
-        var module = await _uow.ModuleRepository.GetModuleByIdAsync(id, includeActivities, trackChanges);
+        var module = await _uow.ModuleRepository.GetModuleByConditionAsync(
+            module => module.Id == id && module.CourseId == courseId,
+            includeActivities,
+            trackChanges
+            );
         if (module is null) throw new ModuleNotFoundException(id);
         return module;
     }
