@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.AuthDtos;
+using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 
 namespace LMS.Infrastructure.Data;
@@ -16,10 +17,13 @@ public class MapperProfile : Profile
         CreateMap<ActivityTypeDto, ActivityType>()
             .ReverseMap();
         CreateMap<ActivityDto, Activity>()
-            .ReverseMap();
+            .ForMember(target => target.Type, config => config.MapFrom(src => src.ActivityType))
+            .ForMember(target => target.Documents, config => config.MapFrom(src => src.Documents))
+            .ReverseMap()
+            .ForMember(target => target.ActivityType, config => config.MapFrom(src => src.Type))
+            .ForMember(target => target.Documents, config => config.MapFrom(src => src.Documents));
         CreateMap<ActivityEditDto, Activity>()
-            //.ForMember(target => target.Documents, config => config.AllowNull())
-            //.ForMember(target => target.Id, config => config.Ignore())
+            .ForMember(target => target.Documents, config => config.AllowNull())
             .ForMember(target => target.StartsAt,
                         opt => opt.MapFrom((src, destination) =>
                                              src.StartsAt == default
@@ -27,7 +31,7 @@ public class MapperProfile : Profile
                                              : src.StartsAt))
             .ReverseMap();
         CreateMap<ActivityCreateDto, Activity>()
-            //.ForMember(target => target.Documents, config => config.AllowNull())
+            .ForMember(target => target.Documents, config => config.AllowNull())
             .ForMember(target => target.StartsAt,
                         opt => opt.MapFrom((src, destination) =>
                                              src.StartsAt == default
@@ -35,6 +39,7 @@ public class MapperProfile : Profile
                                              : src.StartsAt))
             .ReverseMap();
         #endregion
+
         #region Modules
         CreateMap<Module, ModuleDto>().ReverseMap();
         CreateMap<ModuleUpdateDto, Module>()
@@ -50,6 +55,15 @@ public class MapperProfile : Profile
                                              src.StartsAt == default
                                              ? destination.StartsAt
                                              : src.StartsAt))
+            .ReverseMap();
+        #endregion
+
+        #region Documents
+        CreateMap<Document, DocumentDto>()
+            .ReverseMap();
+        CreateMap<DocumentManipulationDto, Document>()
+            .ForMember(target => target.UploadedAt, config => config.Ignore())
+            .ForMember(target => target.UploadedByUserId, config => config.Ignore())
             .ReverseMap();
         #endregion
     }

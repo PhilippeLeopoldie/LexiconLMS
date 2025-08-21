@@ -3,11 +3,12 @@ using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LMS.Infrastructure.Repositories;
 public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<Activity>(context), IActivityRepository
 {
-    public async Task<PagedList<Activity>> GetModuleActivities(int moduleId, RequestParams requestParams, bool trackChanges = false)
+    public async Task<PagedList<Activity>> GetModuleActivitiesAsync(int moduleId, RequestParams requestParams, bool trackChanges = false)
     {
         var query = FindByCondition(a => a.ModuleId == moduleId
                                     && (requestParams.SearchTerm == null
@@ -17,7 +18,9 @@ public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<A
                                     trackChanges);
 
         query = ApplyOrdering(query, requestParams);
-
+        query = query
+                .Include(a => a.Type)
+                .Include(a => a.Documents);
         return await PagedList<Activity>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
@@ -26,6 +29,14 @@ public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<A
         return await Context.Activities
             .Where(a => a.ModuleId == moduleId && (excludeActivityId == null || a.Id != excludeActivityId))
             .AnyAsync(a => startsAt < a.EndsAt && endsAt > a.StartsAt);
+    }
+
+    public async Task<Activity?> GetActivityByIdAsync(Expression<Func<Activity, bool>> expression, bool trackChanges = false)
+    {
+        return await FindByCondition(expression, trackChanges)
+                    .Include(a => a.Type)
+                    .Include(a => a.Documents)
+                    .FirstOrDefaultAsync();
     }
 
     private static IQueryable<Activity> ApplyOrdering(IQueryable<Activity> activities, RequestParams requestParams)
