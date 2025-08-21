@@ -11,19 +11,19 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
 {
 
     public async Task<PagedList<Module>> GetModulesAsync(
-        ModuleRequestParams requestParams,
         int courseId,
-        bool sortByName =false,
+        ModuleRequestParams requestParams,
         bool trackChanges = false
         )
     {
         var query = FindByCondition(module => module.CourseId.Equals(courseId), trackChanges);
 
         if(requestParams.IncludeActivities)
+        {
             query = query.Include(module => module.Activities);
+        }
 
-        if(sortByName)
-            query = query.OrderBy(module => module.Name);
+        query = ApplyOrdering(query, requestParams);
 
         return await PagedList<Module>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
@@ -57,5 +57,17 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
             query = query.Where(module => module.Id != excludeModuleId);
 
         return await query.AnyAsync(module => startsAt < module.EndsAt && endsAt > module.StartsAt);
+    }
+
+    private static IQueryable<Module> ApplyOrdering(IQueryable<Module> modules, RequestParams requestParams)
+    {
+        if (string.IsNullOrEmpty(requestParams.OrderBy)) return modules;
+
+        return requestParams.OrderBy.ToLower() switch
+        {
+            "name" => modules.OrderBy(t => t.Name),
+            "startdate" => modules.OrderBy(t => t.StartsAt),
+            _ => modules
+        };
     }
 }

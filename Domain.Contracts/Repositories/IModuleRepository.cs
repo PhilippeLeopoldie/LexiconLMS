@@ -7,9 +7,8 @@ public interface IModuleRepository : IRepositoryBase<Module>, IInternalRepositor
 {
     Task<Module?> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges);
     Task<PagedList<Module>> GetModulesAsync(
-        ModuleRequestParams requestParams,
         int courseId,
-        bool sortByName = false,
+        ModuleRequestParams requestParams,
         bool trackChanges = false
         );
     Task<Module?> GetModuleByNameAsync(string name, bool trackChanges);
