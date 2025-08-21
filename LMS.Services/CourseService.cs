@@ -2,15 +2,40 @@
 using AutoMapper.QueryableExtensions;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
 
 public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager) : ICourseService
 {
+    public async Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForCreationDto courseDto)
+    {
+        EnsureNotNull(courseDto, "Course data is null.");
+
+        var course = mapper.Map<Course>(courseDto);
+        unitOfWork.CourseRepository.Create(course);
+
+        if (!ValidateEntity(course, out var errors))
+            throw new BadRequestException($"Invalid course data: {errors}");
+
+        try
+        {
+            unitOfWork.CourseRepository.Create(course);
+            await unitOfWork.CompleteAsync();
+
+            return (mapper.Map<CourseDto>(course), course.Id);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("An unexpected error occurred while creating the course.", ex);
+        }
+    }
+
     public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(RequestParams requestParams, bool trackChanges = false)
     {
         ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
@@ -63,5 +88,20 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         .ProjectTo<CourseDto>(mapper.ConfigurationProvider)
         .FirstOrDefaultAsync(),
         meta);
+    }
+    private static void EnsureNotNull<T>(T obj, string message)
+    {
+        if (obj == null)
+            throw new BadRequestException(message);
+    }
+    protected static bool ValidateEntity<T>(T entity, out string? errors)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+
+        var validationContext = new ValidationContext(entity);
+        var validationResults = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(entity, validationContext, validationResults, true);
+        errors = string.Join("; ", validationResults.Select(x => x.ErrorMessage ?? string.Empty));
+        return isValid;
     }
 }

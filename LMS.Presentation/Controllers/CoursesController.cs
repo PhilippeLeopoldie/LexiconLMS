@@ -23,7 +23,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         return Ok(courses);
     }
 
-    [HttpGet("{userId:string}")]
+    [HttpGet("{userId}")]
     [Authorize(Roles = "Teacher, Student")]  // NOTE: Not really needed
     public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
         string userId, 
@@ -53,5 +53,16 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         if (course == null)
             return NotFound($"Course with ID {courseId} not found.");
         return Ok(course);
+    }
+
+    [HttpPost]
+    [Authorize (Roles = "Teacher")]
+    public async Task<ActionResult<CourseDto>> CreateCourseAsync([FromBody] CourseForCreationDto courseDto)
+    {
+        if (courseDto == null)
+            return BadRequest("Course data is null.");
+
+        var createdCourse = await serviceManager.CourseService.CreateCourseAsync(courseDto);
+        return CreatedAtAction(nameof(GetCourseByIdAsync), new { courseId = createdCourse.createdCourseId }, createdCourse);
     }
 }
