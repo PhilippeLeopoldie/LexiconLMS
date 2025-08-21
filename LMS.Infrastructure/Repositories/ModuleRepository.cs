@@ -3,7 +3,6 @@ using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 
 namespace LMS.Infrastructure.Repositories;
