@@ -110,6 +110,22 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         }
     }
 
+    public async Task DeleteCourseAsync(int courseId)
+    {
+        var course = await unitOfWork.CourseRepository.FindByCondition(c => c.Id == courseId).FirstOrDefaultAsync()
+            ?? throw new NotFoundException($"Course with ID {courseId} not found.");
+
+        try
+        {
+            unitOfWork.CourseRepository.Delete(course);
+            await unitOfWork.CompleteAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("An unexpected error occurred while deleting the course.", ex);
+        }
+    }
+
     private static void EnsureNotNull<T>(T obj, string message)
     {
         if (obj == null)

@@ -76,4 +76,12 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         await serviceManager.CourseService.UpdateCourseAsync(courseId, courseDto);
         return NoContent();
     }
+
+    [HttpDelete("{courseId:int}")]
+    [Authorize (Roles = "Teacher")]
+    public async Task<IActionResult> DeleteCourseAsync(int courseId)
+    {
+        await serviceManager.CourseService.DeleteCourseAsync(courseId);
+        return NoContent();
+    }
 }
