@@ -7,7 +7,7 @@ namespace Services.Contracts;
 public interface IModuleService
 {
     Task DeleteModuleAsync(int id);
-    Task<(IEnumerable<ModuleDto> moduleDtos, MetaData metaData)> GetAllModulesAsync(ModuleRequestParams requestParams, int courseId, bool sortByName = false, bool trackChanges = false);
+    Task<(IEnumerable<ModuleDto> moduleDtos, MetaData metaData)> GetAllModulesAsync(int courseId, ModuleRequestParams requestParams, bool trackChanges = false);
     Task<ModuleDto> GetModuleByIdAsync(int id, bool includeActivities);
     Task<ModuleDto> GetModuleByNameAsync(string name);
     Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int id);

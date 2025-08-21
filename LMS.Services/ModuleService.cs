@@ -20,13 +20,12 @@ public class ModuleService : IModuleService
     }
 
     public async Task<(IEnumerable<ModuleDto> moduleDtos, MetaData metaData)> GetAllModulesAsync(
-        ModuleRequestParams requestParams,
         int courseId,
-        bool sortByName = false,
+        ModuleRequestParams requestParams,
         bool trackChanges = false
         )
     {
-        var pagedList = await _uow.ModuleRepository.GetModulesAsync(requestParams, courseId, sortByName, trackChanges);
+        var pagedList = await _uow.ModuleRepository.GetModulesAsync(courseId, requestParams, trackChanges);
         var ModulesDto = _mapper.Map<IEnumerable<ModuleDto>>(pagedList.Items);
         return (ModulesDto, pagedList.MetaData);
     }
