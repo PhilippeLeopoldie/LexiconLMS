@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.Common;
+using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +42,18 @@ public class ModuleController : ControllerBase
         return Ok(modules);
     }
 
+    [HttpGet("{id}")]
+    [Authorize(Roles = "Teacher, Student")]
+    [SwaggerOperation(Summary = "Get module by ID", Description = "Retrieves a specific module by its ID within a course.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Module retrieved successfully", typeof(ModuleDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult<ModuleDto>> GetModule(int courseId, int id, bool includeActivities)
+    {
+        var module = await _serviceManager.ModuleService.GetModuleByIdAsync(courseId, id, includeActivities);
 
+        return Ok(module);
+    }
 
 }
