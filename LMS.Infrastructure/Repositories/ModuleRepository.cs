@@ -3,6 +3,7 @@ using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 
 namespace LMS.Infrastructure.Repositories;
@@ -28,9 +29,9 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await PagedList<Module>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
-    public async Task<Module?> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges)
+    public async Task<Module?> GetModuleByConditionAsync(Expression<Func<Module, bool>> expression, bool includeActivities, bool trackChanges)
     {
-        var query = FindByCondition(module => module.Id.Equals(id), trackChanges);
+        var query = FindByCondition(expression, trackChanges);
 
         if (includeActivities) 
             query = query.Include(module => module.Activities);
@@ -38,11 +39,11 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await query.FirstOrDefaultAsync();
     }
 
-    public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
+    /*public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
     {
         return await FindByCondition(module => string.Equals(module.Name, name), trackChanges)
             .FirstOrDefaultAsync();
-    }
+    }*/
 
     public async Task<bool> HasOverlappingAsync(
         int courseId,
