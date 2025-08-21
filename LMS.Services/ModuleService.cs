@@ -67,6 +67,13 @@ public class ModuleService : IModuleService
 
     public async Task<ModuleDto> CreateModuleAsync(ModuleCreateDto dto)
     {
+        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(dto.CourseId, dto.StartsAt, dto.EndsAt);
+
+        if (hasAnyOverlapping) 
+        {
+            throw new ModuleOverlappingException($"{dto.StartsAt:G} - {dto.EndsAt:G}");
+        }
+       
         var module = _mapper.Map<Module>(dto);
         _uow.ModuleRepository.Create(module);
         await _uow.CompleteAsync();
