@@ -13,7 +13,7 @@ namespace LMS.Services;
 
 public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager) : ICourseService
 {
-    public async Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForCreationDto courseDto)
+    public async Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForModificationDto courseDto)
     {
         EnsureNotNull(courseDto, "Course data is null.");
 
@@ -89,6 +89,27 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         .FirstOrDefaultAsync(),
         meta);
     }
+    public async Task UpdateCourseAsync(int courseId, CourseForModificationDto courseDto)
+    {
+        EnsureNotNull(courseDto, "Course data is null.");
+        var course = unitOfWork.CourseRepository.FindByCondition(c => c.Id == courseId, true).FirstOrDefault()
+            ?? throw new NotFoundException($"Course with ID {courseId} not found.");
+
+        mapper.Map(courseDto, course);
+        if (!ValidateEntity(course, out var errors))
+            throw new BadRequestException($"Invalid course data: {errors}");
+
+        try
+        {
+            unitOfWork.CourseRepository.Update(course);
+            await unitOfWork.CompleteAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("An unexpected error occurred while updating the course.", ex);
+        }
+    }
+
     private static void EnsureNotNull<T>(T obj, string message)
     {
         if (obj == null)

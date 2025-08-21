@@ -57,12 +57,23 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 
     [HttpPost]
     [Authorize (Roles = "Teacher")]
-    public async Task<ActionResult<CourseDto>> CreateCourseAsync([FromBody] CourseForCreationDto courseDto)
+    public async Task<ActionResult<CourseDto>> CreateCourseAsync([FromBody] CourseForModificationDto courseDto)
     {
         if (courseDto == null)
             return BadRequest("Course data is null.");
 
         var createdCourse = await serviceManager.CourseService.CreateCourseAsync(courseDto);
         return CreatedAtAction(nameof(GetCourseByIdAsync), new { courseId = createdCourse.createdCourseId }, createdCourse);
+    }
+
+    [HttpPut("{courseId:int}")]
+    [Authorize (Roles = "Teacher")]
+    public async Task<IActionResult> UpdateCourseAsync(int courseId, [FromBody] CourseForModificationDto courseDto)
+    {
+        if (courseDto == null)
+            return BadRequest("Course data is null.");
+
+        await serviceManager.CourseService.UpdateCourseAsync(courseId, courseDto);
+        return NoContent();
     }
 }
