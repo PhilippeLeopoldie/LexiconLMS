@@ -98,7 +98,7 @@ public class ModuleService : IModuleService
 
         if (hasAnyOverlapping)
         {
-            throw new ModuleOverlappingException($"{dto.StartsAt:G} - {dto.EndsAt:G}");
+            throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
         }
     }
 
