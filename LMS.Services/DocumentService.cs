@@ -3,6 +3,7 @@ using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.DocumentDtos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
@@ -17,87 +18,8 @@ public class DocumentService(IUnitOfWork unitOfWork, IMapper mapper, UserManager
     public async Task<DocumentDto> GetByIdAsync(int id)
     {
         var document = await unitOfWork.DocumentRepository.GetByIdAsync(id);
-        if (document == null)
-            throw new NotFoundException($"Document with ID {id} not found");
-
-        return mapper.Map<DocumentDto>(document);
-    }
-
-    public async Task<DocumentDto> CreateAsync(DocumentManipulationDto documentDto, string userId)
-    {
-        if (string.IsNullOrWhiteSpace(documentDto.Name))
-            throw new BadRequestException("Document name is required");
-
-        if (string.IsNullOrWhiteSpace(documentDto.StoragePath))
-            throw new BadRequestException("Storage path is required");
-
-        if (documentDto.Size <= 0)
-            throw new BadRequestException("Document size must be greater than 0");
-
-        if (!documentDto.CourseId.HasValue && !documentDto.ModuleId.HasValue && !documentDto.ActivityId.HasValue)
-            throw new BadRequestException("Document must be associated with a course, module, or activity");
-
-        var user = await userManager.FindByIdAsync(userId)
-            ?? throw new NotFoundException($"User with ID {userId} not found");
-
-        var document = new Document
-        {
-            Name = documentDto.Name,
-            Description = documentDto.Description,
-            StoragePath = documentDto.StoragePath,
-            Size = documentDto.Size,
-            FileType = documentDto.FileType,
-            UploadedAt = DateTime.UtcNow,
-            UploadedByUserId = userId,
-            User = user,
-            CourseId = documentDto.CourseId,
-            ModuleId = documentDto.ModuleId,
-            ActivityId = documentDto.ActivityId
-        };
-
-        unitOfWork.DocumentRepository.Create(document);
-        await unitOfWork.CompleteAsync();
-
-        return mapper.Map<DocumentDto>(document);
-    }
-
-    public async Task UpdateAsync(int id, DocumentManipulationDto documentDto, string userId)
-    {
-        var existingDocument = await unitOfWork.DocumentRepository.GetByIdAsync(id, true)
-            ?? throw new NotFoundException($"Document with ID {id} not found");
-
-        if (existingDocument.UploadedByUserId != userId)
-            throw new BadRequestException("You can only update documents you uploaded");
-
-        if (string.IsNullOrWhiteSpace(documentDto.Name))
-            throw new BadRequestException("Document name is required");
-
-        if (string.IsNullOrWhiteSpace(documentDto.StoragePath))
-            throw new BadRequestException("Storage path is required");
-
-        if (documentDto.Size <= 0)
-            throw new BadRequestException("Document size must be greater than 0");
-
-        existingDocument.Name = documentDto.Name;
-        existingDocument.Description = documentDto.Description;
-        existingDocument.StoragePath = documentDto.StoragePath;
-        existingDocument.Size = documentDto.Size;
-        existingDocument.FileType = documentDto.FileType;
-
-        unitOfWork.DocumentRepository.Create(existingDocument);
-        await unitOfWork.CompleteAsync();
-    }
-
-    public async Task DeleteAsync(int id, string userId)
-    {
-        var document = await unitOfWork.DocumentRepository.GetByIdAsync(id)
-            ?? throw new NotFoundException($"Document with ID {id} not found");
-
-        if (document.UploadedByUserId != userId)
-            throw new BadRequestException("You can only delete documents you uploaded");
-
-        unitOfWork.DocumentRepository.Delete(document);
-        await unitOfWork.CompleteAsync();
+        return document == null ? throw new NotFoundException($"Document with ID {id} not found")
+                                : mapper.Map<DocumentDto>(document);
     }
 
     public async Task<IEnumerable<DocumentDto>> GetDocumentsByCourseAsync(int courseId)
@@ -124,38 +46,116 @@ public class DocumentService(IUnitOfWork unitOfWork, IMapper mapper, UserManager
         return mapper.Map<IEnumerable<DocumentDto>>(documents);
     }
 
-    public async Task<DocumentDto> ShareDocumentAsync(DocumentManipulationDto documentDto, string userId, int courseId, int? moduleId = null, int? activityId = null)
+    public async Task ShareDocumentAsync(int documentId, string sharerUserId, int? courseId, int? moduleId, int? activityId)
     {
-        if (string.IsNullOrWhiteSpace(documentDto.Name))
-            throw new BadRequestException("Document name is required");
+        var document = await unitOfWork.DocumentRepository.GetByIdAsync(documentId, true)
+            ?? throw new NotFoundException($"Document with ID {documentId} not found.");
 
-        if (string.IsNullOrWhiteSpace(documentDto.StoragePath))
-            throw new BadRequestException("Storage path is required");
+        if (document.DeletedAt != null)
+            throw new BadRequestException("Cannot share a deleted document.");
 
-        if (documentDto.Size <= 0)
-            throw new BadRequestException("Document size must be greater than 0");
+        var sharerUser = await userManager.FindByIdAsync(sharerUserId);
+        if (sharerUser == null || (!document.UploadedByUserId.Equals(sharerUserId) && !await userManager.IsInRoleAsync(sharerUser, "Teacher")))
+            throw new BadRequestException("You do not have permission to share this document.");
 
+        if (courseId == null && moduleId == null && activityId == null)
+            throw new BadRequestException("Must specify a course, module, or activity to share the document with.");
+
+        if ((courseId != null && moduleId != null) || (courseId != null && activityId != null) || (moduleId != null && activityId != null))
+            throw new BadRequestException("Document can only be shared with one entity at a time.");
+
+        document.CourseId = courseId;
+        document.ModuleId = moduleId;
+        document.ActivityId = activityId;
+
+        await unitOfWork.CompleteAsync();
+    }
+
+    public async Task<int> UploadAsync(IFormFile file, string webRootPath, string userId, int? courseId, int? moduleId, int? activityId)
+    {
         var user = await userManager.FindByIdAsync(userId)
             ?? throw new NotFoundException($"User with ID {userId} not found");
 
+        if (file == null || file.Length == 0)
+            throw new BadRequestException("No file selected for upload.");
+
+        var uploadsFolder = Path.Combine(webRootPath, "uploads");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        await using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(fileStream);
+        }
+
         var document = new Document
         {
-            Name = documentDto.Name,
-            Description = documentDto.Description,
-            StoragePath = documentDto.StoragePath,
-            Size = documentDto.Size,
-            FileType = documentDto.FileType,
-            UploadedAt = DateTime.UtcNow,
             UploadedByUserId = userId,
-            User = user,
+            Name = uniqueFileName,
+            StoragePath = filePath,
+            Size = (int)file.Length,
+            FileType = file.ContentType,
+            UploadedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             CourseId = courseId,
             ModuleId = moduleId,
-            ActivityId = activityId
+            ActivityId = activityId,
+            User = user
         };
 
         unitOfWork.DocumentRepository.Create(document);
         await unitOfWork.CompleteAsync();
 
-        return mapper.Map<DocumentDto>(document);
+        return document.Id;
+    }
+
+    public async Task<(Stream stream, string fileName, string contentType)> DownloadAsync(int documentId)
+    {
+        var document = await unitOfWork.DocumentRepository.GetByIdAsync(documentId, false)
+            ?? throw new NotFoundException($"Document with ID {documentId} not found.");
+
+        var filePath = Path.Combine(document.StoragePath);
+
+        if (!File.Exists(filePath))
+            throw new NotFoundException("File not found on server.");
+
+        var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+        return (fileStream, Path.GetFileName(document.Name), document.FileType ?? "application/octet-stream");
+    }
+
+    public async Task UpdateAsync(int id, DocumentUpdateDto documentDto)
+    {
+        var existingDocument = await unitOfWork.DocumentRepository.GetByIdAsync(id, true)
+            ?? throw new NotFoundException($"Document with ID {id} not found");
+
+        mapper.Map(documentDto, existingDocument);
+        await unitOfWork.CompleteAsync();
+    }
+
+    public async Task RestoreAsync(int id, bool restore = false)
+    {
+        var existingDocument = await unitOfWork.DocumentRepository.GetDeletedByIdAsync(id, true)
+            ?? throw new NotFoundException($"Document with ID {id} not found");
+
+        if (restore)
+            existingDocument.DeletedAt = null;
+
+        await unitOfWork.CompleteAsync();
+    }
+
+    public async Task DeleteAsync(int id, string userId)
+    {
+        var document = await unitOfWork.DocumentRepository.GetByIdAsync(id, true)
+            ?? throw new NotFoundException($"Document with ID {id} not found");
+
+        if (document.UploadedByUserId != userId)
+            throw new BadRequestException("You can only delete documents you uploaded");
+
+        document.DeletedAt = DateTime.UtcNow;
+        await unitOfWork.CompleteAsync();
     }
 }
