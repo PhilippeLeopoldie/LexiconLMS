@@ -36,7 +36,8 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false);
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityCreateDto.StartsAt, activityCreateDto.EndsAt))
@@ -67,7 +68,8 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
 
         EnsureNotNull(activityEditDto, "Activity data is null.");
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false);
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
