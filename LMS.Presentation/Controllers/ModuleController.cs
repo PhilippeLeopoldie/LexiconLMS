@@ -50,7 +50,7 @@ public class ModuleController : ControllerBase
         return Ok(module);
     }
 
-    [HttpPut("{id}")]
+    /*[HttpPut("{id}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Update module", Description = "Updates an existing module within a course.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Module updated successfully")]
@@ -62,5 +62,6 @@ public class ModuleController : ControllerBase
     {
         await _serviceManager.ModuleService.UpdateModuleAsync(courseId, id, moduleDto);
         return NoContent();
-    }
+
+    }*/
 }
