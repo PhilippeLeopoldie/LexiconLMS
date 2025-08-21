@@ -47,10 +47,13 @@ public class ModuleService : IModuleService
     public async Task UpdateModuleAsync(int id, ModuleUpdateDto dto)
     {
         if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
+        await HasAnyOverlapping(dto, id);
         var module = await GetModuleByIdOrThrowExceptionAsync(id, includeActivities: false, trackChanges: true);
         _mapper.Map(dto, module);
         await _uow.CompleteAsync();
     }
+
+    
 
     public async Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int id)
     {
@@ -67,13 +70,8 @@ public class ModuleService : IModuleService
 
     public async Task<ModuleDto> CreateModuleAsync(ModuleCreateDto dto)
     {
-        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(dto.CourseId, dto.StartsAt, dto.EndsAt);
+        await HasAnyOverlapping(dto);
 
-        if (hasAnyOverlapping) 
-        {
-            throw new ModuleOverlappingException($"{dto.StartsAt:G} - {dto.EndsAt:G}");
-        }
-       
         var module = _mapper.Map<Module>(dto);
         _uow.ModuleRepository.Create(module);
         await _uow.CompleteAsync();
@@ -92,6 +90,16 @@ public class ModuleService : IModuleService
         var module = await _uow.ModuleRepository.GetModuleByIdAsync(id, includeActivities, trackChanges);
         if (module is null) throw new ModuleNotFoundException(id);
         return module;
+    }
+
+    private async Task HasAnyOverlapping(ModuleForManipulationDto dto, int? id = null)
+    {
+        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(dto.CourseId, dto.StartsAt, dto.EndsAt, id);
+
+        if (hasAnyOverlapping)
+        {
+            throw new ModuleOverlappingException($"{dto.StartsAt:G} - {dto.EndsAt:G}");
+        }
     }
 
 }
