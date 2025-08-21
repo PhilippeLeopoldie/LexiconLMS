@@ -21,11 +21,23 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         return (courses, pagedList.MetaData);
     }
 
-    public async Task<CourseDto?> GetCourseByIdAsync(int courseId)
+    public async Task<CourseDto?> GetCourseByIdAsync(int courseId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
     {
-        var result = await unitOfWork.CourseRepository
-            .FindByCondition(c => c.Id == courseId)
+        var query = unitOfWork.CourseRepository
+            .FindByCondition(c => c.Id == courseId);
+
+        if (includeModules)
+        {
+            query = query.Include(c => c.Modules);
+            if (includeActivities)
+                query = query.Include(c => c.Modules).ThenInclude(m => m.Activities);
+        }
+        if  (trackChanges)
+            query = query.AsTracking();
+
+        var result = await query
             .FirstOrDefaultAsync();
+
         if (result == null)
             return null;
         return mapper.Map<CourseDto>(result);

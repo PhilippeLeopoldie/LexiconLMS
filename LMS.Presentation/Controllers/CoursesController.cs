@@ -23,7 +23,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         return Ok(courses);
     }
 
-    [HttpGet("{userId}")]
+    [HttpGet("{userId:string}")]
     [Authorize(Roles = "Teacher, Student")]  // NOTE: Not really needed
     public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
         string userId, 
@@ -38,6 +38,20 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         if (course == null)
             return NotFound($"No course found for user {userId}.");
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
+        return Ok(course);
+    }
+
+    [HttpGet("{courseId:int}")]
+    [Authorize(Roles = "Teacher, Student")]
+    public async Task<ActionResult<CourseDto>> GetCourseByIdAsync(
+        int courseId, 
+        [FromQuery] bool includeModules = false, 
+        [FromQuery] bool includeActivities = false,
+        [FromQuery] RequestParams requestParams = null!)
+    {
+        var course = await serviceManager.CourseService.GetCourseByIdAsync(courseId, includeModules, includeActivities, requestParams);
+        if (course == null)
+            return NotFound($"Course with ID {courseId} not found.");
         return Ok(course);
     }
 }
