@@ -40,7 +40,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityCreateDto.StartsAt, activityCreateDto.EndsAt))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityCreateDto.StartsAt:yyyy-MM-dd HH:mm} - {activityCreateDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         var activity = mapper.Map<Activity>(activityCreateDto);
         activity.ModuleId = moduleId;
@@ -71,7 +71,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityEditDto.StartsAt:yyyy-MM-dd HH:mm} - {activityEditDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         mapper.Map(activityEditDto, activity);
         if (!ValidateEntity(activity, out var errors))
