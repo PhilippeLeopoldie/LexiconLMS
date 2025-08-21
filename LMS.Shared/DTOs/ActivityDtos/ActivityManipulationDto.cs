@@ -11,5 +11,5 @@ public record ActivityManipulationDto
     [Required(ErrorMessage = "The End date is required")]
     public required DateTime EndsAt { get; init; }
     [Required(ErrorMessage = "The Activity type is required")]
-    public required int ActivityTypeId { get; set; }
+    public required int ActivityTypeId { get; init; }
 }

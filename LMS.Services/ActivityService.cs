@@ -4,7 +4,6 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
-using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,7 +15,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
         ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
         EnsureModuleExists(moduleId);
 
-        PagedList<Activity> pagedList = await unitOfWork.ActivityRepository.GetModuleActivities(moduleId, requestParams, trackChanges);
+        PagedList<Activity> pagedList = await unitOfWork.ActivityRepository.GetModuleActivitiesAsync(moduleId, requestParams, trackChanges);
         var activities = mapper.Map<IEnumerable<ActivityDto>>(pagedList.Items);
 
         return (activities, pagedList.MetaData);
@@ -26,7 +25,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     public async Task<ActivityDto> GetByIdAsync(int moduleId, int id, bool trackChanges = false)
     {
         EnsureModuleExists(moduleId);
-        var activity = await unitOfWork.ActivityRepository.FindByCondition(activity => activity.Id == id && activity.ModuleId == moduleId, trackChanges).FirstOrDefaultAsync();
+        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, trackChanges);
         return activity == null
             ? throw new NotFoundException($"Activity with id '{id}' not found in module '{moduleId}'.")
             : mapper.Map<ActivityDto>(activity);
@@ -64,13 +63,12 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     public async Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto)
     {
         EnsureModuleExists(moduleId);
-        var activity = unitOfWork.ActivityRepository.FindByCondition(activity => activity.Id == id && activity.ModuleId == moduleId, true).FirstOrDefault()
-            ?? throw new NotFoundException($"Activity with id '{id}' not found in module '{moduleId}'.");
+        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
         EnsureNotNull(activityEditDto, "Activity data is null.");
 
         var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
-        EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module);
+        EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
             throw new BadRequestException("Activity overlaps with another activity in the same module.");
@@ -81,7 +79,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
 
         try
         {
-            unitOfWork.ActivityRepository.Update(activity);
+            unitOfWork.ActivityRepository.Update(activity!);
             await unitOfWork.CompleteAsync();
         }
         catch (Exception ex)
@@ -93,7 +91,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     public async Task DeleteAsync(int moduleId, int id)
     {
         EnsureModuleExists(moduleId);
-        var activity = unitOfWork.ActivityRepository.FindByCondition(activity => activity.Id == id && activity.ModuleId == moduleId).FirstOrDefault()
+        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId)
             ?? throw new NotFoundException($"Activity with id '{id}' not found in module '{moduleId}'.");
 
         try
