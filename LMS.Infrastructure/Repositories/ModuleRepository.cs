@@ -3,6 +3,7 @@ using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 
 namespace LMS.Infrastructure.Repositories;
@@ -42,5 +43,20 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
     {
         return await FindByCondition(module => string.Equals(module.Name, name), trackChanges)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> HasOverlappingAsync(
+        int courseId,
+        DateTime startsAt,
+        DateTime endsAt,
+        int? excludeModuleId = null
+        )
+    {
+        var query = Context.Modules.Where(module => module.CourseId == courseId);
+
+        if(excludeModuleId is not null)
+            query = query.Where(module => module.Id != excludeModuleId);
+
+        return await query.AnyAsync(module => startsAt < module.EndsAt && endsAt > module.StartsAt);
     }
 }
