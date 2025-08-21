@@ -13,4 +13,10 @@ public interface IModuleRepository : IRepositoryBase<Module>, IInternalRepositor
         bool trackChanges = false
         );
     Task<Module?> GetModuleByNameAsync(string name, bool trackChanges);
+    Task<bool> HasOverlappingAsync(
+        int courseId,
+        DateTime startsAt,
+        DateTime endsAt,
+        int? excludeModuleId = null
+        );
 }

@@ -43,13 +43,20 @@ public static class ExceptionMiddlewareExtensions
                         case BadRequestException badRequestException:
                             statusCode = StatusCodes.Status400BadRequest;
                             problemDetails = problemDetailsFactory.CreateProblemDetails(
-
                                 context,
                                 statusCode,
                                 title: badRequestException.Title,
                                 detail: badRequestException.Message,
                                 instance: context.Request.Path);
-
+                            break;
+                        case ConflictException conflictException:
+                            statusCode = StatusCodes.Status409Conflict;
+                            problemDetails = problemDetailsFactory.CreateProblemDetails(
+                                context,
+                                statusCode,
+                                title: conflictException.Title,
+                                detail: conflictException.Message,
+                                instance: context.Request.Path);
                             break;
                         default:
                             statusCode = StatusCodes.Status500InternalServerError;
