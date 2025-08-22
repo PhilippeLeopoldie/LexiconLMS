@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using LMS.Shared.DTOs.ActivityDtos;
 using System.ComponentModel.DataAnnotations;
 
 
@@ -16,5 +17,5 @@ public record ModuleForManipulationDto
     [Required(ErrorMessage = "The Course id is required")]
     public int CourseId { get; init; }
 
-    public IEnumerable<Activity>? Activities { get; init; }
+    public IEnumerable<ActivityDto>? Activities { get; init; }
 }
