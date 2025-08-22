@@ -36,11 +36,11 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         }
     }
 
-    public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(RequestParams requestParams, bool trackChanges = false)
+    public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
     {
         ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
         
-        PagedList<Course> pagedList = await unitOfWork.CourseRepository.GetAllCoursesAsync(requestParams, trackChanges);
+        PagedList<Course> pagedList = await unitOfWork.CourseRepository.GetAllCoursesAsync(includeModules, includeActivities, requestParams, trackChanges);
         var courses = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
 
         return (courses, pagedList.MetaData);

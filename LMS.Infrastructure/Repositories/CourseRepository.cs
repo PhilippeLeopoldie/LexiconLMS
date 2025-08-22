@@ -11,10 +11,16 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
     public async Task<Course?> GetCourseByIdAsync(int id, bool trackChanges = false) =>
         await FindByCondition(course => course.Id.Equals(id), trackChanges).FirstOrDefaultAsync();
 
-    public async Task<PagedList<Course>> GetAllCoursesAsync(RequestParams requestParams, bool trackChanges = false)
+    public async Task<PagedList<Course>> GetAllCoursesAsync(bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
     {
         var query = FindAll(trackChanges);
 
+        if (includeModules)
+        {
+            query = query.Include(c => c.Modules);
+            if (includeActivities)
+                query = query.Include(c => c.Modules).ThenInclude(m => m.Activities);
+        }
         query = ApplyOrdering(query, requestParams);
 
         return await PagedList<Course>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
