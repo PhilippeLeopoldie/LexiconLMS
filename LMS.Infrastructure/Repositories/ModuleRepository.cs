@@ -1,11 +1,9 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
-using Domain.Models.Exceptions;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Reflection.Metadata.Ecma335;
 
 
 namespace LMS.Infrastructure.Repositories;
