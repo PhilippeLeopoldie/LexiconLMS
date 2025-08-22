@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.AuthDtos;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 
@@ -12,6 +13,37 @@ public class MapperProfile : Profile
     public MapperProfile()
     {
         CreateMap<UserRegistrationDto, ApplicationUser>();
+
+        #region Courses
+        CreateMap<Course, CourseDto>()
+            .ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules))
+            .ReverseMap()
+            .ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules));
+        CreateMap<CourseForModificationDto, Course>()
+            .ForMember(target => target.Starts,
+                        options => options.MapFrom((src, destination) =>
+                                             src.Starts == default
+                                             ? destination.Starts
+                                             : src.Starts))
+            .ForMember(target => target.Ends,
+                        options => options.MapFrom((src, destination) =>
+                                             src.Ends == default
+                                             ? destination.Ends
+                                             : src.Ends))
+            .ReverseMap();
+        CreateMap<CourseForCreationDto, Course>()
+            .ForMember(target => target.Starts,
+                        options => options.MapFrom((src, destination) =>
+                                             src.Starts == default
+                                             ? destination.Starts
+                                             : src.Starts))
+            .ForMember(target => target.Ends,
+                        options => options.MapFrom((src, destination) =>
+                                             src.Ends == default
+                                             ? destination.Ends
+                                             : src.Ends))
+            .ReverseMap();
+        #endregion
 
         #region Activities
         CreateMap<ActivityTypeDto, ActivityType>()
