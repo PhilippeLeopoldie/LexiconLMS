@@ -35,12 +35,15 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     {
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
+        EnsureActivityStartsBeforeEndDate(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false)
+            ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityCreateDto.StartsAt, activityCreateDto.EndsAt))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityCreateDto.StartsAt:yyyy-MM-dd HH:mm} - {activityCreateDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         var activity = mapper.Map<Activity>(activityCreateDto);
         activity.ModuleId = moduleId;
@@ -63,15 +66,15 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     public async Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto)
     {
         EnsureModuleExists(moduleId);
-        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
-
         EnsureNotNull(activityEditDto, "Activity data is null.");
+        EnsureActivityStartsBeforeEndDate(activityEditDto.StartsAt, activityEditDto.EndsAt);
+        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
         var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityEditDto.StartsAt:yyyy-MM-dd HH:mm} - {activityEditDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         mapper.Map(activityEditDto, activity);
         if (!ValidateEntity(activity, out var errors))
@@ -115,5 +118,11 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     {
         if (startsAt < module.StartsAt || endsAt > module.EndsAt)
             throw new BadRequestException("Activity must be within module start and end time.");
+    }
+
+    private static void EnsureActivityStartsBeforeEndDate(DateTime startsAt, DateTime endsAt)
+    {
+        if (startsAt >= endsAt)
+            throw new BadRequestException("Start date must be before end date.");
     }
 }

@@ -61,7 +61,7 @@ public class MapperProfile : Profile
         #region Documents
         CreateMap<Document, DocumentDto>()
             .ReverseMap();
-        CreateMap<DocumentManipulationDto, Document>()
+        CreateMap<DocumentUpdateDto, Document>()
             .ForMember(target => target.UploadedAt, config => config.Ignore())
             .ForMember(target => target.UploadedByUserId, config => config.Ignore())
             .ReverseMap();

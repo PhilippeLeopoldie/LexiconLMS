@@ -2,6 +2,8 @@
 public class Document : BaseModel
 {
     public DateTime UploadedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
     public required string StoragePath { get; set; }
     public int Size { get; set; }
     public string? FileType { get; set; }
