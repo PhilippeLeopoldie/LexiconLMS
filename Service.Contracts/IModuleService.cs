@@ -2,7 +2,7 @@
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ModuleDtos;
 
-namespace Services.Contracts;
+namespace Service.Contracts;
 
 public interface IModuleService
 {
