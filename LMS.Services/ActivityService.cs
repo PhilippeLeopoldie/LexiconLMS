@@ -8,7 +8,7 @@ using Service.Contracts;
 using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
-public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivityService
+public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBase, IActivityService
 {
     public async Task<(IEnumerable<ActivityDto> activities, MetaData metaData)> GetAllAsync(int moduleId, RequestParams requestParams, bool trackChanges = false)
     {
@@ -111,26 +111,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
             throw new NotFoundException($"Module with id '{moduleId}' not found.");
     }
 
-    private static void EnsureNotNull<T>(T obj, string message)
-    {
-        if (obj == null)
-            throw new BadRequestException(message);
-    }
-
     private static void EnsureActivityWithinModule(DateTime startsAt, DateTime endsAt, Module module)
     {
         if (startsAt < module.StartsAt || endsAt > module.EndsAt)
             throw new BadRequestException("Activity must be within module start and end time.");
-    }
-
-    protected static bool ValidateEntity<T>(T entity, out string? errors)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-
-        var validationContext = new ValidationContext(entity);
-        var validationResults = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(entity, validationContext, validationResults, true);
-        errors = string.Join("; ", validationResults.Select(x => x.ErrorMessage ?? string.Empty));
-        return isValid;
     }
 }
