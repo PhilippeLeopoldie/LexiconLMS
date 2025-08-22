@@ -4,7 +4,7 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ModuleDtos;
-using Services.Contracts;
+using Service.Contracts;
 
 namespace LMS.Services;
 

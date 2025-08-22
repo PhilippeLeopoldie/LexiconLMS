@@ -5,7 +5,7 @@ using LMS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Services.Contracts;
+using Service.Contracts;
 
 namespace LMS.API.Extensions;
 

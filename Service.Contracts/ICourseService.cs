@@ -2,7 +2,7 @@
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.CourseDtos;
 
-namespace Service.Contracts;
+namespace LMS.Services;
 
 public interface ICourseService
 {
