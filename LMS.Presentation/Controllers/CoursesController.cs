@@ -1,10 +1,12 @@
 ﻿using LMS.Shared.Common;
+using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Service.Contracts;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
 
 namespace LMS.Presentation.Controllers;
@@ -16,6 +18,11 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "List all courses", Description = "List all registered courses")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Courses retrieved successfully", typeof(IEnumerable<CourseDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request parameters")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
     public async Task<ActionResult<IEnumerable<CourseDto>>> GetCoursesAsync([FromQuery] RequestParams requestParams)
     {
         var (courses, metaData) = await serviceManager.CourseService.GetAllCoursesAsync(requestParams);
@@ -25,6 +32,11 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 
     [HttpGet("{userId}")]
     [Authorize(Roles = "Teacher, Student")]  // NOTE: Not really needed
+    [SwaggerOperation(Summary = "Get course by student", Description = "Retrieve course info for a specific student")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Course retrieved successfully", typeof(CourseDto))]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Student not found")]
     public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
         string userId, 
         [FromQuery] bool includeModules = false,
@@ -43,6 +55,12 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 
     [HttpGet("{courseId:int}")]
     [Authorize(Roles = "Teacher, Student")]
+    [SwaggerOperation(Summary = "Get course by id", Description = "Retrieve a single course by it's id.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Course retrieved successfully", typeof(CourseDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid course data")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Id not found")]
     public async Task<ActionResult<CourseDto>> GetCourseByIdAsync(
         int courseId, 
         [FromQuery] bool includeModules = false, 
@@ -57,7 +75,13 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 
     [HttpPost]
     [Authorize (Roles = "Teacher")]
-    public async Task<ActionResult<CourseDto>> CreateCourseAsync([FromBody] CourseForModificationDto courseDto)
+    [SwaggerOperation(Summary = "Create courses", Description = "Create a new course")]
+    [SwaggerResponse(StatusCodes.Status201Created, "Course created successfully", typeof(CourseDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid course data")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
+    public async Task<ActionResult<CourseDto>> CreateCourseAsync([FromBody] CourseForCreationDto courseDto)
     {
         if (courseDto == null)
             return BadRequest("Course data is null.");
@@ -68,6 +92,12 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 
     [HttpPut("{courseId:int}")]
     [Authorize (Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Update course", Description = "Update an existing course")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Course updated successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid course data")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
     public async Task<IActionResult> UpdateCourseAsync(int courseId, [FromBody] CourseForModificationDto courseDto)
     {
         if (courseDto == null)
@@ -79,6 +109,12 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
 
     [HttpDelete("{courseId:int}")]
     [Authorize (Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Delete course", Description = "Delete an existing course")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Course deleted successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid course data")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
     public async Task<IActionResult> DeleteCourseAsync(int courseId)
     {
         await serviceManager.CourseService.DeleteCourseAsync(courseId);
