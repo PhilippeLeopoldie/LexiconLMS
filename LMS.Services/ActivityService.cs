@@ -8,7 +8,7 @@ using Service.Contracts;
 using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
-public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivityService
+public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBase, IActivityService
 {
     public async Task<(IEnumerable<ActivityDto> activities, MetaData metaData)> GetAllAsync(int moduleId, RequestParams requestParams, bool trackChanges = false)
     {
@@ -35,13 +35,17 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     {
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
+        EnsureActivityStartsBeforeEndDate(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
+
 
         //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
-        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
+                    ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityCreateDto.StartsAt, activityCreateDto.EndsAt))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityCreateDto.StartsAt:yyyy-MM-dd HH:mm} - {activityCreateDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         var activity = mapper.Map<Activity>(activityCreateDto);
         activity.ModuleId = moduleId;
@@ -64,16 +68,17 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     public async Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto)
     {
         EnsureModuleExists(moduleId);
+        EnsureNotNull(activityEditDto, "Activity data is null.");
+        EnsureActivityStartsBeforeEndDate(activityEditDto.StartsAt, activityEditDto.EndsAt);
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
-        EnsureNotNull(activityEditDto, "Activity data is null.");
-
         //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
-        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
+                      ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityEditDto.StartsAt:yyyy-MM-dd HH:mm} - {activityEditDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         mapper.Map(activityEditDto, activity);
         if (!ValidateEntity(activity, out var errors))
@@ -113,26 +118,15 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
             throw new NotFoundException($"Module with id '{moduleId}' not found.");
     }
 
-    private static void EnsureNotNull<T>(T obj, string message)
-    {
-        if (obj == null)
-            throw new BadRequestException(message);
-    }
-
     private static void EnsureActivityWithinModule(DateTime startsAt, DateTime endsAt, Module module)
     {
         if (startsAt < module.StartsAt || endsAt > module.EndsAt)
             throw new BadRequestException("Activity must be within module start and end time.");
     }
 
-    protected static bool ValidateEntity<T>(T entity, out string? errors)
+    private static void EnsureActivityStartsBeforeEndDate(DateTime startsAt, DateTime endsAt)
     {
-        ArgumentNullException.ThrowIfNull(entity);
-
-        var validationContext = new ValidationContext(entity);
-        var validationResults = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(entity, validationContext, validationResults, true);
-        errors = string.Join("; ", validationResults.Select(x => x.ErrorMessage ?? string.Empty));
-        return isValid;
+        if (startsAt >= endsAt)
+            throw new BadRequestException("Start date must be before end date.");
     }
 }

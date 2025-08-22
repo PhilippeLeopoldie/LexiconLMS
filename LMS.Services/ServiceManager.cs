@@ -6,12 +6,13 @@ namespace LMS.Services;
 public class ServiceManager : IServiceManager
 {
     private Lazy<IAuthService> authService;
+    private Lazy<ICourseService> courseService;
     private Lazy<IActivityService> activityService;
     private Lazy<IActivityTypeService> activityTypeService;
     private Lazy<IDocumentService> documentService;
     private Lazy<IModuleService> moduleService;
     public IAuthService AuthService => authService.Value;
-
+    public ICourseService CourseService => courseService.Value;
     public IActivityService ActivityService => activityService.Value;
 
     public IActivityTypeService ActivityTypeService => activityTypeService.Value;
@@ -22,12 +23,14 @@ public class ServiceManager : IServiceManager
 
     public ServiceManager(
         Lazy<IAuthService> authService,
+        Lazy<ICourseService> courseService,
         Lazy<IActivityService> activityService,
         Lazy<IActivityTypeService> activityTypeService,
         Lazy<IDocumentService> documentService,
         Lazy<IModuleService> moduleService)
     {
         this.authService = authService;
+        this.courseService = courseService;
         this.activityService = activityService;
         this.activityTypeService = activityTypeService;
         this.documentService = documentService;
