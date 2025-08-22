@@ -26,8 +26,8 @@ public class ModuleService : IModuleService
         )
     {
         var pagedList = await _uow.ModuleRepository.GetModulesAsync(courseId, requestParams, trackChanges);
-        var ModulesDto = _mapper.Map<IEnumerable<ModuleDto>>(pagedList.Items);
-        return (ModulesDto, pagedList.MetaData);
+        var modulesDto = _mapper.Map<IEnumerable<ModuleDto>>(pagedList.Items);
+        return (modulesDto, pagedList.MetaData);
     }
 
     public async Task<ModuleDto> GetModuleByIdAsync(int courseId,int id, bool includeActivities)
@@ -49,9 +49,8 @@ public class ModuleService : IModuleService
 
     public async Task UpdateModuleAsync(int courseId, int id, ModuleUpdateDto dto)
     {
-        //if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
-        await HasAnyOverlapping(courseId, dto, id);
         var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities: false, trackChanges: true);
+        await EnsureNoOverlapAsync(courseId, dto, id);
         _mapper.Map(dto, module);
         await _uow.CompleteAsync();
     }
@@ -73,9 +72,9 @@ public class ModuleService : IModuleService
 
     public async Task<ModuleDto> CreateModuleAsync(int courseId, ModuleCreateDto dto)
     {
-        await HasAnyOverlapping(courseId, dto);
+        await EnsureNoOverlapAsync(courseId, dto);
         var module = _mapper.Map<Module>(dto);
-        module.Id = courseId;
+        module.CourseId = courseId;
         _uow.ModuleRepository.Create(module);
         await _uow.CompleteAsync();
         return _mapper.Map<ModuleDto>(module);
@@ -98,14 +97,15 @@ public class ModuleService : IModuleService
         return module ?? throw new ModuleNotFoundException(id); 
     }
 
-    private async Task HasAnyOverlapping(int courseId, ModuleForManipulationDto dto, int? id = null)
+    private async Task EnsureNoOverlapAsync(int courseId, ModuleForManipulationDto dto, int? id = null)
     {
-        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(courseId, dto.StartsAt, dto.EndsAt, id)
-            ?? throw new NotFoundException($"There is no module with CourseId: {courseId}");
-        if (hasAnyOverlapping)
-        {
-            throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
-        }
+        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(courseId, dto.StartsAt, dto.EndsAt, id);
+
+        if (hasAnyOverlapping is null)
+            throw new CourseNotFoundException(courseId);
+
+        if (hasAnyOverlapping.Value)
+                throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
     }
 
 }
