@@ -37,8 +37,10 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         EnsureNotNull(activityCreateDto, "Activity data is null.");
         EnsureActivityStartsBeforeEndDate(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false)
-            ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+
+        //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
+                    ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
 
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
@@ -70,7 +72,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         EnsureActivityStartsBeforeEndDate(activityEditDto.StartsAt, activityEditDto.EndsAt);
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
+                      ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
