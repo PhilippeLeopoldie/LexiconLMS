@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LMS.Shared.DTOs.ActivityDtos;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -17,5 +18,5 @@ public record ModuleDto
 
     public int CourseId { get; init; }
 
-    public IEnumerable<Activity> Activities { get; init; }
+    public IEnumerable<ActivityDto>? Activities { get; init; }
 }

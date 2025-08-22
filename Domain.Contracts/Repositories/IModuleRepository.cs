@@ -1,18 +1,18 @@
 ﻿using Domain.Models.Entities;
 using LMS.Shared.Common;
+using System.Linq.Expressions;
 
 namespace Domain.Contracts.Repositories;
 
 public interface IModuleRepository : IRepositoryBase<Module>, IInternalRepositoryBase<Module>
 {
-    Task<Module?> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges);
+    Task<Module?> GetModuleByConditionAsync(Expression<Func<Module, bool>> expression, bool includeActivities, bool trackChanges);
     Task<PagedList<Module>> GetModulesAsync(
-        ModuleRequestParams requestParams,
         int courseId,
-        bool sortByName = false,
+        ModuleRequestParams requestParams,
         bool trackChanges = false
         );
-    Task<Module?> GetModuleByNameAsync(string name, bool trackChanges);
+    //Task<Module?> GetModuleByNameAsync(string name, bool trackChanges);
     Task<bool> HasOverlappingAsync(
         int courseId,
         DateTime startsAt,

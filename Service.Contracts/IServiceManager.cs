@@ -1,6 +1,7 @@
-﻿using LMS.Services;
+using LMS.Services;
 
 namespace Service.Contracts;
+
 public interface IServiceManager
 {
     IAuthService AuthService { get; }
@@ -8,4 +9,5 @@ public interface IServiceManager
     IActivityService ActivityService { get; }
     IActivityTypeService ActivityTypeService { get; }
     IDocumentService DocumentService { get; }
+    IModuleService ModuleService { get; }
 }
