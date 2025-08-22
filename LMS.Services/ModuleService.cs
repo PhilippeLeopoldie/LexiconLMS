@@ -49,8 +49,8 @@ public class ModuleService : IModuleService
 
     public async Task UpdateModuleAsync(int courseId, int id, ModuleUpdateDto dto)
     {
-        if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
-        await HasAnyOverlapping(dto, id);
+        //if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
+        await HasAnyOverlapping(courseId, dto, id);
         var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities: false, trackChanges: true);
         _mapper.Map(dto, module);
         await _uow.CompleteAsync();
@@ -71,11 +71,11 @@ public class ModuleService : IModuleService
         await _uow.CompleteAsync();
     }
 
-    public async Task<ModuleDto> CreateModuleAsync(ModuleCreateDto dto)
+    public async Task<ModuleDto> CreateModuleAsync(int courseId, ModuleCreateDto dto)
     {
-        await HasAnyOverlapping(dto);
-
+        await HasAnyOverlapping(courseId, dto);
         var module = _mapper.Map<Module>(dto);
+        module.Id = courseId;
         _uow.ModuleRepository.Create(module);
         await _uow.CompleteAsync();
         return _mapper.Map<ModuleDto>(module);
@@ -95,14 +95,13 @@ public class ModuleService : IModuleService
             includeActivities,
             trackChanges
             );
-        if (module is null) throw new ModuleNotFoundException(id);
-        return module;
+        return module ?? throw new ModuleNotFoundException(id); 
     }
 
-    private async Task HasAnyOverlapping(ModuleForManipulationDto dto, int? id = null)
+    private async Task HasAnyOverlapping(int courseId, ModuleForManipulationDto dto, int? id = null)
     {
-        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(dto.CourseId, dto.StartsAt, dto.EndsAt, id);
-
+        var hasAnyOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(courseId, dto.StartsAt, dto.EndsAt, id)
+            ?? throw new NotFoundException($"There is no module with CourseId: {courseId}");
         if (hasAnyOverlapping)
         {
             throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
