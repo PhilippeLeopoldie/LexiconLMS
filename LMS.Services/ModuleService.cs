@@ -8,7 +8,7 @@ using Service.Contracts;
 
 namespace LMS.Services;
 
-public class ModuleService : IModuleService
+public class ModuleService : ServiceBase, IModuleService
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
@@ -30,7 +30,7 @@ public class ModuleService : IModuleService
         return (ModulesDto, pagedList.MetaData);
     }
 
-    public async Task<ModuleDto> GetModuleByIdAsync(int courseId,int id, bool includeActivities)
+    public async Task<ModuleDto> GetModuleByIdAsync(int courseId, int id, bool includeActivities)
     {
         var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities, trackChanges: false);
         return _mapper.Map<ModuleDto>(module);
@@ -50,13 +50,13 @@ public class ModuleService : IModuleService
     public async Task UpdateModuleAsync(int courseId, int id, ModuleUpdateDto dto)
     {
         if (id != dto.Id) throw new InvalidEntryBadRequestException(id);
+        ValidateDateRange(dto.StartsAt, dto.EndsAt);
         await HasAnyOverlapping(dto, id);
+        await EnsureModulWithinCourse(dto.StartsAt, dto.EndsAt, courseId);
         var module = await GetModuleByIdOrThrowExceptionAsync(courseId, id, includeActivities: false, trackChanges: true);
         _mapper.Map(dto, module);
         await _uow.CompleteAsync();
     }
-
-    
 
     public async Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int courseId, int id)
     {
@@ -71,9 +71,11 @@ public class ModuleService : IModuleService
         await _uow.CompleteAsync();
     }
 
-    public async Task<ModuleDto> CreateModuleAsync(ModuleCreateDto dto)
+    public async Task<ModuleDto> CreateModuleAsync(int courseId, ModuleCreateDto dto)
     {
+        ValidateDateRange(dto.StartsAt, dto.EndsAt);
         await HasAnyOverlapping(dto);
+        await EnsureModulWithinCourse(dto.StartsAt, dto.EndsAt, courseId);
 
         var module = _mapper.Map<Module>(dto);
         _uow.ModuleRepository.Create(module);
@@ -107,6 +109,15 @@ public class ModuleService : IModuleService
         {
             throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
         }
+    }
+
+    private async Task EnsureModulWithinCourse(DateTime startsAt, DateTime endsAt, int courseId)
+    {
+        var course = await _uow.CourseRepository.GetCourseByIdAsync(courseId, false)
+            ?? throw new NotFoundException($"The Course with id: {courseId} is not found!");
+
+        if (startsAt < course.Starts || endsAt > course.Ends)
+            throw new BadRequestException("Module must be within course start and end time.");
     }
 
 }

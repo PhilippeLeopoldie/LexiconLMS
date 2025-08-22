@@ -5,7 +5,6 @@ using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
 using Service.Contracts;
-using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
 public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBase, IActivityService
@@ -35,10 +34,8 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     {
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
-        EnsureActivityStartsBeforeEndDate(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
+        ValidateDateRange(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
 
-
-        //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
         var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
                     ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
 
@@ -69,10 +66,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     {
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityEditDto, "Activity data is null.");
-        EnsureActivityStartsBeforeEndDate(activityEditDto.StartsAt, activityEditDto.EndsAt);
+        ValidateDateRange(activityEditDto.StartsAt, activityEditDto.EndsAt);
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
-        //var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
         var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
                       ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
@@ -122,11 +118,5 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     {
         if (startsAt < module.StartsAt || endsAt > module.EndsAt)
             throw new BadRequestException("Activity must be within module start and end time.");
-    }
-
-    private static void EnsureActivityStartsBeforeEndDate(DateTime startsAt, DateTime endsAt)
-    {
-        if (startsAt >= endsAt)
-            throw new BadRequestException("Start date must be before end date.");
     }
 }
