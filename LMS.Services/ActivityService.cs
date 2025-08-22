@@ -35,8 +35,11 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     {
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
+        EnsureActivityStartsBeforeEndDate(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false)
+            ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityCreateDto.StartsAt, activityCreateDto.EndsAt))
@@ -63,9 +66,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     public async Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto)
     {
         EnsureModuleExists(moduleId);
-        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
-
         EnsureNotNull(activityEditDto, "Activity data is null.");
+        EnsureActivityStartsBeforeEndDate(activityEditDto.StartsAt, activityEditDto.EndsAt);
+        var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
         var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
@@ -121,6 +124,12 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     {
         if (startsAt < module.StartsAt || endsAt > module.EndsAt)
             throw new BadRequestException("Activity must be within module start and end time.");
+    }
+
+    private static void EnsureActivityStartsBeforeEndDate(DateTime startsAt, DateTime endsAt)
+    {
+        if (startsAt >= endsAt)
+            throw new BadRequestException("Start date must be before end date.");
     }
 
     protected static bool ValidateEntity<T>(T entity, out string? errors)

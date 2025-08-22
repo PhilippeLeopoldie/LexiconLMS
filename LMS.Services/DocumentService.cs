@@ -2,6 +2,7 @@
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
+using LMS.Shared.Common;
 using LMS.Shared.DTOs.DocumentDtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -10,10 +11,12 @@ using Service.Contracts;
 namespace LMS.Services;
 public class DocumentService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager) : IDocumentService
 {
-    public async Task<IEnumerable<DocumentDto>> GetAllAsync()
+    public async Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetAllAsync(RequestParams requestParams, bool trackChanges = false)
     {
-        var documents = await unitOfWork.DocumentRepository.GetAllAsync();
-        return mapper.Map<IEnumerable<DocumentDto>>(documents);
+        ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
+        var documents = await unitOfWork.DocumentRepository.GetAllAsync(requestParams, trackChanges);
+        var mappedDocuments = mapper.Map<IEnumerable<DocumentDto>>(documents.Items);
+        return (mappedDocuments, documents.MetaData);
     }
     public async Task<DocumentDto> GetByIdAsync(int id)
     {
@@ -22,28 +25,35 @@ public class DocumentService(IUnitOfWork unitOfWork, IMapper mapper, UserManager
                                 : mapper.Map<DocumentDto>(document);
     }
 
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsByCourseAsync(int courseId)
+    public async Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByCourseAsync(int courseId, RequestParams requestParams, bool trackChanges = false)
     {
-        var documents = await unitOfWork.DocumentRepository.GetDocumentsByCourseAsync(courseId);
-        return mapper.Map<IEnumerable<DocumentDto>>(documents);
+        var documents = await unitOfWork.DocumentRepository.GetDocumentsByCourseAsync(requestParams, courseId, trackChanges);
+        var mappedDocuments = mapper.Map<IEnumerable<DocumentDto>>(documents.Items);
+        return (mappedDocuments, documents.MetaData);
     }
 
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsByModuleAsync(int moduleId)
+    public async Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByModuleAsync(int moduleId, RequestParams requestParams, bool trackChanges = false)
     {
-        var documents = await unitOfWork.DocumentRepository.GetDocumentsByModuleAsync(moduleId);
-        return mapper.Map<IEnumerable<DocumentDto>>(documents);
+        ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
+        var documents = await unitOfWork.DocumentRepository.GetDocumentsByModuleAsync(requestParams, moduleId, trackChanges);
+        var mappedDocuments = mapper.Map<IEnumerable<DocumentDto>>(documents.Items);
+        return (mappedDocuments, documents.MetaData);
     }
 
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsByActivityAsync(int activityId)
+    public async Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByActivityAsync(int activityId, RequestParams requestParams, bool trackChanges = false)
     {
-        var documents = await unitOfWork.DocumentRepository.GetDocumentsByActivityAsync(activityId);
-        return mapper.Map<IEnumerable<DocumentDto>>(documents);
+        ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
+        var documents = await unitOfWork.DocumentRepository.GetDocumentsByActivityAsync(requestParams, activityId, trackChanges);
+        var mappedDocuments = mapper.Map<IEnumerable<DocumentDto>>(documents.Items);
+        return (mappedDocuments, documents.MetaData);
     }
 
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsByUserAsync(string userId)
+    public async Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByUserAsync(string userId, RequestParams requestParams, bool trackChanges = false)
     {
-        var documents = await unitOfWork.DocumentRepository.GetDocumentsByUserAsync(userId);
-        return mapper.Map<IEnumerable<DocumentDto>>(documents);
+        ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
+        var documents = await unitOfWork.DocumentRepository.GetDocumentsByUserAsync(requestParams, userId, trackChanges);
+        var mappedDocuments = mapper.Map<IEnumerable<DocumentDto>>(documents.Items);
+        return (mappedDocuments, documents.MetaData);
     }
 
     public async Task ShareDocumentAsync(int documentId, string sharerUserId, int? courseId, int? moduleId, int? activityId)

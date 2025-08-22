@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.DocumentDtos;
+﻿using LMS.Shared.Common;
+using LMS.Shared.DTOs.DocumentDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using System.Text.Json;
 using IFormFile = Microsoft.AspNetCore.Http.IFormFile;
 
 namespace LMS.Presentation.Controllers;
@@ -21,9 +23,10 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request parameters")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocuments()
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocuments([FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetAllAsync();
+        var (documents, metaData) = await serviceManager.DocumentService.GetAllAsync(parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
@@ -46,9 +49,10 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByCourse(int courseId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByCourse(int courseId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByCourseAsync(courseId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByCourseAsync(courseId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
@@ -58,9 +62,10 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByModule(int moduleId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByModule(int moduleId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByModuleAsync(moduleId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByModuleAsync(moduleId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
@@ -70,9 +75,10 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByActivity(int activityId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByActivity(int activityId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByActivityAsync(activityId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByActivityAsync(activityId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
@@ -82,9 +88,10 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByUser(string userId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByUser(string userId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByUserAsync(userId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByUserAsync(userId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
