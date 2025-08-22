@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
 
-public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager) : ICourseService
+public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager) : ServiceBase, ICourseService
 {
     public async Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForModificationDto courseDto)
     {
@@ -124,21 +124,5 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         {
             throw new Exception("An unexpected error occurred while deleting the course.", ex);
         }
-    }
-
-    private static void EnsureNotNull<T>(T obj, string message)
-    {
-        if (obj == null)
-            throw new BadRequestException(message);
-    }
-    protected static bool ValidateEntity<T>(T entity, out string? errors)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-
-        var validationContext = new ValidationContext(entity);
-        var validationResults = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(entity, validationContext, validationResults, true);
-        errors = string.Join("; ", validationResults.Select(x => x.ErrorMessage ?? string.Empty));
-        return isValid;
     }
 }
