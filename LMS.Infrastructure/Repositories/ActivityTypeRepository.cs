@@ -12,4 +12,10 @@ public class ActivityTypeRepository(ApplicationDbContext context) : RepositoryBa
             .OrderBy(at => at.Name)
             .ToListAsync();
     }
+
+    public async Task<int?> GetAssignmentTypeIdAsync()
+    {
+        var assignmentType = await FindByCondition(at => at.Name == "Inlämningsuppgift").FirstOrDefaultAsync();
+        return assignmentType?.Id;
+    }
 }

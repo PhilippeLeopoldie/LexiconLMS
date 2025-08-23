@@ -108,6 +108,38 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         }
     }
 
+    public async Task<IEnumerable<AssignmentDto>> GetStudentAssignmentsAsync(string studentUserId)
+    {
+        var assignmentTypeId = await unitOfWork.ActivityTypeRepository.GetAssignmentTypeIdAsync();
+        if (assignmentTypeId == null)
+            return [];
+
+        var course = await unitOfWork.CourseRepository.GetByStudentIdAsync(studentUserId);
+        if (course == null)
+            return [];
+
+        var assignments = await unitOfWork.ActivityRepository.GetByCourseIdAndTypeIdAsync(course.Id, assignmentTypeId.Value);
+
+        var assignmentDtos = new List<AssignmentDto>();
+        foreach (var assignment in assignments)
+        {
+            var submittedDocument = await unitOfWork.DocumentRepository.GetDocumentForActivityAndUserAsync(assignment.Id, studentUserId);
+
+            assignmentDtos.Add(new AssignmentDto
+            {
+                Id = assignment.Id,
+                Name = assignment.Name,
+                EndDate = assignment.EndsAt,
+                ModuleName = assignment.Module.Name,
+                CourseName = course.Name,
+                IsSubmitted = submittedDocument != null,
+                IsLate = submittedDocument != null && submittedDocument.UploadedAt > assignment.EndsAt,
+                SubmittedDocumentId = submittedDocument?.Id
+            });
+        }
+        return assignmentDtos;
+    }
+
     private void EnsureModuleExists(int moduleId)
     {
         if (moduleId == 0 || !unitOfWork.ActivityRepository.FindByCondition(activity => activity.ModuleId == moduleId).Any())
