@@ -14,6 +14,7 @@ public interface IDocumentService
     Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByModuleAsync(int moduleId, RequestParams requestParams, bool trackChanges = false);
     Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByActivityAsync(int activityId, RequestParams requestParams, bool trackChanges = false);
     Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetDocumentsByUserAsync(string userId, RequestParams requestParams, bool trackChanges = false);
+    Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetSubmissionsForActivityAsync(int activityId, RequestParams requestParams, bool trackChanges = false);
     Task ShareDocumentAsync(int documentId, string sharerUserId, int? courseId, int? moduleId, int? activityId);
     Task<int> UploadAsync(IFormFile file, string webRootPath, string userId, int? courseId, int? moduleId, int? activityId);
     Task<(Stream stream, string fileName, string contentType)> DownloadAsync(int documentId);

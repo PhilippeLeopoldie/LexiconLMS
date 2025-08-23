@@ -5,4 +5,5 @@ public interface IActivityTypeRepository : IRepositoryBase<ActivityType>, IInter
 {
     Task<IEnumerable<ActivityType>> GetAllAsync(bool trackChanges);
     Task<int?> GetAssignmentTypeIdAsync();
+    Task<ActivityType?> GetByIdAsync(int activityTypeId);
 }

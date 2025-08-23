@@ -69,7 +69,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(documents);
     }
 
-    [HttpGet("activity/{activityId}")]
+    [HttpGet("activity/{activityId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by activity", Description = "Retrieves all documents associated with a specific activity.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
@@ -78,6 +78,19 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByActivity(int activityId, [FromQuery] RequestParams parameter)
     {
         var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByActivityAsync(activityId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
+        return Ok(documents);
+    }
+
+    [HttpGet("submissions/{activityId:int}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Get submissions for activity", Description = "Retrieves all document submissions for a specific activity.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Submissions retrieved successfully", typeof(IEnumerable<DocumentDto>))]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetSubmissionsForActivity(int activityId, [FromQuery] RequestParams parameter)
+    {
+        var (documents, metaData) = await serviceManager.DocumentService.GetSubmissionsForActivityAsync(activityId, parameter);
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }

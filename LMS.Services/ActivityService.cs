@@ -35,9 +35,11 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
         ValidateDateRange(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
+        var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityCreateDto.ActivityTypeId)
+            ?? throw new NotFoundException($"Activity Type with ID {activityCreateDto.ActivityTypeId} not found.");
 
         var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
-                    ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+            ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
 
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
@@ -67,6 +69,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityEditDto, "Activity data is null.");
         ValidateDateRange(activityEditDto.StartsAt, activityEditDto.EndsAt);
+        var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityEditDto.ActivityTypeId)
+            ?? throw new NotFoundException($"Activity Type with ID {activityEditDto.ActivityTypeId} not found.");
+
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
         var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)

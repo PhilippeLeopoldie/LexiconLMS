@@ -18,4 +18,7 @@ public class ActivityTypeRepository(ApplicationDbContext context) : RepositoryBa
         var assignmentType = await FindByCondition(at => at.Name == "Inlämningsuppgift").FirstOrDefaultAsync();
         return assignmentType?.Id;
     }
+
+    public async Task<ActivityType?> GetByIdAsync(int activityTypeId) =>
+        await FindByCondition(at => at.Id == activityTypeId).FirstOrDefaultAsync();
 }
