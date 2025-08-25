@@ -7,4 +7,5 @@ public interface ICourseRepository : IRepositoryBase<Course>, IInternalRepositor
 {
     Task<Course?> GetCourseByIdAsync(int id, bool trackChanges = false);
     Task<PagedList<Course>> GetAllCoursesAsync(bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false);
+    Task<Course?> GetByStudentIdAsync(string studentUserId);
 }

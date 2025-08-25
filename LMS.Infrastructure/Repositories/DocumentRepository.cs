@@ -98,6 +98,13 @@ public class DocumentRepository(ApplicationDbContext context) : RepositoryBase<D
         return await PagedList<Document>.CreateAsync(documents, requestParams.Page, requestParams.PageSize);
     }
 
+    public async Task<Document?> GetDocumentForActivityAndUserAsync(int activityId, string studentUserId) =>
+        await FindByCondition(d => d.ActivityId == activityId
+                                && d.UploadedByUserId.Equals(studentUserId)
+                                && d.DeletedAt == null)
+            .OrderByDescending(d => d.UploadedAt)
+            .FirstOrDefaultAsync();
+
     private static IQueryable<Document> ApplyOrdering(IQueryable<Document> documents, RequestParams requestParams)
     {
         if (string.IsNullOrEmpty(requestParams.OrderBy)) return documents;

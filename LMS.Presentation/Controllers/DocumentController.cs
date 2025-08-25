@@ -30,7 +30,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(documents);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get document by ID", Description = "Retrieves a specific document by its ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Document retrieved successfully", typeof(DocumentDto))]
@@ -43,7 +43,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(document);
     }
 
-    [HttpGet("course/{courseId}")]
+    [HttpGet("course/{courseId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by course", Description = "Retrieves all documents associated with a specific course.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
@@ -56,7 +56,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(documents);
     }
 
-    [HttpGet("module/{moduleId}")]
+    [HttpGet("module/{moduleId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by module", Description = "Retrieves all documents associated with a specific module.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
@@ -69,7 +69,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(documents);
     }
 
-    [HttpGet("activity/{activityId}")]
+    [HttpGet("activity/{activityId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by activity", Description = "Retrieves all documents associated with a specific activity.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
@@ -78,6 +78,19 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByActivity(int activityId, [FromQuery] RequestParams parameter)
     {
         var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByActivityAsync(activityId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
+        return Ok(documents);
+    }
+
+    [HttpGet("submissions/{activityId:int}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Get submissions for activity", Description = "Retrieves all document submissions for a specific activity.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Submissions retrieved successfully", typeof(IEnumerable<DocumentDto>))]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetSubmissionsForActivity(int activityId, [FromQuery] RequestParams parameter)
+    {
+        var (documents, metaData) = await serviceManager.DocumentService.GetSubmissionsForActivityAsync(activityId, parameter);
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
@@ -112,7 +125,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return CreatedAtAction(nameof(GetDocument), new { id }, null);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Update document", Description = "Updates an existing document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document updated successfully")]
@@ -126,7 +139,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return NoContent();
     }
 
-    [HttpPut("{id}/restore")]
+    [HttpPut("{id:int}/restore")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Restore document", Description = "Restores a deleted document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document restored successfully")]
@@ -140,7 +153,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Delete document", Description = "Deletes an existing document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document deleted successfully")]
@@ -158,7 +171,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     }
 
     [HttpPost("upload")]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Upload document", Description = "Uploads a document file to the server.")]
     [SwaggerResponse(StatusCodes.Status201Created, "Document uploaded successfully", typeof(int))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid file or parameters")]

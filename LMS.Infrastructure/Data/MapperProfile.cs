@@ -70,6 +70,12 @@ public class MapperProfile : Profile
                                              ? destination.StartsAt
                                              : src.StartsAt))
             .ReverseMap();
+        CreateMap<Activity, AssignmentDto>()
+            .ForMember(target => target.ModuleName, config => config.MapFrom(src => src.Module.Name))
+            .ForMember(target => target.CourseName, config => config.MapFrom(src => src.Module.Course.Name))
+            .ForMember(target => target.IsSubmitted, config => config.Ignore())
+            .ForMember(target => target.IsLate, config => config.Ignore())
+            .ForMember(target => target.SubmittedDocumentId, config => config.Ignore());
         #endregion
 
         #region Modules

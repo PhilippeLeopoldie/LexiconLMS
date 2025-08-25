@@ -56,6 +56,14 @@ public class DocumentService(IUnitOfWork unitOfWork, IMapper mapper, UserManager
         return (mappedDocuments, documents.MetaData);
     }
 
+    public async Task<(IEnumerable<DocumentDto>, MetaData metaData)> GetSubmissionsForActivityAsync(int activityId, RequestParams requestParams, bool trackChanges = false)
+    {
+        ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
+        var submissions = await unitOfWork.DocumentRepository.GetDocumentsByActivityAsync(requestParams, activityId, trackChanges);
+        var mappedDocuments = mapper.Map<IEnumerable<DocumentDto>>(submissions.Items);
+        return (mappedDocuments, submissions.MetaData);
+    }
+
     public async Task ShareDocumentAsync(int documentId, string sharerUserId, int? courseId, int? moduleId, int? activityId)
     {
         var document = await unitOfWork.DocumentRepository.GetByIdAsync(documentId, true)
