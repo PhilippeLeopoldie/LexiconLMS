@@ -101,4 +101,17 @@ public class ModuleController : ControllerBase
         return CreatedAtAction(nameof(GetModuleById), new { courseId, id = createdModule.Id }, createdModule);
     }
 
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Delete module", Description = "Deletes an existing module within a course.")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Module deleted successfully")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<IActionResult> DeleteModuleAsync(int courseId, int id)
+    {
+        await _serviceManager.ModuleService.DeleteModuleAsync(courseId, id);
+        return NoContent();
+    }
+
 }
