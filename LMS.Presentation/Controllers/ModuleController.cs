@@ -45,7 +45,7 @@ public class ModuleController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<ModuleDto>> GetModule(int courseId, int id, bool includeActivities)
+    public async Task<ActionResult<ModuleDto>> GetModuleById(int courseId, int id, bool includeActivities)
     {
         var module = await _serviceManager.ModuleService.GetModuleByIdAsync(courseId, id, includeActivities);
         return Ok(module);
@@ -87,5 +87,18 @@ public class ModuleController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Create module", Description = "Creates a new module within a course.")]
+    [SwaggerResponse(StatusCodes.Status201Created, "Module created successfully", typeof(ModuleDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid module data")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult<ModuleDto>> PostModule(int courseId, ModuleCreateDto dto)
+    {
+        var createdModule = await _serviceManager.ModuleService.CreateModuleAsync(courseId, dto);
+        return CreatedAtAction(nameof(GetModuleById), new { courseId, id = createdModule.Id }, createdModule);
+    }
 
 }
