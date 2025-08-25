@@ -111,9 +111,7 @@ public class ModuleService : ServiceBase, IModuleService
             throw new CourseNotFoundException(courseId);
 
         if (hasAnyModuleOverlapping.Value)
-        {
             throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
-        }
     }
 
     private async Task EnsureModuleWithinCourse(DateTime startsAt, DateTime endsAt, int courseId)
