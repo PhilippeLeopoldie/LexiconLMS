@@ -25,6 +25,8 @@ public class ModuleService : ServiceBase, IModuleService
         bool trackChanges = false
         )
     {
+        if (!await _uow.ModuleRepository.CourseExistAsync(courseId))
+            throw new CourseNotFoundException(courseId);
         var pagedList = await _uow.ModuleRepository.GetModulesAsync(courseId, requestParams, trackChanges);
         var modulesDto = _mapper.Map<IEnumerable<ModuleDto>>(pagedList.Items);
         return (modulesDto, pagedList.MetaData);
@@ -89,6 +91,9 @@ public class ModuleService : ServiceBase, IModuleService
 
     private async Task<Module> GetModuleByIdOrThrowExceptionAsync(int courseId, int id, bool includeActivities, bool trackChanges)
     {
+        if(!await _uow.ModuleRepository.CourseExistAsync(courseId))
+            throw new CourseNotFoundException(courseId);
+            
         var module = await _uow.ModuleRepository.GetModuleByConditionAsync(
             module => module.Id == id && module.CourseId == courseId,
             includeActivities,
