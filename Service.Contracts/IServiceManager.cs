@@ -1,5 +1,3 @@
-using LMS.Services;
-
 namespace Service.Contracts;
 
 public interface IServiceManager

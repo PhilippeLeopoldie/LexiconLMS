@@ -5,7 +5,7 @@ using LMS.Blazor.Components;
 using LMS.Blazor.Components.Account;
 using LMS.Blazor.Data;
 using LMS.Blazor.Services;
-
+using LMS.Blazor.Services.NoOpServices;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -29,8 +29,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 
 // API service
 //builder.Services.AddScoped<IApiService, ClientApiService>();
-builder.Services.AddScoped<IApiService, ServiceNoopApiService>();
-builder.Services.AddScoped<IAuthReadyService, ServiceNoopAuthReadyService>();
+builder.Services.AddScoped<IApiService, ServerNoopApiService>();
+builder.Services.AddScoped<IAuthReadyService, ServerNoopAuthReadyService>();
 
 // Authentication setup
 builder.Services.AddAuthentication(options =>

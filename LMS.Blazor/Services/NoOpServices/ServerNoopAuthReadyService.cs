@@ -1,4 +1,6 @@
-﻿namespace LMS.Blazor.Services.NoOpServices;
+﻿using LMS.Blazor.Client.Services;
+
+namespace LMS.Blazor.Services.NoOpServices;
 
 public sealed class ServerNoopAuthReadyService : IAuthReadyService
 {
