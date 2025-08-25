@@ -24,7 +24,7 @@ public class ModuleNotFoundException : NotFoundException
 
 public class CourseNotFoundException : NotFoundException
 {
-    public CourseNotFoundException(int id) : base($"No Course with id: {id}  found!")
+    public CourseNotFoundException(int courseId) : base($"No Course with id: {courseId}  found!")
     {
     }
 }
