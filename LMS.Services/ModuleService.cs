@@ -117,10 +117,10 @@ public class ModuleService : ServiceBase, IModuleService
     private async Task EnsureModuleWithinCourse(DateTime startsAt, DateTime endsAt, int courseId)
     {
         var course = await _uow.CourseRepository.GetCourseByIdAsync(courseId, false)
-            ?? throw new NotFoundException($"The Course with id: {courseId} is not found!");
+            ?? throw new CourseNotFoundException(courseId);
 
         if (startsAt < course.Starts || endsAt > course.Ends)
-            throw new BadRequestException("Module must be within course start and end time.");
+            throw new ModuleOverlappingException(course.Starts, course.Ends);
     }
 
 }
