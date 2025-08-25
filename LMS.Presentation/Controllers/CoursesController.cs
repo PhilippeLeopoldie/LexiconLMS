@@ -23,9 +23,13 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request parameters")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<CourseDto>>> GetCoursesAsync([FromQuery] RequestParams requestParams)
+    public async Task<ActionResult<IEnumerable<CourseDto>>> GetCoursesAsync(
+        [FromQuery] bool includeModules = false,
+        [FromQuery] bool includeActivities = false,
+        [FromQuery] RequestParams requestParams = null!
+    )
     {
-        var (courses, metaData) = await serviceManager.CourseService.GetAllCoursesAsync(requestParams);
+        var (courses, metaData) = await serviceManager.CourseService.GetAllCoursesAsync(includeModules, includeActivities, requestParams);
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(courses);
     }

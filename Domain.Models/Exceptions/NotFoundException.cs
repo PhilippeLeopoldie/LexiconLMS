@@ -10,7 +10,10 @@ public  class NotFoundException : Exception
 
 public class ModuleNotFoundException : NotFoundException
 {
-    public ModuleNotFoundException(int id) : base($"The Module with id: {id} is not found!")
+    public ModuleNotFoundException(int id, int courseId) : base($"The Module with id: {id}  is not found in course with id: {courseId}!")
+    {
+    }
+    public ModuleNotFoundException(int id) : base($"The Module with id: {id}  is not found!")
     {
     }
 

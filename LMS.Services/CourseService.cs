@@ -7,7 +7,6 @@ using LMS.Shared.Common;
 using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
 
@@ -16,6 +15,7 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
     public async Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForModificationDto courseDto)
     {
         EnsureNotNull(courseDto, "Course data is null.");
+        ValidateDateRange(courseDto.Starts, courseDto.Ends);
 
         var course = mapper.Map<Course>(courseDto);
         unitOfWork.CourseRepository.Create(course);
@@ -36,11 +36,11 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         }
     }
 
-    public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(RequestParams requestParams, bool trackChanges = false)
+    public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
     {
         ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
-        
-        PagedList<Course> pagedList = await unitOfWork.CourseRepository.GetAllCoursesAsync(requestParams, trackChanges);
+
+        PagedList<Course> pagedList = await unitOfWork.CourseRepository.GetAllCoursesAsync(includeModules, includeActivities, requestParams, trackChanges);
         var courses = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
 
         return (courses, pagedList.MetaData);
@@ -57,7 +57,7 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
             if (includeActivities)
                 query = query.Include(c => c.Modules).ThenInclude(m => m.Activities);
         }
-        if  (trackChanges)
+        if (trackChanges)
             query = query.AsTracking();
 
         var result = await query
@@ -92,6 +92,8 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
     public async Task UpdateCourseAsync(int courseId, CourseForModificationDto courseDto)
     {
         EnsureNotNull(courseDto, "Course data is null.");
+        ValidateDateRange(courseDto.Starts, courseDto.Ends);
+
         var course = unitOfWork.CourseRepository.FindByCondition(c => c.Id == courseId, true).FirstOrDefault()
             ?? throw new NotFoundException($"Course with ID {courseId} not found.");
 
