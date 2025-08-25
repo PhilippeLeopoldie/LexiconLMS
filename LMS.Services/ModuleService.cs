@@ -94,7 +94,7 @@ public class ModuleService : ServiceBase, IModuleService
             includeActivities,
             trackChanges
             );
-        return module ?? throw new ModuleNotFoundException(id); 
+        return module ?? throw new ModuleNotFoundException(id, courseId); 
     }
 
     private async Task EnsureNoOverlapAsync(int courseId, ModuleForManipulationDto dto, int? id = null)
