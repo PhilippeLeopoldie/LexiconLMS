@@ -11,7 +11,7 @@ public interface IModuleService
     Task<ModuleDto> GetModuleByIdAsync(int courseId, int id, bool includeActivities);
     Task<ModuleDto> GetModuleByNameAsync(int courseId, string name, bool includeActivities);
     Task<(Module, ModuleUpdateDto)> GetModuleForPatchAsync(int courseId, int id);
-    Task<ModuleDto> CreateModuleAsync(ModuleCreateDto dto);
+    Task<ModuleDto> CreateModuleAsync(int courseId, ModuleCreateDto dto);
     Task UpdateModuleAsync(int courseId, int id, ModuleUpdateDto dto);
     Task ApplyModulePatchAsync(Module module, ModuleUpdateDto dto);
 }
