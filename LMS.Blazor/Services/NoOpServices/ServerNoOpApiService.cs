@@ -2,7 +2,7 @@
 
 namespace LMS.Blazor.Services.NoOpServices;
 
-public class ServerNoopApiService : IApiService
+public class ServerNoOpApiService : IApiService
 {
     public Task<T?> CallApiAsync<T>(string endpoint, CancellationToken cancellationToken = default) => Task.FromResult<T?>(default);
 }
