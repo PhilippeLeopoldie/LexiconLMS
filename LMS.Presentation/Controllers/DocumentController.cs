@@ -30,7 +30,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(documents);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get document by ID", Description = "Retrieves a specific document by its ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Document retrieved successfully", typeof(DocumentDto))]
@@ -43,7 +43,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(document);
     }
 
-    [HttpGet("course/{courseId}")]
+    [HttpGet("course/{courseId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by course", Description = "Retrieves all documents associated with a specific course.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
@@ -56,7 +56,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return Ok(documents);
     }
 
-    [HttpGet("module/{moduleId}")]
+    [HttpGet("module/{moduleId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by module", Description = "Retrieves all documents associated with a specific module.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
@@ -125,7 +125,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return CreatedAtAction(nameof(GetDocument), new { id }, null);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Update document", Description = "Updates an existing document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document updated successfully")]
@@ -139,7 +139,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return NoContent();
     }
 
-    [HttpPut("{id}/restore")]
+    [HttpPut("{id:int}/restore")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Restore document", Description = "Restores a deleted document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document restored successfully")]
@@ -153,7 +153,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Delete document", Description = "Deletes an existing document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document deleted successfully")]

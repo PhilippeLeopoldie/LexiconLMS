@@ -31,7 +31,7 @@ namespace LMS.Presentation.Controllers
             return Ok(activities);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [Authorize(Roles = "Teacher, Student")]
         [SwaggerOperation(Summary = "Get activity by ID", Description = "Retrieves a specific activity by its ID within a module.")]
         [SwaggerResponse(StatusCodes.Status200OK, "Activity retrieved successfully", typeof(ActivityDto))]
@@ -45,7 +45,7 @@ namespace LMS.Presentation.Controllers
             return activity;
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(Summary = "Update activity", Description = "Updates an existing activity within a module.")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Activity updated successfully")]
@@ -74,7 +74,7 @@ namespace LMS.Presentation.Controllers
             return CreatedAtAction(actionName: nameof(GetActivity), routeValues: new { moduleId, id = result.createdActivityId }, value: result.activityDto);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(Summary = "Delete activity", Description = "Deletes an existing activity within a module.")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Activity deleted successfully")]
