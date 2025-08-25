@@ -99,6 +99,12 @@ public class ModuleService : ServiceBase, IModuleService
 
     private async Task EnsureNoOverlapAsync(int courseId, ModuleForManipulationDto dto, int? id = null)
     {
+        await EnsureModuleHasNoOverLapAsync(courseId, dto, id);
+        await EnsureModuleWithinCourse(dto.StartsAt, dto.EndsAt, courseId);
+    }
+
+    private async Task EnsureModuleHasNoOverLapAsync(int courseId, ModuleForManipulationDto dto, int? id)
+    {
         var hasAnyModuleOverlapping = await _uow.ModuleRepository.HasOverlappingAsync(courseId, dto.StartsAt, dto.EndsAt, id);
 
         if (hasAnyModuleOverlapping is null)
@@ -108,10 +114,9 @@ public class ModuleService : ServiceBase, IModuleService
         {
             throw new ModuleOverlappingException($"{dto.StartsAt:yyyy-MM-dd HH:mm} - {dto.EndsAt:yyyy-MM-dd HH:mm}");
         }
-        await EnsureModulWithinCourse(dto.StartsAt, dto.EndsAt, courseId);
     }
 
-    private async Task EnsureModulWithinCourse(DateTime startsAt, DateTime endsAt, int courseId)
+    private async Task EnsureModuleWithinCourse(DateTime startsAt, DateTime endsAt, int courseId)
     {
         var course = await _uow.CourseRepository.GetCourseByIdAsync(courseId, false)
             ?? throw new NotFoundException($"The Course with id: {courseId} is not found!");
