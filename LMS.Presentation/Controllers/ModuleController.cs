@@ -1,7 +1,9 @@
-﻿using LMS.Shared.Common;
+﻿using Domain.Models.Exceptions;
+using LMS.Shared.Common;
 using LMS.Shared.DTOs.ModuleDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Swashbuckle.AspNetCore.Annotations;
@@ -46,7 +48,6 @@ public class ModuleController : ControllerBase
     public async Task<ActionResult<ModuleDto>> GetModule(int courseId, int id, bool includeActivities)
     {
         var module = await _serviceManager.ModuleService.GetModuleByIdAsync(courseId, id, includeActivities);
-
         return Ok(module);
     }
 
@@ -62,6 +63,29 @@ public class ModuleController : ControllerBase
     {
         await _serviceManager.ModuleService.UpdateModuleAsync(courseId, id, moduleDto);
         return NoContent();
-
     }
+
+    [HttpPatch("{id}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Patch module", Description = "Patch a part of en existing module within a course.")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Module patched successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid module data")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Module not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult> PatchModuleAsync(int courseId, int id, [FromBody] JsonPatchDocument<ModuleUpdateDto> patchDocument)
+    {
+        if (patchDocument is null) throw new InvalidEntryBadRequestException();
+
+        var (module, patchDto) = await _serviceManager.ModuleService.GetModuleForPatchAsync(courseId, id);
+
+        patchDocument.ApplyTo(patchDto, ModelState);
+        if(!TryValidateModel(patchDto))
+            return ValidationProblem(ModelState);
+
+        await _serviceManager.ModuleService.ApplyModulePatchAsync(module, patchDto);
+        return NoContent();
+    }
+
+
 }
