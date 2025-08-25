@@ -31,6 +31,7 @@ public class ModuleController : ControllerBase
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request parameters")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course not found")]
     public async Task<ActionResult<IEnumerable<ModuleDto>>> GetModules(int courseId, [FromQuery] ModuleRequestParams parameter)
     {
         var (modules, metadata) = await _serviceManager.ModuleService.GetAllModulesAsync(courseId, parameter);
