@@ -171,7 +171,7 @@ public class DocumentsController(IServiceManager serviceManager, IWebHostEnviron
     }
 
     [HttpPost("upload")]
-    [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Upload document", Description = "Uploads a document file to the server.")]
     [SwaggerResponse(StatusCodes.Status201Created, "Document uploaded successfully", typeof(int))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid file or parameters")]
