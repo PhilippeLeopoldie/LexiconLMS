@@ -7,6 +7,7 @@ namespace LMS.Shared.DTOs.ModuleDtos;
 
 public record ModuleForManipulationDto
 {
+    //public int Id { get; init; }
     [Required(ErrorMessage = "The Name is required")]
     public required string Name { get; init; }
     public string? Description { get; init; }
@@ -14,8 +15,8 @@ public record ModuleForManipulationDto
     public required DateTime StartsAt { get; init; }
     [Required(ErrorMessage = "The End date is required")]
     public required DateTime EndsAt { get; init; }
-    [Required(ErrorMessage = "The Course id is required")]
-    public int CourseId { get; init; }
+    //[Required(ErrorMessage = "The Course id is required")]
+    //public int CourseId { get; init; }
 
-    public IEnumerable<ActivityDto>? Activities { get; init; }
+    //public IEnumerable<ActivityDto>? Activities { get; init; }
 }

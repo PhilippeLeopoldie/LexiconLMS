@@ -39,13 +39,9 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await query.FirstOrDefaultAsync();
     }
 
-    /*public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
-    {
-        return await FindByCondition(module => string.Equals(module.Name, name), trackChanges)
-            .FirstOrDefaultAsync();
-    }*/
+    
 
-    public async Task<bool> HasOverlappingAsync(
+    public async Task<bool?> HasOverlappingAsync(
         int courseId,
         DateTime startsAt,
         DateTime endsAt,
@@ -53,6 +49,7 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         )
     {
         var query = Context.Modules.Where(module => module.CourseId == courseId);
+        if (query is null) return null;
 
         if(excludeModuleId is not null)
             query = query.Where(module => module.Id != excludeModuleId);
