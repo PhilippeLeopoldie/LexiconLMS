@@ -35,9 +35,11 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
         ValidateDateRange(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
+        var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityCreateDto.ActivityTypeId)
+            ?? throw new NotFoundException($"Activity Type with ID {activityCreateDto.ActivityTypeId} not found.");
 
         var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
-                    ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+            ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
 
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
@@ -67,6 +69,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityEditDto, "Activity data is null.");
         ValidateDateRange(activityEditDto.StartsAt, activityEditDto.EndsAt);
+        var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityEditDto.ActivityTypeId)
+            ?? throw new NotFoundException($"Activity Type with ID {activityEditDto.ActivityTypeId} not found.");
+
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
         var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
@@ -106,6 +111,38 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         {
             throw new Exception("An unexpected error occurred while checking activity lock status.", ex);
         }
+    }
+
+    public async Task<IEnumerable<AssignmentDto>> GetStudentAssignmentsAsync(string studentUserId)
+    {
+        var assignmentTypeId = await unitOfWork.ActivityTypeRepository.GetAssignmentTypeIdAsync();
+        if (assignmentTypeId == null)
+            return [];
+
+        var course = await unitOfWork.CourseRepository.GetByStudentIdAsync(studentUserId);
+        if (course == null)
+            return [];
+
+        var assignments = await unitOfWork.ActivityRepository.GetByCourseIdAndTypeIdAsync(course.Id, assignmentTypeId.Value);
+
+        var assignmentDtos = new List<AssignmentDto>();
+        foreach (var assignment in assignments)
+        {
+            var submittedDocument = await unitOfWork.DocumentRepository.GetDocumentForActivityAndUserAsync(assignment.Id, studentUserId);
+
+            assignmentDtos.Add(new AssignmentDto
+            {
+                Id = assignment.Id,
+                Name = assignment.Name,
+                EndDate = assignment.EndsAt,
+                ModuleName = assignment.Module.Name,
+                CourseName = course.Name,
+                IsSubmitted = submittedDocument != null,
+                IsLate = submittedDocument != null && submittedDocument.UploadedAt > assignment.EndsAt,
+                SubmittedDocumentId = submittedDocument?.Id
+            });
+        }
+        return assignmentDtos;
     }
 
     private void EnsureModuleExists(int moduleId)

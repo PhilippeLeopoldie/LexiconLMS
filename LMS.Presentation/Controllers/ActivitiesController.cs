@@ -1,7 +1,9 @@
-﻿using LMS.Shared.Common;
+﻿using Domain.Models.Entities;
+using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Swashbuckle.AspNetCore.Annotations;
@@ -12,7 +14,7 @@ namespace LMS.Presentation.Controllers
     [Route("api/modules/{moduleId:int}/[controller]")]
     [ApiController]
     [Authorize]
-    public class ActivitiesController(IServiceManager serviceManager) : ControllerBase
+    public class ActivitiesController(IServiceManager serviceManager, UserManager<ApplicationUser> userManager) : ControllerBase
     {
 
         [HttpGet]
@@ -29,7 +31,7 @@ namespace LMS.Presentation.Controllers
             return Ok(activities);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [Authorize(Roles = "Teacher, Student")]
         [SwaggerOperation(Summary = "Get activity by ID", Description = "Retrieves a specific activity by its ID within a module.")]
         [SwaggerResponse(StatusCodes.Status200OK, "Activity retrieved successfully", typeof(ActivityDto))]
@@ -43,7 +45,7 @@ namespace LMS.Presentation.Controllers
             return activity;
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(Summary = "Update activity", Description = "Updates an existing activity within a module.")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Activity updated successfully")]
@@ -72,7 +74,7 @@ namespace LMS.Presentation.Controllers
             return CreatedAtAction(actionName: nameof(GetActivity), routeValues: new { moduleId, id = result.createdActivityId }, value: result.activityDto);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = "Teacher")]
         [SwaggerOperation(Summary = "Delete activity", Description = "Deletes an existing activity within a module.")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Activity deleted successfully")]
@@ -83,6 +85,23 @@ namespace LMS.Presentation.Controllers
         {
             await serviceManager.ActivityService.DeleteAsync(moduleId, id);
             return NoContent();
+        }
+
+        [HttpGet("assignments")]
+        [Authorize(Roles = "Student")]
+        [SwaggerOperation(Summary = "Get assignments by student", Description = "Retrieves a list of assignment activities the student is enrolled in.")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Assignments retrieved successfully", typeof(IEnumerable<ActivityDto>))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request parameters")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+        [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+        public async Task<ActionResult<IEnumerable<AssignmentDto>>> GetStudentAssignments()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized("User not found.");
+
+            var assignments = await serviceManager.ActivityService.GetStudentAssignmentsAsync(user.Id);
+            return Ok(assignments);
         }
     }
 }

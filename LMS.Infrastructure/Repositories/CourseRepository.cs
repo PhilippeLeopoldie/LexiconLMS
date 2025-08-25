@@ -25,7 +25,10 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
 
         return await PagedList<Course>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
-        
+
+    public async Task<Course?> GetByStudentIdAsync(string studentUserId) =>
+        await FindByCondition(c => c.Students.Any(student => student.Id.Equals(studentUserId))).FirstOrDefaultAsync();
+
     private static IQueryable<Course> ApplyOrdering(IQueryable<Course> courses, RequestParams requestParams)
     {
         if (string.IsNullOrEmpty(requestParams.OrderBy)) return courses
@@ -39,4 +42,5 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
             _ => courses
         };
     }
+
 }
