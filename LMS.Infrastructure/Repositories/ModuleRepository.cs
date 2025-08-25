@@ -57,6 +57,12 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await query.AnyAsync(module => startsAt < module.EndsAt && endsAt > module.StartsAt);
     }
 
+    public async Task<bool> CourseExistAsync(int courseId)
+    {
+        if(courseId <= 0) return false;
+        return await Context.Courses.AnyAsync(course => course.Id == courseId);
+    }
+
     private static IQueryable<Module> ApplyOrdering(IQueryable<Module> modules, RequestParams requestParams)
     {
         if (string.IsNullOrEmpty(requestParams.OrderBy)) return modules;
