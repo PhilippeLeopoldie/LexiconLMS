@@ -2,5 +2,5 @@
 
 public interface IApiService
 {
-    Task<T?> CallApiAsync<T>();
+    Task<T?> CallApiAsync<T>(string endpoint, CancellationToken cancellationToken = default);
 }
