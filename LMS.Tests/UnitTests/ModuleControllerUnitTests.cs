@@ -84,5 +84,28 @@ public class ModuleControllerUnitTests
 
     }
 
+    [Fact]
+    public async Task GetModuleById_ReturnsOk_WithModule()
+    {
+        // Arrange
+        int courseId = SeedData.GetCourse().Id;
+        var module = SeedData.GetModuleDtos().First();
+
+        _serviceManagerMock.Setup(s => s.ModuleService.GetModuleByIdAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>()))
+            .ReturnsAsync(module);
+
+        // Act
+        var result = await _controller.GetModuleById(courseId, module.Id, true);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnValue = Assert.IsType<ModuleDto>(okResult.Value);
+        Assert.Equal(module.Id, returnValue.Id);
+    }
+
     
+
 }
