@@ -5,6 +5,7 @@ using LMS.Shared.DTOs.AuthDtos;
 using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.DocumentDtos;
 using LMS.Shared.DTOs.ModuleDtos;
+using LMS.Shared.DTOs.UserDtos;
 
 namespace LMS.Infrastructure.Data;
 
@@ -103,6 +104,18 @@ public class MapperProfile : Profile
             .ForMember(target => target.UploadedAt, config => config.Ignore())
             .ForMember(target => target.UploadedByUserId, config => config.Ignore())
             .ReverseMap();
+        #endregion
+
+        #region Users
+        CreateMap<ApplicationUser, UserBasicDto>()
+            .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id))
+            .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email));
+
+        CreateMap<UserBasicDto, ApplicationUser>()
+            .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id))
+            .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email));
         #endregion
     }
 }
