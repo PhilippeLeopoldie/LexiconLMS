@@ -106,6 +106,26 @@ public class ModuleControllerUnitTests
         Assert.Equal(module.Id, returnValue.Id);
     }
 
-    
+    [Fact]
+    public async Task GetModuleById_ShouldThrowModuleNotFoundException()
+    {
+        // Arrange
+        int courseId = SeedData.GetCourse().Id;
+        var moduleId = 99;
 
+        _serviceManagerMock.Setup(s => s.ModuleService.GetModuleByIdAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>()))
+            .ThrowsAsync(new ModuleNotFoundException(moduleId, courseId));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ModuleNotFoundException>(() => _controller.GetModuleById(courseId, moduleId, true));
+        _serviceManagerMock.Verify(service => service.ModuleService.GetModuleByIdAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>()), Times.Once());
+    }
+
+   
 }
