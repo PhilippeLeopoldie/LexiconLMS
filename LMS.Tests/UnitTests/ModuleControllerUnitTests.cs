@@ -127,5 +127,32 @@ public class ModuleControllerUnitTests
             It.IsAny<bool>()), Times.Once());
     }
 
-   
+    [Fact]
+    public async Task PostModule_ShouldReturnsCreatedAtAction()
+    {
+        // Arrange
+        int courseId = 1;
+        var dto = SeedData.GetModuleCreateDto();
+        var created = new ModuleDto
+        {
+            Id = 10,
+            Name = dto.Name,
+            Description = dto.Description,
+            StartsAt = dto.StartsAt,
+            EndsAt = dto.EndsAt,
+        };
+
+        _serviceManagerMock.Setup(s => s.ModuleService.CreateModuleAsync(courseId, dto))
+            .ReturnsAsync(created);
+
+        // Act
+        var result = await _controller.PostModule(courseId, dto);
+
+        // Assert
+        var createdAt = Assert.IsType<CreatedAtActionResult>(result.Result);
+        var returnValue = Assert.IsType<ModuleDto>(createdAt.Value);
+        Assert.Equal(10, returnValue.Id);
+    }
+
+    
 }
