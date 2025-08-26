@@ -60,6 +60,29 @@ public class ModuleControllerUnitTests
         module => Assert.Equal("Web Development with React", module.Name));
     }
 
-    
+    [Fact]
+    public async Task GetAllModulesAsync_ShouldThrowCourseNotFoundException()
+    {
+        // Arrange
 
+        int courseId = 99;
+        var parameters = new ModuleRequestParams();
+
+        _serviceManagerMock.Setup(s => s.ModuleService.GetAllModulesAsync(
+            It.IsAny<int>(),
+            It.IsAny<ModuleRequestParams>(),
+            It.IsAny<bool>()))
+            .ThrowsAsync(new CourseNotFoundException(courseId));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<CourseNotFoundException>(() => _controller.GetModules(courseId, parameters));
+
+        _serviceManagerMock.Verify(service => service.ModuleService.GetAllModulesAsync(
+            It.IsAny<int>(),
+            It.IsAny<ModuleRequestParams>(),
+            It.IsAny<bool>()), Times.Once());
+
+    }
+
+    
 }
