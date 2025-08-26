@@ -30,7 +30,7 @@ public class UserRepository(ApplicationDbContext context) : RepositoryBase<Appli
             throw new ArgumentNullException(nameof(user));
 
         Create(user);
-        await Context.SaveChangesAsync();
+        
     }
 
 
@@ -43,7 +43,7 @@ public class UserRepository(ApplicationDbContext context) : RepositoryBase<Appli
             throw new KeyNotFoundException($"User with id {id} was not found.");
 
         Delete(user);
-        await Context.SaveChangesAsync();
+        
     }
 
     

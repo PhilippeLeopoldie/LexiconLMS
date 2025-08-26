@@ -28,7 +28,7 @@ public class ServiceManager : IServiceManager
         Lazy<IActivityService> activityService,
         Lazy<IActivityTypeService> activityTypeService,
         Lazy<IDocumentService> documentService,
-        Lazy<IUserService> userService)
+        Lazy<IUserService> userService,
         Lazy<IModuleService> moduleService)
     {
         this.authService = authService;
