@@ -5,4 +5,5 @@ public interface IServiceManager
     IActivityService ActivityService { get; }
     IActivityTypeService ActivityTypeService { get; }
     IDocumentService DocumentService { get; }
+    IUserService UserService { get; }
 }

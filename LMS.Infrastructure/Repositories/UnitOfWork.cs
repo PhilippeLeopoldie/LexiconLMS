@@ -7,6 +7,7 @@ public class UnitOfWork(ApplicationDbContext context,
                         Lazy<IModuleRepository> moduleRepository,
                         Lazy<ICourseRepository> courseRepository,
                         Lazy<IDocumentRepository> documentRepository,
+                        Lazy<IUserRepository> userRepository,
                         Lazy<IActivityTypeRepository> activityTypeRepository) : IUnitOfWork
 {
     private readonly ApplicationDbContext context = context ?? throw new ArgumentNullException(nameof(context));
@@ -14,6 +15,7 @@ public class UnitOfWork(ApplicationDbContext context,
     private readonly Lazy<IModuleRepository> moduleRepository = moduleRepository;
     private readonly Lazy<ICourseRepository> courseRepository = courseRepository;
     private readonly Lazy<IDocumentRepository> documentRepository = documentRepository;
+    private readonly Lazy<IUserRepository> userRepository = userRepository;
     private readonly Lazy<IActivityTypeRepository> activityTypeRepository = activityTypeRepository;
 
     public IActivityRepository ActivityRepository => activityRepository.Value;
@@ -22,6 +24,7 @@ public class UnitOfWork(ApplicationDbContext context,
     public ICourseRepository CourseRepository => courseRepository.Value;
 
     public IDocumentRepository DocumentRepository => documentRepository.Value;
+    public IUserRepository UserRepository => userRepository.Value;
 
 
     public async Task CompleteAsync() => await context.SaveChangesAsync();
