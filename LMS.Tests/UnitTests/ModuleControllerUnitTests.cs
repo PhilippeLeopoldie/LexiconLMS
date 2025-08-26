@@ -155,6 +155,37 @@ public class ModuleControllerUnitTests
     }
 
     [Fact]
+    public async Task PostModule_ShouldThrowException_whenModuleStartDateAfterEndDate ()
+    {
+        // Arrange
+        int courseId = 1;
+        var errorMessage = "Start date must be before end date.";
+        var dto = SeedData.GetModuleCreateDto();
+        var created = new ModuleDto
+        {
+            Id = 10,
+            Name = dto.Name,
+            Description = dto.Description,
+            StartsAt = dto.EndsAt,
+            EndsAt = dto.StartsAt,
+        };
+
+        _serviceManagerMock.Setup(s => s.ModuleService.CreateModuleAsync(It.IsAny<int>(), It.IsAny<ModuleCreateDto>()))
+            .ThrowsAsync(new BadRequestException(errorMessage));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() => _controller.PostModule(courseId, dto));
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.CreateModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<ModuleCreateDto>()),
+            Times.Once()
+        );
+    }
+
+
+
+    [Fact]
     public async Task DeleteModule_ShouldReturnsNoContent()
     {
         // Arrange
