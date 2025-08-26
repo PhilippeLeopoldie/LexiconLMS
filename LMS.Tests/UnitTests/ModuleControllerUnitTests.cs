@@ -232,7 +232,8 @@ public class ModuleControllerUnitTests
             .ThrowsAsync(new ModuleOverlappingException(created.StartsAt, created.EndsAt));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ModuleOverlappingException>(() => _controller.PostModule(courseId, dto));
+        var exception = await Record.ExceptionAsync(() => _controller.PostModule(courseId, dto));
+        Assert.IsAssignableFrom<ConflictException>(exception);
         Assert.Equal(errorMessage, exception.Message);
         _serviceManagerMock.Verify(service => service.ModuleService.CreateModuleAsync(
             It.IsAny<int>(),
