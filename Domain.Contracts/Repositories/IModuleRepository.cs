@@ -19,4 +19,5 @@ public interface IModuleRepository : IRepositoryBase<Module>, IInternalRepositor
         DateTime endsAt,
         int? excludeModuleId = null
         );
+    Task<bool> CourseExistAsync(int courseId);
 }
