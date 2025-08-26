@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Blazor.Client", "LMS.Bl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Infrastructure", "LMS.Infrastructure\LMS.Infrastructure.csproj", "{175E35EB-29AB-98F3-9B15-2F59F81AAD09}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMS.Tests", "LMS.Tests\LMS.Tests.csproj", "{6CE424E0-DC70-4E71-B5B7-0CA60FEA8BCC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{175E35EB-29AB-98F3-9B15-2F59F81AAD09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{175E35EB-29AB-98F3-9B15-2F59F81AAD09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{175E35EB-29AB-98F3-9B15-2F59F81AAD09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CE424E0-DC70-4E71-B5B7-0CA60FEA8BCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CE424E0-DC70-4E71-B5B7-0CA60FEA8BCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CE424E0-DC70-4E71-B5B7-0CA60FEA8BCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CE424E0-DC70-4E71-B5B7-0CA60FEA8BCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +100,7 @@ Global
 		{EBD51E46-3803-8991-BDFA-B899DE1DA2BB} = {6F17C632-5F8D-44B3-BC98-3CBF638DC2F9}
 		{7BA0B507-7E36-34C7-6C7F-7D93827A2767} = {6F17C632-5F8D-44B3-BC98-3CBF638DC2F9}
 		{175E35EB-29AB-98F3-9B15-2F59F81AAD09} = {D10F06A2-15E3-48A7-A62E-5B967CF53BB4}
+		{6CE424E0-DC70-4E71-B5B7-0CA60FEA8BCC} = {6A65434E-0B26-476D-A0D8-87C6B3AC44C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F35F38BC-8F0E-4CC9-929A-0D4EA3CCFB45}
