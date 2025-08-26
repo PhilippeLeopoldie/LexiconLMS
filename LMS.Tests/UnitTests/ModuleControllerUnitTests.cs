@@ -212,6 +212,35 @@ public class ModuleControllerUnitTests
         );
     }
 
+    [Fact]
+    public async Task PostModule_ShouldThrowException_whenModuleOverlap()
+    {
+        // Arrange
+        int courseId = 1;
+        var dto = SeedData.GetModuleCreateDto();
+        var created = new ModuleDto
+        {
+            Id = 10,
+            Name = dto.Name,
+            Description = dto.Description,
+            StartsAt = dto.EndsAt,
+            EndsAt = dto.StartsAt,
+        };
+        var errorMessage = $"Module must be within course dates: {created.StartsAt} - {created.EndsAt}.";
+
+        _serviceManagerMock.Setup(s => s.ModuleService.CreateModuleAsync(It.IsAny<int>(), It.IsAny<ModuleCreateDto>()))
+            .ThrowsAsync(new ModuleOverlappingException(created.StartsAt, created.EndsAt));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ModuleOverlappingException>(() => _controller.PostModule(courseId, dto));
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.CreateModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<ModuleCreateDto>()),
+            Times.Once()
+        );
+    }
+
 
     [Fact]
     public async Task DeleteModule_ShouldReturnsNoContent()
