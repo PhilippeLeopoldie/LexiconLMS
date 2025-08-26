@@ -183,6 +183,34 @@ public class ModuleControllerUnitTests
         );
     }
 
+    [Fact]
+    public async Task PostModule_ShouldThrowException_whenCourseNotFound()
+    {
+        // Arrange
+        int courseId = 1;
+        var errorMessage = $"No Course with id: {courseId}  found!";
+        var dto = SeedData.GetModuleCreateDto();
+        var created = new ModuleDto
+        {
+            Id = 10,
+            Name = dto.Name,
+            Description = dto.Description,
+            StartsAt = dto.EndsAt,
+            EndsAt = dto.StartsAt,
+        };
+
+        _serviceManagerMock.Setup(s => s.ModuleService.CreateModuleAsync(It.IsAny<int>(), It.IsAny<ModuleCreateDto>()))
+            .ThrowsAsync(new CourseNotFoundException(courseId));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<CourseNotFoundException>(() => _controller.PostModule(courseId, dto));
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.CreateModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<ModuleCreateDto>()),
+            Times.Once()
+        );
+    }
 
 
     [Fact]
