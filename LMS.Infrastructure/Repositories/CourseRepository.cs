@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
+using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infrastructure.Repositories;
@@ -10,6 +11,36 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
     public async Task<Course?> GetCourseByIdAsync(int id, bool trackChanges = false) =>
         await FindByCondition(course => course.Id.Equals(id), trackChanges).FirstOrDefaultAsync();
 
-    public async Task<IEnumerable<Course>> GetAllCoursesAsync(bool trackChanges = false) =>
-        await FindAll(trackChanges).ToListAsync();
+    public async Task<PagedList<Course>> GetAllCoursesAsync(bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
+    {
+        var query = FindAll(trackChanges);
+
+        if (includeModules)
+        {
+            query = query.Include(c => c.Modules);
+            if (includeActivities)
+                query = query.Include(c => c.Modules).ThenInclude(m => m.Activities);
+        }
+        query = ApplyOrdering(query, requestParams);
+
+        return await PagedList<Course>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
+    }
+
+    public async Task<Course?> GetByStudentIdAsync(string studentUserId) =>
+        await FindByCondition(c => c.Students.Any(student => student.Id.Equals(studentUserId))).FirstOrDefaultAsync();
+
+    private static IQueryable<Course> ApplyOrdering(IQueryable<Course> courses, RequestParams requestParams)
+    {
+        if (string.IsNullOrEmpty(requestParams.OrderBy)) return courses
+            .OrderBy(c => c.Starts)
+            .ThenBy(c => c.Name);
+
+        return requestParams.OrderBy.ToLower() switch
+        {
+            "name" => courses.OrderBy(c => c.Name),
+            "startdate" => courses.OrderBy(c => c.Starts).ThenBy(c => c.Name),
+            _ => courses
+        };
+    }
+
 }

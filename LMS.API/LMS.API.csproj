@@ -32,4 +32,8 @@
     <ProjectReference Include="..\LMS.Services\LMS.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\" />
+  </ItemGroup>
+
 </Project>

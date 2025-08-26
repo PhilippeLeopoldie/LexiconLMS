@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using Services.Contracts;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Service.Contracts;
+
 
 namespace LMS.API.Extensions;
 
@@ -117,6 +118,7 @@ public static class ServiceExtensions
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IActivityService, ActivityService>();
         services.AddScoped<IActivityTypeService, ActivityTypeService>();
         services.AddScoped<IModuleService, ModuleService>();
@@ -124,6 +126,7 @@ public static class ServiceExtensions
         services.AddScoped<IUserService, UserService>();
 
         services.AddLazy<IAuthService>();
+        services.AddLazy<ICourseService>();
         services.AddLazy<IActivityService>();
         services.AddLazy<IActivityTypeService>();
         services.AddLazy<IModuleService>();

@@ -39,6 +39,13 @@ public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<A
                     .FirstOrDefaultAsync();
     }
 
+    public async Task<IEnumerable<Activity>> GetByCourseIdAndTypeIdAsync(int courseId, int activityTypeId)
+    {
+        return await FindByCondition(a => a.Module.CourseId == courseId && a.ActivityTypeId == activityTypeId)
+                    .Include(a => a.Module)
+                    .ToListAsync();
+    }
+
     private static IQueryable<Activity> ApplyOrdering(IQueryable<Activity> activities, RequestParams requestParams)
     {
         if (string.IsNullOrEmpty(requestParams.OrderBy)) return activities;

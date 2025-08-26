@@ -5,10 +5,9 @@ using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
 using Service.Contracts;
-using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Services;
-public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivityService
+public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBase, IActivityService
 {
     public async Task<(IEnumerable<ActivityDto> activities, MetaData metaData)> GetAllAsync(int moduleId, RequestParams requestParams, bool trackChanges = false)
     {
@@ -35,12 +34,17 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     {
         EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
+        ValidateDateRange(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
+        var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityCreateDto.ActivityTypeId)
+            ?? throw new NotFoundException($"Activity Type with ID {activityCreateDto.ActivityTypeId} not found.");
 
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
+            ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
+
         EnsureActivityWithinModule(activityCreateDto.StartsAt, activityCreateDto.EndsAt, module);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityCreateDto.StartsAt, activityCreateDto.EndsAt))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityCreateDto.StartsAt:yyyy-MM-dd HH:mm} - {activityCreateDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         var activity = mapper.Map<Activity>(activityCreateDto);
         activity.ModuleId = moduleId;
@@ -63,15 +67,19 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
     public async Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto)
     {
         EnsureModuleExists(moduleId);
+        EnsureNotNull(activityEditDto, "Activity data is null.");
+        ValidateDateRange(activityEditDto.StartsAt, activityEditDto.EndsAt);
+        var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityEditDto.ActivityTypeId)
+            ?? throw new NotFoundException($"Activity Type with ID {activityEditDto.ActivityTypeId} not found.");
+
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, true);
 
-        EnsureNotNull(activityEditDto, "Activity data is null.");
-
-        var module = await unitOfWork.ModuleRepository.GetModuleByIdAsync(moduleId, false, false);
+        var module = await unitOfWork.ModuleRepository.GetModuleByConditionAsync(module => module.Id == moduleId, false, false)
+                      ?? throw new NotFoundException($"Module with id '{moduleId}' not found.");
         EnsureActivityWithinModule(activityEditDto.StartsAt, activityEditDto.EndsAt, module!);
 
         if (await unitOfWork.ActivityRepository.AnyOverlappingAsync(moduleId, activityEditDto.StartsAt, activityEditDto.EndsAt, id))
-            throw new BadRequestException("Activity overlaps with another activity in the same module.");
+            throw new ActivityOverlapException($"{activityEditDto.StartsAt:yyyy-MM-dd HH:mm} - {activityEditDto.EndsAt:yyyy-MM-dd HH:mm}");
 
         mapper.Map(activityEditDto, activity);
         if (!ValidateEntity(activity, out var errors))
@@ -105,32 +113,47 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : IActivity
         }
     }
 
+    public async Task<IEnumerable<AssignmentDto>> GetStudentAssignmentsAsync(string studentUserId)
+    {
+        var assignmentTypeId = await unitOfWork.ActivityTypeRepository.GetAssignmentTypeIdAsync();
+        if (assignmentTypeId == null)
+            return [];
+
+        var course = await unitOfWork.CourseRepository.GetByStudentIdAsync(studentUserId);
+        if (course == null)
+            return [];
+
+        var assignments = await unitOfWork.ActivityRepository.GetByCourseIdAndTypeIdAsync(course.Id, assignmentTypeId.Value);
+
+        var assignmentDtos = new List<AssignmentDto>();
+        foreach (var assignment in assignments)
+        {
+            var submittedDocument = await unitOfWork.DocumentRepository.GetDocumentForActivityAndUserAsync(assignment.Id, studentUserId);
+
+            assignmentDtos.Add(new AssignmentDto
+            {
+                Id = assignment.Id,
+                Name = assignment.Name,
+                EndDate = assignment.EndsAt,
+                ModuleName = assignment.Module.Name,
+                CourseName = course.Name,
+                IsSubmitted = submittedDocument != null,
+                IsLate = submittedDocument != null && submittedDocument.UploadedAt > assignment.EndsAt,
+                SubmittedDocumentId = submittedDocument?.Id
+            });
+        }
+        return assignmentDtos;
+    }
+
     private void EnsureModuleExists(int moduleId)
     {
         if (moduleId == 0 || !unitOfWork.ActivityRepository.FindByCondition(activity => activity.ModuleId == moduleId).Any())
             throw new NotFoundException($"Module with id '{moduleId}' not found.");
     }
 
-    private static void EnsureNotNull<T>(T obj, string message)
-    {
-        if (obj == null)
-            throw new BadRequestException(message);
-    }
-
     private static void EnsureActivityWithinModule(DateTime startsAt, DateTime endsAt, Module module)
     {
         if (startsAt < module.StartsAt || endsAt > module.EndsAt)
             throw new BadRequestException("Activity must be within module start and end time.");
-    }
-
-    protected static bool ValidateEntity<T>(T entity, out string? errors)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-
-        var validationContext = new ValidationContext(entity);
-        var validationResults = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(entity, validationContext, validationResults, true);
-        errors = string.Join("; ", validationResults.Select(x => x.ErrorMessage ?? string.Empty));
-        return isValid;
     }
 }

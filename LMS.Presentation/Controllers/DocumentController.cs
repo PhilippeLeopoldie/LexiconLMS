@@ -1,16 +1,20 @@
-﻿using LMS.Shared.DTOs.DocumentDtos;
+﻿using LMS.Shared.Common;
+using LMS.Shared.DTOs.DocumentDtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using System.Text.Json;
+using IFormFile = Microsoft.AspNetCore.Http.IFormFile;
 
 namespace LMS.Presentation.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class DocumentsController(IServiceManager serviceManager) : ControllerBase
+public class DocumentsController(IServiceManager serviceManager, IWebHostEnvironment webHostEnvironment) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Teacher, Student")]
@@ -19,13 +23,14 @@ public class DocumentsController(IServiceManager serviceManager) : ControllerBas
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request parameters")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocuments()
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocuments([FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetAllAsync();
+        var (documents, metaData) = await serviceManager.DocumentService.GetAllAsync(parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get document by ID", Description = "Retrieves a specific document by its ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Document retrieved successfully", typeof(DocumentDto))]
@@ -38,39 +43,55 @@ public class DocumentsController(IServiceManager serviceManager) : ControllerBas
         return Ok(document);
     }
 
-    [HttpGet("course/{courseId}")]
+    [HttpGet("course/{courseId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by course", Description = "Retrieves all documents associated with a specific course.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByCourse(int courseId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByCourse(int courseId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByCourseAsync(courseId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByCourseAsync(courseId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
-    [HttpGet("module/{moduleId}")]
+    [HttpGet("module/{moduleId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by module", Description = "Retrieves all documents associated with a specific module.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByModule(int moduleId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByModule(int moduleId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByModuleAsync(moduleId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByModuleAsync(moduleId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
-    [HttpGet("activity/{activityId}")]
+    [HttpGet("activity/{activityId:int}")]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get documents by activity", Description = "Retrieves all documents associated with a specific activity.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByActivity(int activityId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByActivity(int activityId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByActivityAsync(activityId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByActivityAsync(activityId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
+        return Ok(documents);
+    }
+
+    [HttpGet("submissions/{activityId:int}")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Get submissions for activity", Description = "Retrieves all document submissions for a specific activity.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Submissions retrieved successfully", typeof(IEnumerable<DocumentDto>))]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetSubmissionsForActivity(int activityId, [FromQuery] RequestParams parameter)
+    {
+        var (documents, metaData) = await serviceManager.DocumentService.GetSubmissionsForActivityAsync(activityId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
@@ -80,47 +101,31 @@ public class DocumentsController(IServiceManager serviceManager) : ControllerBas
     [SwaggerResponse(StatusCodes.Status200OK, "Documents retrieved successfully", typeof(IEnumerable<DocumentDto>))]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByUser(string userId)
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocumentsByUser(string userId, [FromQuery] RequestParams parameter)
     {
-        var documents = await serviceManager.DocumentService.GetDocumentsByUserAsync(userId);
+        var (documents, metaData) = await serviceManager.DocumentService.GetDocumentsByUserAsync(userId, parameter);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(documents);
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Teacher")]
-    [SwaggerOperation(Summary = "Create document", Description = "Creates a new document.")]
-    [SwaggerResponse(StatusCodes.Status201Created, "Document created successfully", typeof(DocumentDto))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid document data")]
-    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
-    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<DocumentDto>> PostDocument(DocumentManipulationDto document)
-    {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized("User ID not found in token");
-
-        var createdDocument = await serviceManager.DocumentService.CreateAsync(document, userId);
-        return CreatedAtAction(nameof(GetDocument), new { id = createdDocument.Id }, createdDocument);
-    }
-
-    [HttpPost("share")]
-    [Authorize(Roles = "Student")]
+    [HttpPost("{id:int}/share")]
+    [Authorize(Roles = "Student, Teacher")]
     [SwaggerOperation(Summary = "Share document", Description = "Shares a document with a course, module, or activity.")]
     [SwaggerResponse(StatusCodes.Status201Created, "Document shared successfully", typeof(DocumentDto))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid document data")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<ActionResult<DocumentDto>> ShareDocument(DocumentManipulationDto document, int courseId, int? moduleId = null, int? activityId = null)
+    public async Task<ActionResult<DocumentDto>> ShareDocument(int id, int? courseId, int? moduleId, int? activityId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("User ID not found in token");
 
-        var sharedDocument = await serviceManager.DocumentService.ShareDocumentAsync(document, userId, courseId, moduleId, activityId);
-        return CreatedAtAction(nameof(GetDocument), new { id = sharedDocument.Id }, sharedDocument);
+        await serviceManager.DocumentService.ShareDocumentAsync(id, userId, courseId, moduleId, activityId);
+        return CreatedAtAction(nameof(GetDocument), new { id }, null);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Update document", Description = "Updates an existing document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document updated successfully")]
@@ -128,17 +133,27 @@ public class DocumentsController(IServiceManager serviceManager) : ControllerBas
     [SwaggerResponse(StatusCodes.Status404NotFound, "Document not found")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
-    public async Task<IActionResult> PutDocument(int id, DocumentManipulationDto document)
+    public async Task<IActionResult> PutDocument(int id, DocumentUpdateDto document)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized("User ID not found in token");
-
-        await serviceManager.DocumentService.UpdateAsync(id, document, userId);
+        await serviceManager.DocumentService.UpdateAsync(id, document);
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpPut("{id:int}/restore")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Restore document", Description = "Restores a deleted document.")]
+    [SwaggerResponse(StatusCodes.Status204NoContent, "Document restored successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid restore request")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Document not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<IActionResult> RestoreDocument(int id, bool restore = false)
+    {
+        await serviceManager.DocumentService.RestoreAsync(id, restore);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Delete document", Description = "Deletes an existing document.")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Document deleted successfully")]
@@ -153,5 +168,35 @@ public class DocumentsController(IServiceManager serviceManager) : ControllerBas
 
         await serviceManager.DocumentService.DeleteAsync(id, userId);
         return NoContent();
+    }
+
+    [HttpPost("upload")]
+    [Authorize(Roles = "Teacher, Student")]
+    [SwaggerOperation(Summary = "Upload document", Description = "Uploads a document file to the server.")]
+    [SwaggerResponse(StatusCodes.Status201Created, "Document uploaded successfully", typeof(int))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid file or parameters")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<ActionResult<int>> UploadDocument(IFormFile file, int? courseId, int? moduleId, int? activityId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User ID not found in token");
+        var webRootPath = webHostEnvironment.WebRootPath;
+        var documentId = await serviceManager.DocumentService.UploadAsync(file, webRootPath, userId, courseId, moduleId, activityId);
+        return CreatedAtAction(nameof(GetDocument), new { id = documentId }, documentId);
+    }
+
+    [HttpGet("{id:int}/download")]
+    [Authorize(Roles = "Teacher, Student")]
+    [SwaggerOperation(Summary = "Download document", Description = "Downloads a document file from the server.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Document downloaded successfully")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Document not found")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    public async Task<IActionResult> DownloadDocument(int id)
+    {
+        var (stream, fileName, contentType) = await serviceManager.DocumentService.DownloadAsync(id);
+        return File(stream, contentType, fileName);
     }
 }

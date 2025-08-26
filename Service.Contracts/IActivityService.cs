@@ -8,4 +8,5 @@ public interface IActivityService
     Task<(ActivityDto activityDto, int createdActivityId)> CreateAsync(int moduleId, ActivityCreateDto activityCreateDto);
     Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto);
     Task DeleteAsync(int moduleId, int id);
+    Task<IEnumerable<AssignmentDto>> GetStudentAssignmentsAsync(string studentUserId);
 }

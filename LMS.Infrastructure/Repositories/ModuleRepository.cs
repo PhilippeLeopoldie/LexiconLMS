@@ -3,6 +3,7 @@ using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 
 namespace LMS.Infrastructure.Repositories;
@@ -11,26 +12,26 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
 {
 
     public async Task<PagedList<Module>> GetModulesAsync(
-        ModuleRequestParams requestParams,
         int courseId,
-        bool sortByName =false,
+        ModuleRequestParams requestParams,
         bool trackChanges = false
         )
     {
         var query = FindByCondition(module => module.CourseId.Equals(courseId), trackChanges);
 
         if(requestParams.IncludeActivities)
+        {
             query = query.Include(module => module.Activities);
+        }
 
-        if(sortByName)
-            query = query.OrderBy(module => module.Name);
+        query = ApplyOrdering(query, requestParams);
 
         return await PagedList<Module>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
-    public async Task<Module?> GetModuleByIdAsync(int id, bool includeActivities, bool trackChanges)
+    public async Task<Module?> GetModuleByConditionAsync(Expression<Func<Module, bool>> expression, bool includeActivities, bool trackChanges)
     {
-        var query = FindByCondition(module => module.Id.Equals(id), trackChanges);
+        var query = FindByCondition(expression, trackChanges);
 
         if (includeActivities) 
             query = query.Include(module => module.Activities);
@@ -38,13 +39,9 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await query.FirstOrDefaultAsync();
     }
 
-    public async Task<Module?> GetModuleByNameAsync(string name, bool trackChanges)
-    {
-        return await FindByCondition(module => string.Equals(module.Name, name), trackChanges)
-            .FirstOrDefaultAsync();
-    }
+    
 
-    public async Task<bool> HasOverlappingAsync(
+    public async Task<bool?> HasOverlappingAsync(
         int courseId,
         DateTime startsAt,
         DateTime endsAt,
@@ -52,10 +49,29 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         )
     {
         var query = Context.Modules.Where(module => module.CourseId == courseId);
+        if (query is null) return null;
 
         if(excludeModuleId is not null)
             query = query.Where(module => module.Id != excludeModuleId);
 
         return await query.AnyAsync(module => startsAt < module.EndsAt && endsAt > module.StartsAt);
+    }
+
+    public async Task<bool> CourseExistAsync(int courseId)
+    {
+        if(courseId <= 0) return false;
+        return await Context.Courses.AnyAsync(course => course.Id == courseId);
+    }
+
+    private static IQueryable<Module> ApplyOrdering(IQueryable<Module> modules, RequestParams requestParams)
+    {
+        if (string.IsNullOrEmpty(requestParams.OrderBy)) return modules;
+
+        return requestParams.OrderBy.ToLower() switch
+        {
+            "name" => modules.OrderBy(t => t.Name),
+            "startdate" => modules.OrderBy(t => t.StartsAt),
+            _ => modules
+        };
     }
 }
