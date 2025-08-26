@@ -142,7 +142,7 @@ public class ModuleControllerUnitTests
             EndsAt = dto.EndsAt,
         };
 
-        _serviceManagerMock.Setup(s => s.ModuleService.CreateModuleAsync(courseId, dto))
+        _serviceManagerMock.Setup(s => s.ModuleService.CreateModuleAsync(It.IsAny<int>(), It.IsAny<ModuleCreateDto>()))
             .ReturnsAsync(created);
 
         // Act
