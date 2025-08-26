@@ -154,5 +154,20 @@ public class ModuleControllerUnitTests
         Assert.Equal(10, returnValue.Id);
     }
 
-    
+    [Fact]
+    public async Task DeleteModule_ShouldReturnsNoContent()
+    {
+        // Arrange
+        int courseId = 1, id = 7;
+
+        _serviceManagerMock.Setup(s => s.ModuleService.DeleteModuleAsync(It.IsAny<int>(), It.IsAny<int>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _controller.DeleteModuleAsync(courseId, id);
+
+        // Assert
+        Assert.IsType<NoContentResult>(result);
+    }
+
 }
