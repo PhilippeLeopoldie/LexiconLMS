@@ -84,7 +84,7 @@ namespace LMS.Services
 
         public async Task UpdateUserAsync(UserBasicDto userDto, bool trackChanges = false)
         {
-            var existingUser = await unitOfWork.UserRepository.FindByCondition(u => u.Id == userDto.Id, trackChanges)
+            var existingUser = await unitOfWork.UserRepository.FindByCondition(u => u.Id.Equals( userDto.Id), trackChanges)
                 .FirstOrDefaultAsync();
 
             if (existingUser == null)

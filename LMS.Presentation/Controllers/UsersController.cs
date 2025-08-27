@@ -96,7 +96,7 @@ public class UsersController(IServiceManager serviceManager) : ControllerBase
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Update user", Description = "Update an existing user")]
     [SwaggerResponse(StatusCodes.Status204NoContent, "User updated successfully")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UserBasicDto userDto)
+    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserBasicDto userDto)
     {
         if (id != userDto.Id)
             return BadRequest("User ID mismatch");
