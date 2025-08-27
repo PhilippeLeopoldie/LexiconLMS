@@ -362,14 +362,14 @@ public class ModuleControllerUnitTests
         var module = SeedData.GetFirstModule();
         var dto = SeedData.GetModuleUpdateDto();
 
-        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleForPatchAsync(courseId, moduleId))
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleForPatchAsync(It.IsAny<int>(), It.IsAny<int>()))
             .ReturnsAsync((module, dto));
 
         _serviceManagerMock.Setup(service => service.ModuleService.ApplyModulePatchAsync(module, It.IsAny<ModuleUpdateDto>()))
             .Returns(Task.CompletedTask);
 
-        _mockValidator.Setup(v =>
-           v.Validate(It.IsAny<ActionContext>(), It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>())
+        _mockValidator.Setup(mockObjectModelValidator =>
+           mockObjectModelValidator.Validate(It.IsAny<ActionContext>(), It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>())
        );
         _controller.ObjectValidator = _mockValidator.Object;
 
@@ -378,9 +378,60 @@ public class ModuleControllerUnitTests
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        _serviceManagerMock.Verify(s => s.ModuleService.GetModuleForPatchAsync(courseId, moduleId), Times.Once);
-        _serviceManagerMock.Verify(s => s.ModuleService.ApplyModulePatchAsync(module, It.IsAny<ModuleUpdateDto>()), Times.Once);
+        _serviceManagerMock.Verify(service => service.ModuleService.GetModuleForPatchAsync(courseId, moduleId), Times.Once);
+        _serviceManagerMock.Verify(service => service.ModuleService.ApplyModulePatchAsync(module, It.IsAny<ModuleUpdateDto>()), Times.Once);
     }
+
+    [Fact]
+    public async Task PatchModule_ShouldThrowException_whenModuleStartDateAfterEndDate()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+        var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
+        patchDoc.Replace(m => m.Name, "Patched Module");
+        var errorMessage = "Start date must be before end date.";
+        var dto = SeedData.GetModuleUpdateDto();
+
+
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleForPatchAsync(It.IsAny<int>(), It.IsAny<int>()))
+            .ThrowsAsync(new BadRequestException(errorMessage));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() => _controller.PatchModuleAsync(courseId, moduleId, patchDoc));
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.GetModuleForPatchAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>()),
+            Times.Once()
+        );
+    }
+    
+    [Fact]
+    public async Task PatchModule_ShouldThrowException_whenCourseNotFound()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+    var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
+        patchDoc.Replace(m => m.Name, "Patched Module");
+        var errorMessage = $"No Course with id: {courseId}  found!";
+        var dto = SeedData.GetModuleUpdateDto();
+
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleForPatchAsync(It.IsAny<int>(), It.IsAny<int>()))
+            .ThrowsAsync(new CourseNotFoundException(courseId));
+
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _controller.PatchModuleAsync(courseId, moduleId, patchDoc));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
+        Assert.Equal(errorMessage, exception.Message);
+         _serviceManagerMock.Verify(service => service.ModuleService.GetModuleForPatchAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>()),
+            Times.Once()
+        );
+    }
+  
 
 
     [Fact]
