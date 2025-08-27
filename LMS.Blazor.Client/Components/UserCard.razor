@@ -1,0 +1,31 @@
+﻿@using LMS.Blazor.Client.Services
+@using LMS.Shared.Common
+@using LMS.Shared.DTOs.CourseDtos
+@using System.Security.Principal
+
+<div class="border border-info rounded">
+    <img alt"picture" src="/images/user-profile-icon.svg" width="25" height="auto" />
+    <h3>@user?.Name</h3>
+</div>
+
+
+@code {
+    [Parameter]
+    public int? userId { get; set; }
+    [Inject]
+    private IApiService apiService { get; set; } = default!;
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    private IIdentity? user = default;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (userId == null)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            user = authState.User.Identity;
+        }
+        //var result = await apiService.CallApiAsync<(CourseDto,MetaData)>($"api/courses/{courseId}");
+
+    }
+}

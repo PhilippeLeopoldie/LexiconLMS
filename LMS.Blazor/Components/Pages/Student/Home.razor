@@ -1,0 +1,11 @@
+﻿@page "/Student/"
+@attribute [Authorize(Roles = "Student")]
+@using LMS.Blazor.Client.Components
+
+<h3>Home of the student</h3>
+
+<UserCard />
+
+@code {
+
+}

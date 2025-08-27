@@ -13,6 +13,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IHttpClientFactory HttpClientFactory
 @inject ITokenStorage TokenStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Log in</PageTitle>
 
@@ -87,6 +88,20 @@
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            if (user.IsInRole("Teacher"))
+                NavigationManager.NavigateTo("/Teacher/");
+            else if (user.IsInRole("Student"))
+                NavigationManager.NavigateTo("/Student/");
+            else
+                // Fallback for users without a role
+                NavigationManager.NavigateTo("/");
+        }
     }
 
     public async Task LoginUser()
@@ -116,7 +131,15 @@
             await TokenStorage.StoreTokensAsync(user.Id, tokens);
 
             Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+
+            var roles = await UserManager.GetRolesAsync(user);
+
+            if (roles.Contains("Teacher"))
+                RedirectManager.RedirectTo("/Teacher/");
+            else if (roles.Contains("Student"))
+                RedirectManager.RedirectTo("/Student/");
+            else
+                RedirectManager.RedirectTo(ReturnUrl);
 
 
         }
