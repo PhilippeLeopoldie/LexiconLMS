@@ -1,6 +1,7 @@
 ﻿using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,12 +25,17 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
     public async Task<ActionResult<IEnumerable<CourseDto>>> GetCoursesAsync(
+        [FromQuery] UserRole? includeUsers = null,
         [FromQuery] bool includeModules = false,
         [FromQuery] bool includeActivities = false,
         [FromQuery] RequestParams requestParams = null!
     )
     {
-        var (courses, metaData) = await serviceManager.CourseService.GetAllCoursesAsync(includeModules, includeActivities, requestParams);
+        var (courses, metaData) = await serviceManager.CourseService.GetAllCoursesAsync(
+            includeUsers,
+            includeModules,
+            includeActivities,
+            requestParams);
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
         return Ok(courses);
     }
@@ -44,13 +50,18 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
         string userId, 
         [FromQuery] bool includeModules = false,
-        [FromQuery] bool includeActivities = false, 
+        [FromQuery] bool includeActivities = false,
         [FromQuery] RequestParams requestParams = null!
     )
     {
         ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
 
-        var (course, metaData) = await serviceManager.CourseService.GetCourseForUserAsync(userId, includeModules, includeActivities, requestParams);
+        var (course, metaData) = await serviceManager.CourseService.GetCourseForUserAsync(
+            userId,
+            includeModules,
+            includeActivities,
+            requestParams
+            );
         if (course == null)
             return NotFound($"No course found for user {userId}.");
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(metaData));
