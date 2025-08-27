@@ -16,10 +16,12 @@ public class MapperProfile : Profile
         CreateMap<UserRegistrationDto, ApplicationUser>();
 
         #region Courses
-        CreateMap<Course, CourseDto>()
-            .ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules))
-            .ReverseMap()
-            .ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules));
+        CreateMap<Course, CourseDto>().ReverseMap();
+        /*.ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules))
+        .ReverseMap()
+        .ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules));*/
+        CreateMap<ApplicationUser, UserDto>().ReverseMap();
+
         CreateMap<CourseForModificationDto, Course>()
             .ForMember(target => target.Starts,
                         options => options.MapFrom((src, destination) =>
