@@ -245,7 +245,18 @@ public class SeedData
         };
     }
 
-    
+    public static ModuleUpdateDto GetModuleUpdateDto()
+    {
+        var course = GetCourse();
+        return new ModuleUpdateDto
+        {
+            Name = "Updated Module",
+            Description = "Updated Module description",
+            StartsAt = DateTime.UtcNow.AddDays(16),
+            EndsAt = DateTime.UtcNow.AddDays(29),
+        };
+    }
+
 
 
 }
