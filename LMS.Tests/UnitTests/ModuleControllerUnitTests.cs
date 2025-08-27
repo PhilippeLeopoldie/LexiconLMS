@@ -246,6 +246,104 @@ public class ModuleControllerUnitTests
     }
 
 
+    [Fact]
+    public async Task PutModule_ShouldReturnNoContent_WhenSuccessful()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+        var dto = SeedData.GetModuleUpdateDto();
+
+        _serviceManagerMock.Setup(service => service.ModuleService.UpdateModuleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<ModuleUpdateDto>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _controller.PutModule(courseId, moduleId, dto);
+
+        // Assert
+        Assert.IsType<NoContentResult>(result);
+        _serviceManagerMock.Verify(service => service.ModuleService.UpdateModuleAsync(courseId, moduleId, dto), Times.Once);
+    }
+
+    [Fact]
+    public async Task PutModule_ShouldThrowException_whenModuleStartDateAfterEndDate()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+        var errorMessage = "Start date must be before end date.";
+        var dto = SeedData.GetModuleUpdateDto();
+        
+
+        _serviceManagerMock.Setup(service => service.ModuleService.UpdateModuleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<ModuleUpdateDto>()))
+            .ThrowsAsync(new BadRequestException(errorMessage));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() => _controller.PutModule(courseId, moduleId,dto));
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.UpdateModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<ModuleUpdateDto>()),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public async Task PutModule_ShouldThrowException_whenCourseNotFound()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+        var errorMessage = $"No Course with id: {courseId}  found!";
+        var dto = SeedData.GetModuleUpdateDto();
+
+        _serviceManagerMock.Setup(service => service.ModuleService.UpdateModuleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<ModuleUpdateDto>()))
+            .ThrowsAsync(new CourseNotFoundException(courseId));
+
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _controller.PutModule(courseId, moduleId,dto));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.UpdateModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<ModuleUpdateDto>()),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public async Task PutModule_ShouldThrowException_whenModuleOverlap()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+        var dto = SeedData.GetModuleUpdateDto();
+        var updated = new ModuleDto
+        {
+            Id = 10,
+            Name = dto.Name,
+            Description = dto.Description,
+            StartsAt = dto.EndsAt,
+            EndsAt = dto.StartsAt,
+        };
+        var errorMessage = $"Module must be within course dates: {updated.StartsAt} - {updated.EndsAt}.";
+
+        _serviceManagerMock.Setup(service => service.ModuleService.UpdateModuleAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<ModuleUpdateDto>()))
+            .ThrowsAsync(new ModuleOverlappingException(updated.StartsAt, updated.EndsAt));
+
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _controller.PutModule(courseId, moduleId , dto));
+        Assert.IsAssignableFrom<ConflictException>(exception);
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.UpdateModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<ModuleUpdateDto>()),
+            Times.Once()
+        );
+    }
 
 
     [Fact]
