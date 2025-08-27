@@ -118,8 +118,9 @@ public class ModuleControllerUnitTests
         // Arrange
         int courseId = SeedData.GetCourse().Id;
         var moduleId = 99;
+        var errorMessage = $"The Module with id: {moduleId}  is not found in course with id: {courseId}!";
 
-        _serviceManagerMock.Setup(s => s.ModuleService.GetModuleByIdAsync(
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleByIdAsync(
             It.IsAny<int>(),
             It.IsAny<int>(),
             It.IsAny<bool>()))
@@ -128,6 +129,30 @@ public class ModuleControllerUnitTests
         // Act & Assert
         var exception = await Record.ExceptionAsync(() => _controller.GetModuleById(courseId, moduleId, true));
         Assert.IsAssignableFrom<NotFoundException>(exception);
+        _serviceManagerMock.Verify(service => service.ModuleService.GetModuleByIdAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task GetModuleById_ShouldThrow_WhenCourseNotFoundException()
+    {
+        // Arrange
+        int courseId = 99;
+        var moduleId = SeedData.GetFirstModule().Id;
+        var errorMessage = $"No Course with id: {courseId}  found!";
+
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleByIdAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>()))
+            .ThrowsAsync(new CourseNotFoundException(courseId));
+
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _controller.GetModuleById(courseId, moduleId, true));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
+        Assert.Equal(errorMessage, exception.Message);
         _serviceManagerMock.Verify(service => service.ModuleService.GetModuleByIdAsync(
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -498,7 +523,6 @@ public class ModuleControllerUnitTests
             );
     }
 
-
     [Fact]
     public async Task DeleteModule_ShouldReturnsNoContent()
     {
@@ -526,10 +550,33 @@ public class ModuleControllerUnitTests
         // Arrange
         int courseId = 1;
         int moduleId = 99;
-        var errorMessage = $"The Module with id: {moduleId}  is not found!";
+        var errorMessage = $"The Module with id: {moduleId}  is not found in course with id: {courseId}!";
 
         _serviceManagerMock.Setup(s => s.ModuleService.DeleteModuleAsync(It.IsAny<int>(), It.IsAny<int>()))
-            .ThrowsAsync(new ModuleNotFoundException(moduleId)); ;
+            .ThrowsAsync(new ModuleNotFoundException(moduleId, courseId)); ;
+
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _controller.DeleteModuleAsync(courseId, moduleId));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
+        Assert.Equal(errorMessage, exception.Message);
+
+        _serviceManagerMock.Verify(service => service.ModuleService.DeleteModuleAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>()),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public async Task DeleteModule_ShouldThrowException_whenCourseNotFound()
+    {
+        // Arrange
+        int courseId = 99;
+        int moduleId = 2;
+        var errorMessage = $"No Course with id: {courseId}  found!";
+
+        _serviceManagerMock.Setup(s => s.ModuleService.DeleteModuleAsync(It.IsAny<int>(), It.IsAny<int>()))
+            .ThrowsAsync(new CourseNotFoundException(courseId)); ;
 
         // Act & Assert
         var exception = await Record.ExceptionAsync(() => _controller.DeleteModuleAsync(courseId, moduleId));
