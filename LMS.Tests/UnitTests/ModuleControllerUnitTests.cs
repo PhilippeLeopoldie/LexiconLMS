@@ -3,7 +3,9 @@ using LMS.Presentation.Controllers;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ModuleDtos;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Moq;
 using Service.Contracts;
 using System;
@@ -15,12 +17,14 @@ public class ModuleControllerUnitTests
 
     private readonly Mock<IServiceManager> _serviceManagerMock;
     private readonly ModuleController _controller;
+    private readonly Mock<IObjectModelValidator> _mockValidator;
 
 
     public ModuleControllerUnitTests()
     {
         _serviceManagerMock = new Mock<IServiceManager>();
         _controller = new ModuleController(_serviceManagerMock.Object);
+        _mockValidator = new Mock<IObjectModelValidator>();
 
         // Needed for Response.Headers
         _controller.ControllerContext = new ControllerContext
@@ -343,6 +347,39 @@ public class ModuleControllerUnitTests
             It.IsAny<ModuleUpdateDto>()),
             Times.Once()
         );
+    }
+
+    [Fact]
+    public async Task PatchModule_ShouldReturnNoContent_WhenSuccessful()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+
+        var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
+        patchDoc.Replace(m => m.Name, "Patched Module");
+
+        var module = SeedData.GetFirstModule();
+        var dto = SeedData.GetModuleUpdateDto();
+
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleForPatchAsync(courseId, moduleId))
+            .ReturnsAsync((module, dto));
+
+        _serviceManagerMock.Setup(service => service.ModuleService.ApplyModulePatchAsync(module, It.IsAny<ModuleUpdateDto>()))
+            .Returns(Task.CompletedTask);
+
+        _mockValidator.Setup(v =>
+           v.Validate(It.IsAny<ActionContext>(), It.IsAny<ValidationStateDictionary>(), It.IsAny<string>(), It.IsAny<object>())
+       );
+        _controller.ObjectValidator = _mockValidator.Object;
+
+        // Act
+        var result = await _controller.PatchModuleAsync(courseId, moduleId, patchDoc);
+
+        // Assert
+        Assert.IsType<NoContentResult>(result);
+        _serviceManagerMock.Verify(s => s.ModuleService.GetModuleForPatchAsync(courseId, moduleId), Times.Once);
+        _serviceManagerMock.Verify(s => s.ModuleService.ApplyModulePatchAsync(module, It.IsAny<ModuleUpdateDto>()), Times.Once);
     }
 
 
