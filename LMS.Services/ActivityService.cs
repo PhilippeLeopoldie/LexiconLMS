@@ -147,7 +147,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
 
     private void EnsureModuleExists(int moduleId)
     {
-        if (moduleId == 0 || !unitOfWork.ActivityRepository.FindByCondition(activity => activity.ModuleId == moduleId).Any())
+        /*if (moduleId == 0 || !unitOfWork.ActivityRepository.FindByCondition(activity => activity.ModuleId == moduleId).Any())
+            throw new NotFoundException($"Module with id '{moduleId}' not found.");*/
+        if (moduleId == 0 || !unitOfWork.ModuleRepository.FindByCondition(module => module.Id == moduleId).Any())
             throw new NotFoundException($"Module with id '{moduleId}' not found.");
     }
 
