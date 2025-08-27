@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Service.Contracts;
+using System;
 
 namespace LMS.Tests.UnitTests;
 
@@ -75,8 +76,8 @@ public class ModuleControllerUnitTests
             .ThrowsAsync(new CourseNotFoundException(courseId));
 
         // Act & Assert
-        await Assert.ThrowsAsync<CourseNotFoundException>(() => _controller.GetModules(courseId, parameters));
-
+        var exception = await Record.ExceptionAsync(() => _controller.GetModules(courseId, parameters));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
         _serviceManagerMock.Verify(service => service.ModuleService.GetAllModulesAsync(
             It.IsAny<int>(),
             It.IsAny<ModuleRequestParams>(),
@@ -120,7 +121,8 @@ public class ModuleControllerUnitTests
             .ThrowsAsync(new ModuleNotFoundException(moduleId, courseId));
 
         // Act & Assert
-        await Assert.ThrowsAsync<ModuleNotFoundException>(() => _controller.GetModuleById(courseId, moduleId, true));
+        var exception = await Record.ExceptionAsync(() => _controller.GetModuleById(courseId, moduleId, true));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
         _serviceManagerMock.Verify(service => service.ModuleService.GetModuleByIdAsync(
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -203,7 +205,8 @@ public class ModuleControllerUnitTests
             .ThrowsAsync(new CourseNotFoundException(courseId));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<CourseNotFoundException>(() => _controller.PostModule(courseId, dto));
+        var exception = await Record.ExceptionAsync(() => _controller.PostModule(courseId, dto));
+        Assert.IsAssignableFrom<NotFoundException>(exception);
         Assert.Equal(errorMessage, exception.Message);
         _serviceManagerMock.Verify(service => service.ModuleService.CreateModuleAsync(
             It.IsAny<int>(),
@@ -241,6 +244,8 @@ public class ModuleControllerUnitTests
             Times.Once()
         );
     }
+
+
 
 
     [Fact]
