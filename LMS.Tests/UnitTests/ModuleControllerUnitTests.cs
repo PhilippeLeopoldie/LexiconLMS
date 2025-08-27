@@ -1,4 +1,5 @@
-﻿using Domain.Models.Exceptions;
+﻿using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Presentation.Controllers;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ModuleDtos;
@@ -357,7 +358,7 @@ public class ModuleControllerUnitTests
         int moduleId = 2;
 
         var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
-        patchDoc.Replace(m => m.Name, "Patched Module");
+        patchDoc.Replace(module => module.Name, "Patched Module");
 
         var module = SeedData.GetFirstModule();
         var dto = SeedData.GetModuleUpdateDto();
@@ -405,6 +406,11 @@ public class ModuleControllerUnitTests
             It.IsAny<int>()),
             Times.Once()
         );
+        _serviceManagerMock.Verify(service => service.ModuleService.ApplyModulePatchAsync(
+            It.IsAny<Module>(),
+            It.IsAny<ModuleUpdateDto>()),
+            Times.Never
+            );
     }
     
     [Fact]
@@ -413,7 +419,7 @@ public class ModuleControllerUnitTests
         // Arrange
         int courseId = 1;
         int moduleId = 2;
-    var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
+        var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
         patchDoc.Replace(m => m.Name, "Patched Module");
         var errorMessage = $"No Course with id: {courseId}  found!";
         var dto = SeedData.GetModuleUpdateDto();
@@ -430,8 +436,43 @@ public class ModuleControllerUnitTests
             It.IsAny<int>()),
             Times.Once()
         );
+        _serviceManagerMock.Verify(service => service.ModuleService.ApplyModulePatchAsync(
+            It.IsAny<Module>(),
+            It.IsAny<ModuleUpdateDto>()),
+            Times.Never
+            );
     }
-  
+    
+    [Fact]
+    public async Task PatchModule_ShouldThrowException_whenModuleOverlap()
+    {
+        // Arrange
+        int courseId = 1;
+        int moduleId = 2;
+        var patchDoc = new JsonPatchDocument<ModuleUpdateDto>();
+        patchDoc.Replace(module => module.Name, "Patched Module");
+        var dto = SeedData.GetModuleUpdateDto();
+        var module = SeedData.GetFirstModule();
+        var errorMessage = $"Module must be within course dates: {module.StartsAt} - {module.EndsAt}.";
+
+        _serviceManagerMock.Setup(service => service.ModuleService.GetModuleForPatchAsync(It.IsAny<int>(), It.IsAny<int>()))
+            .ThrowsAsync(new ModuleOverlappingException(module.StartsAt, module.EndsAt));
+
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _controller.PatchModuleAsync(courseId, moduleId, patchDoc));
+        Assert.IsAssignableFrom<ConflictException>(exception);
+        Assert.Equal(errorMessage, exception.Message);
+        _serviceManagerMock.Verify(service => service.ModuleService.GetModuleForPatchAsync(
+            It.IsAny<int>(),
+            It.IsAny<int>()),
+            Times.Once()
+        );
+        _serviceManagerMock.Verify(service => service.ModuleService.ApplyModulePatchAsync(
+            It.IsAny<Module>(),
+            It.IsAny<ModuleUpdateDto>()),
+            Times.Never
+            );
+    }
 
 
     [Fact]
