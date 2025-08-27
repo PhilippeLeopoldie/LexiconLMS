@@ -235,7 +235,6 @@ public class SeedData
 
     public static ModuleCreateDto GetModuleCreateDto()
     {
-        var course = GetCourse();
         return new ModuleCreateDto
         {
             Name = "New Module",
@@ -247,7 +246,6 @@ public class SeedData
 
     public static ModuleUpdateDto GetModuleUpdateDto()
     {
-        var course = GetCourse();
         return new ModuleUpdateDto
         {
             Name = "Updated Module",
@@ -255,6 +253,12 @@ public class SeedData
             StartsAt = DateTime.UtcNow.AddDays(16),
             EndsAt = DateTime.UtcNow.AddDays(29),
         };
+    }
+
+    public static Module GetFirstModule()
+    {
+        var course = GetCourse();
+        return course.Modules.First();
     }
 
 
