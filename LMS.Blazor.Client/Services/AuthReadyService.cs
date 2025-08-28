@@ -36,7 +36,7 @@ public sealed class AuthReadyService : IAuthReadyService
     }
 
     private static bool IsAuthenticated(ClaimsPrincipal principal) =>
-        principal.Identity?.IsAuthenticated == true;
+      principal.Identity?.IsAuthenticated == true;
 
     public async Task WaitAsync(CancellationToken cancellationToken = default)
     {
