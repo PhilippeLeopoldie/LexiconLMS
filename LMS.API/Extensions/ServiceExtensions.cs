@@ -2,10 +2,14 @@
 using LMS.Infrastructure.Repositories;
 using LMS.Presentation;
 using LMS.Services;
+using LMS.Shared.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using Service.Contracts;
+
 
 namespace LMS.API.Extensions;
 
@@ -36,6 +40,15 @@ public static class ServiceExtensions
                .AddSwaggerGen(setup =>
                {
                    setup.EnableAnnotations();
+                   // Add parameter for role selection
+                   setup.MapType<UserRole>(() => new OpenApiSchema
+                   {
+                       Type = "string",
+                       Enum = Enum.GetNames(typeof(UserRole))
+                           .Select(name => new OpenApiString(name))
+                           .ToList<IOpenApiAny>()
+                   });
+
 
                    setup.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                    {
@@ -90,12 +103,14 @@ public static class ServiceExtensions
         services.AddScoped<IModuleRepository, ModuleRepository>();
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddLazy<IActivityRepository>();
         services.AddLazy<IActivityTypeRepository>();
         services.AddLazy<IModuleRepository>();
         services.AddLazy<ICourseRepository>();
         services.AddLazy<IDocumentRepository>();
+        services.AddLazy<IUserRepository>();
     }
 
     public static void AddServiceLayer(this IServiceCollection services)
@@ -108,6 +123,7 @@ public static class ServiceExtensions
         services.AddScoped<IActivityTypeService, ActivityTypeService>();
         services.AddScoped<IModuleService, ModuleService>();
         services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<IUserService, UserService>();
 
         services.AddLazy<IAuthService>();
         services.AddLazy<ICourseService>();
@@ -115,5 +131,6 @@ public static class ServiceExtensions
         services.AddLazy<IActivityTypeService>();
         services.AddLazy<IModuleService>();
         services.AddLazy<IDocumentService>();
+        services.AddLazy<IUserService>();
     }
 }

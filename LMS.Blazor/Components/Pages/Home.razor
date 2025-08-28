@@ -1,5 +1,6 @@
 ﻿@using LMS.Blazor.Client.Shared.Components
 @page "/"
+@attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
 <AuthorizeView Context="authContext" Roles="Teacher">

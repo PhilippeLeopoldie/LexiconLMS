@@ -7,6 +7,7 @@ using LMS.Shared.Common;
 using LMS.Shared.DTOs.CourseDtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Service.Contracts;
 
 namespace LMS.Services;
 

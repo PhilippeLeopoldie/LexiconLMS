@@ -11,9 +11,15 @@ public class ConflictException : Exception
 
 public class ModuleOverlappingException : ConflictException
 {
-    public ModuleOverlappingException(string range) : base($"The time range: {range} overlaps with an other module in this course.")
+    public ModuleOverlappingException(string moduleRange) : base($"The time range: {moduleRange} overlaps with an other module in this course.")
     {
     }
+
+    public ModuleOverlappingException(DateTime courseStart, DateTime courseEnd) 
+        : base($"Module must be within course dates: {courseStart} - {courseEnd}.")
+    {
+    }
+
 }
 
 public class ActivityOverlapException(string range)

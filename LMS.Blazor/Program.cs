@@ -4,7 +4,7 @@ using LMS.Blazor.Components;
 using LMS.Blazor.Components.Account;
 using LMS.Blazor.Data;
 using LMS.Blazor.Services;
-
+using LMS.Blazor.Services.NoOpServices;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,9 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
 // API service
-builder.Services.AddScoped<IApiService, ClientApiService>();
+//builder.Services.AddScoped<IApiService, ClientApiService>();
+builder.Services.AddScoped<IApiService, ServerNoopApiService>();
+builder.Services.AddScoped<IAuthReadyService, ServerNoopAuthReadyService>();
 builder.Services.AddScoped<ThemeService>();
 
 
@@ -38,6 +40,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
 })
 .AddIdentityCookies();
+
+builder.Services
+    .AddAuthorization()
+    .AddCascadingAuthenticationState();
 
 // Database setup
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
