@@ -71,9 +71,8 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
 
     public async Task<(CourseDto?, MetaData)> GetCourseForUserAsync(string userId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
     {
-        var user = await userManager.FindByIdAsync(userId);
-        if (user == null)
-            throw new ArgumentException("User not found", nameof(userId));
+        var user = await userManager.FindByIdAsync(userId)
+            ?? throw new ArgumentException("User not found", nameof(userId));
 
         var query = unitOfWork.CourseRepository
             .FindByCondition(c => c.Id == user.CourseId, trackChanges);

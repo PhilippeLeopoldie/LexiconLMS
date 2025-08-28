@@ -18,7 +18,7 @@ internal class ApiCaller(IHttpClientFactory httpClientFactory, ITokenStorage Tok
         var baseAddress = config["LmsAPIBaseAddress"];
         ArgumentException.ThrowIfNullOrEmpty(baseAddress, nameof(baseAddress));
 
-        Uri uri = new Uri(new Uri(baseAddress), endPoint);
+        Uri uri = new(new Uri(baseAddress), endPoint);
         return await client.GetFromJsonAsync<T>(uri, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
