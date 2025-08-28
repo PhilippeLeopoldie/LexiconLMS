@@ -114,7 +114,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     [HttpPost]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Add student ", Description = "Add student to course")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Student added successfully", typeof(CourseDto))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Student added successfully")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid  data")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
