@@ -1,0 +1,32 @@
+﻿.lms-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--lms-border);
+    color: var(--lms-muted);
+    background: color-mix(in srgb, var(--lms-border) 40%, transparent);
+}
+
+    .lms-badge.info {
+        color: #0369a1;
+        border-color: #bae6fd;
+        background: #e0f2fe;
+    }
+
+    .lms-badge.success {
+        color: #166534;
+        border-color: #bbf7d0;
+        background: #dcfce7;
+    }
+
+    .lms-badge.danger {
+        color: #991b1b;
+        border-color: #fecaca;
+        background: #fee2e2;
+    }
+
+    .lms-badge.warning {
+        color: #92400e;
+        border-color: #fde68a;
+        background: #fef3c7;
+    }

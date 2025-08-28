@@ -1,0 +1,37 @@
+﻿.lms-tile {
+    background: var(--lms-surface);
+    border: 1px solid var(--lms-border);
+    border-radius: var(--lms-radius);
+    padding: 14px;
+    min-height: 92px;
+    box-shadow: var(--lms-shadow);
+}
+
+.lms-tile__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lms-tile__label {
+    font-size: 12px;
+    color: var(--lms-muted);
+}
+
+.lms-tile__icon {
+    color: var(--lms-muted);
+}
+
+.lms-tile__value {
+    font-size: 28px;
+    line-height: 1.1;
+    margin-top: 6px;
+    color: var(--lms-text);
+    font-weight: 700;
+}
+
+.lms-tile__sub {
+    font-size: 12px;
+    color: var(--lms-muted);
+    margin-top: 2px;
+}

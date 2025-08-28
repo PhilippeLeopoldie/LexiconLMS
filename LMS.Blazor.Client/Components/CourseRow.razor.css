@@ -1,0 +1,49 @@
+﻿.lms-course {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--lms-border);
+    border-radius: 10px;
+    background: var(--lms-surface);
+}
+
+    .lms-course + .lms-course {
+        margin-top: 8px;
+    }
+
+.lms-course__left {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.lms-course__icon {
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    color: var(--lms-muted);
+}
+
+.lms-course__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--lms-text);
+}
+
+.lms-course__sub {
+    font-size: 12px;
+    color: var(--lms-muted);
+}
+
+.lms-course__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lms-course__menu {
+    color: var(--lms-muted);
+    text-decoration: none;
+}

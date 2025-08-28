@@ -1,0 +1,48 @@
+﻿@using LMS.Blazor.Client.Services
+@inject ThemeService ThemeService
+@implements IDisposable
+@rendermode InteractiveAuto
+
+<input type="checkbox" class="btn-check fs-5" id="btn-check" autocomplete="off" @bind="IsDarkTheme">
+<label class="btn theme-switcher " for="btn-check">
+    @if (IsDarkTheme)
+    {
+        <i class="bi bi-moon"></i>
+    }
+    else
+    {
+        <i class="bi bi-brightness-high"></i>
+    }
+</label>
+
+
+@code {
+    private bool _isDarkTheme;
+
+    private bool IsDarkTheme
+    {
+        get => _isDarkTheme;
+        set
+        {
+            _isDarkTheme = value;
+            ThemeService.SetTheme(_isDarkTheme ? "dark" : "light");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        IsDarkTheme = ThemeService.CurrentTheme == "dark";
+        ThemeService.OnChange += OnThemeChanged;
+    }
+
+    private void OnThemeChanged()
+    {
+        _isDarkTheme = ThemeService.CurrentTheme == "dark";
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnChange -= OnThemeChanged;
+    }
+}

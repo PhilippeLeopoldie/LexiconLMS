@@ -1,0 +1,28 @@
+﻿<li class="lms-listcard__item">
+    <div class="lms-listcard__left">
+        @if (Icon is not null)
+        {
+            <span class="lms-avatar">@Icon</span>
+        }
+        <div class="lms-listcard__text">
+            <div class="lms-listcard__title">@Title</div>
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <div class="lms-listcard__subtitle">@Subtitle</div>
+            }
+        </div>
+    </div>
+
+    <div class="lms-listcard__right">
+        @Meta
+        @Actions
+    </div>
+</li>
+
+@code {
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public RenderFragment? Meta { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+}

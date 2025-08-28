@@ -1,0 +1,65 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<header class="top-row fixed-top py-3 px-6 border-bottom">
+    <div class="container-fluid d-grid gap-3 align-items-center" style="grid-template-columns: 1fr 2fr;">
+        <a href="/" class="d-flex align-items-center col-lg-4 mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+            <img src="/images/logo-lexicon.svg" alt="Logo" class="bi" height="36" />
+        </a>
+        <AuthorizeView>
+            <Authorized>
+                <div class="d-flex ms-auto align-items-center user-inf"> 
+                    @* <form class="w-100 me-3" role="search"> 
+                        <input type="search" class="form-control" placeholder="Search..." aria-label="Search"> 
+                    </form>  *@
+                    <ThemeSwitcher />
+                    <div class="flex-shrink-0 dropdown me-2"> 
+                    <a href="#" class="d-block fs-3 link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"> 
+                        <i class="bi bi-person-circle"></i>
+                    </a> 
+                    <ul class="dropdown-menu text-small shadow">
+                        <li class="dropdown-header">@context.User.Identity?.Name</li>
+                        <li>
+                            <a class="dropdown-item" href="Account/Manager">
+                               <i class="bi bi-gear me-2"></i>
+                            Inställningar
+                            </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="Account/Logout" method="post" class="d-inline">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                <button type="submit" class="btn btn-link dropdown-item">
+                                    <i class="bi bi-box-arrow-left me-2"></i>
+                                    Logga ut
+                                </button>
+                            </form>
+                        </li>
+                    </ul> 
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div> 
+</header>
+
+@code {
+    private string? currentUrl;
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

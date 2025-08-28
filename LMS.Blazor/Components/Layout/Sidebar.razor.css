@@ -1,0 +1,56 @@
+.navbar-toggler {
+    appearance: none;
+    cursor: pointer;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: white;
+    position: fixed;
+    top: .5rem;
+    right: 1rem;
+    z-index: 20000;
+    border: 1px solid RGBA(var(--bs-emphasis-color-rgb),var(--bs-link-opacity,0.1)) !important;
+    border-radius: 0.25rem;
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28155, 155, 155, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
+}
+
+    .navbar-toggler:checked {
+        background-color: RGBA(var(--bs-emphasis-color-rgb),var(--bs-link-opacity,0.1)) !important;
+    }
+
+.nav-scrollable {
+    width: 100vw;
+    top: 3.5rem;
+    height: max-content;
+    position: sticky;
+    z-index: 6000;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    box-shadow: var(--bs-box-shadow);
+}
+  
+
+.nav-scrollable {
+    display: none;
+}
+
+.navbar-toggler:checked ~ .nav-scrollable {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    .nav-scrollable {
+        display: block;
+        height: calc(100vh - 9rem);
+        top: 4em;
+        margin-left: 1em;
+        overflow-y: auto;
+        width: 20rem;
+        position: sticky;
+        border-radius: var(--bs-border-radius-lg);
+    }
+
+}
