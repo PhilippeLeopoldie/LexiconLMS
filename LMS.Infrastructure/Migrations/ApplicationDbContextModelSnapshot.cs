@@ -34,7 +34,7 @@ namespace Companies.Infrastructure.Migrations
 
                     b.HasIndex("TeachersId");
 
-                    b.ToTable("ApplicationUserCourse");
+                    b.ToTable("ApplicationUserCourse", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
@@ -70,7 +70,7 @@ namespace Companies.Infrastructure.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("Activities");
+                    b.ToTable("Activities", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
@@ -90,7 +90,7 @@ namespace Companies.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActivityTypes");
+                    b.ToTable("ActivityTypes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
@@ -192,7 +192,7 @@ namespace Companies.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Document", b =>
@@ -252,7 +252,7 @@ namespace Companies.Infrastructure.Migrations
 
                     b.HasIndex("UploadedByUserId");
 
-                    b.ToTable("Documents");
+                    b.ToTable("Documents", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
@@ -283,7 +283,7 @@ namespace Companies.Infrastructure.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Modules");
+                    b.ToTable("Modules", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

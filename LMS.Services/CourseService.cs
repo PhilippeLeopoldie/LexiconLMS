@@ -5,6 +5,7 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.CourseDtos;
+using LMS.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
@@ -37,21 +38,52 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         }
     }
 
-    public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
+    public async Task<(IEnumerable<CourseDto>, MetaData)> GetAllCoursesAsync(
+        UserRole? includeUsers = null,
+        bool includeModules = false,
+        bool includeActivities = false,
+        RequestParams requestParams = null!,
+        bool trackChanges = false)
     {
         ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
 
-        PagedList<Course> pagedList = await unitOfWork.CourseRepository.GetAllCoursesAsync(includeModules, includeActivities, requestParams, trackChanges);
+        PagedList<Course> pagedList = await unitOfWork.CourseRepository.GetAllCoursesAsync(
+            includeUsers,
+            includeModules,
+            includeActivities,
+            requestParams,
+            trackChanges
+            );
         var courses = mapper.Map<IEnumerable<CourseDto>>(pagedList.Items);
 
         return (courses, pagedList.MetaData);
     }
 
-    public async Task<CourseDto?> GetCourseByIdAsync(int courseId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
+    public async Task<CourseDto?> GetCourseByIdAsync(
+        int courseId,
+        UserRole? includeUsers = null,
+        bool includeModules = false,
+        bool includeActivities = false,
+        RequestParams requestParams = null!,
+        bool trackChanges = false)
     {
         var query = unitOfWork.CourseRepository
             .FindByCondition(c => c.Id == courseId);
 
+        // include Users
+        if (includeUsers == UserRole.Student)
+            query = query.Include(course => course.Students);
+
+        if (includeUsers == UserRole.Teacher)
+            query = query.Include(course => course.Teachers);
+
+        if (includeUsers == UserRole.All)
+        {
+            query = query.Include(course => course.Students);
+            query = query.Include(course => course.Teachers);
+        }
+        
+        // include Modules and Activities
         if (includeModules)
         {
             query = query.Include(c => c.Modules);
