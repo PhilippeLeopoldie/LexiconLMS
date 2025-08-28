@@ -26,3 +26,16 @@ public class ActivityOverlapException(string range)
     : ConflictException($"The time range: {range} overlaps with an other activity in this module.")
 { }
 
+public class DuplicateStudentInCourseException : ConflictException
+{
+    public DuplicateStudentInCourseException(string studentId, int courseId) : base($"Student {studentId} is already enrolled in course {courseId}.")
+    {
+    }
+}
+
+public class DuplicateTeacherInCourseException : ConflictException
+{
+    public DuplicateTeacherInCourseException(string teacherId, int courseId) : base($"Teacher {teacherId} is already enrolled in course {courseId}.")
+    {
+    }
+}
