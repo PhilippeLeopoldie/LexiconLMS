@@ -111,7 +111,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     }
 
 
-    [HttpPost("add-student")]
+    [HttpPost("{courseId:int}/add-student")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Add student ", Description = "Add student to course")]
     [SwaggerResponse(StatusCodes.Status200OK, "Student added successfully")]
@@ -125,6 +125,22 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         await serviceManager.CourseService.AddStudentToCourseAsync(userId, courseId);
         return Ok();
     }
+
+    [HttpPost("{courseId:int}/add-teacher")]
+    [Authorize(Roles = "Teacher")]
+    [SwaggerOperation(Summary = "Add teacher ", Description = "Add teacher to course")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Teacher added successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid  data")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authorized")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Course or student not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Teacher already in the course")]
+    public async Task<IActionResult> AddTeacherToCourse(int courseId, [FromQuery] string userId)
+    {
+        await serviceManager.CourseService.AddTeacherToCourseAsync(userId, courseId);
+        return Ok();
+    }
+
 
     [HttpPut("{courseId:int}")]
     [Authorize (Roles = "Teacher")]
