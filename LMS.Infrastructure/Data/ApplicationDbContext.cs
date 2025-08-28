@@ -40,11 +40,6 @@ namespace LMS.Infrastructure.Data
                 .HasMany(u => u.Courses)
                 .WithMany(c => c.Teachers);
 
-            /*builder.Entity<Course>()
-            .HasOne(c => c.Teacher)
-            .WithMany(u => u.Courses)
-            .HasForeignKey(c => c.TeacherId);*/
-
             builder.Entity<Document>()
                 .HasOne(d => d.Course)
                 .WithMany(c => c.Documents)

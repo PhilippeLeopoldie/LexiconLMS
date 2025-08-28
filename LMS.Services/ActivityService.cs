@@ -4,6 +4,7 @@ using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
+using Microsoft.EntityFrameworkCore;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -12,7 +13,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
     public async Task<(IEnumerable<ActivityDto> activities, MetaData metaData)> GetAllAsync(int moduleId, RequestParams requestParams, bool trackChanges = false)
     {
         ArgumentNullException.ThrowIfNull(requestParams, nameof(requestParams));
-        EnsureModuleExists(moduleId);
+        await EnsureModuleExists(moduleId);
 
         PagedList<Activity> pagedList = await unitOfWork.ActivityRepository.GetModuleActivitiesAsync(moduleId, requestParams, trackChanges);
         var activities = mapper.Map<IEnumerable<ActivityDto>>(pagedList.Items);
@@ -23,7 +24,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
 
     public async Task<ActivityDto> GetByIdAsync(int moduleId, int id, bool trackChanges = false)
     {
-        EnsureModuleExists(moduleId);
+        await EnsureModuleExists(moduleId);
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId, trackChanges);
         return activity == null
             ? throw new NotFoundException($"Activity with id '{id}' not found in module '{moduleId}'.")
@@ -32,7 +33,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
 
     public async Task<(ActivityDto activityDto, int createdActivityId)> CreateAsync(int moduleId, ActivityCreateDto activityCreateDto)
     {
-        EnsureModuleExists(moduleId);
+        await EnsureModuleExists(moduleId);
         EnsureNotNull(activityCreateDto, "Activity data is null.");
         ValidateDateRange(activityCreateDto.StartsAt, activityCreateDto.EndsAt);
         var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityCreateDto.ActivityTypeId)
@@ -66,7 +67,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
 
     public async Task UpdateAsync(int moduleId, int id, ActivityEditDto activityEditDto)
     {
-        EnsureModuleExists(moduleId);
+        await EnsureModuleExists(moduleId);
         EnsureNotNull(activityEditDto, "Activity data is null.");
         ValidateDateRange(activityEditDto.StartsAt, activityEditDto.EndsAt);
         var activityType = await unitOfWork.ActivityTypeRepository.GetByIdAsync(activityEditDto.ActivityTypeId)
@@ -98,7 +99,7 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
 
     public async Task DeleteAsync(int moduleId, int id)
     {
-        EnsureModuleExists(moduleId);
+        await EnsureModuleExists(moduleId);
         var activity = await unitOfWork.ActivityRepository.GetActivityByIdAsync(activity => activity.Id == id && activity.ModuleId == moduleId)
             ?? throw new NotFoundException($"Activity with id '{id}' not found in module '{moduleId}'.");
 
@@ -145,11 +146,9 @@ public class ActivityService(IUnitOfWork unitOfWork, IMapper mapper) : ServiceBa
         return assignmentDtos;
     }
 
-    private void EnsureModuleExists(int moduleId)
+    private async Task EnsureModuleExists(int moduleId)
     {
-        /*if (moduleId == 0 || !unitOfWork.ActivityRepository.FindByCondition(activity => activity.ModuleId == moduleId).Any())
-            throw new NotFoundException($"Module with id '{moduleId}' not found.");*/
-        if (moduleId == 0 || !unitOfWork.ModuleRepository.FindByCondition(module => module.Id == moduleId).Any())
+        if (moduleId == 0 || !await unitOfWork.ModuleRepository.FindByCondition(module => module.Id == moduleId).AnyAsync())
             throw new NotFoundException($"Module with id '{moduleId}' not found.");
     }
 

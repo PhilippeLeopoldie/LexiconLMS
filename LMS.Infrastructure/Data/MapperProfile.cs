@@ -13,14 +13,10 @@ public class MapperProfile : Profile
 {
     public MapperProfile()
     {
-        CreateMap<UserRegistrationDto, ApplicationUser>();
+
 
         #region Courses
         CreateMap<Course, CourseDto>().ReverseMap();
-        /*.ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules))
-        .ReverseMap()
-        .ForMember(target => target.Modules, config => config.MapFrom(src => src.Modules));*/
-        CreateMap<ApplicationUser, UserDto>().ReverseMap();
 
         CreateMap<CourseForModificationDto, Course>()
             .ForMember(target => target.Starts,
@@ -109,13 +105,12 @@ public class MapperProfile : Profile
         #endregion
 
         #region Users
-        CreateMap<ApplicationUser, UserBasicDto>()
-            .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id))
+        CreateMap<ApplicationUser, UserBasicDto>().ReverseMap();
+        CreateMap<ApplicationUser, UserDto>().ReverseMap();
+        CreateMap<UserCreationDto, ApplicationUser>()
             .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
             .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email));
-
-        CreateMap<UserBasicDto, ApplicationUser>()
-            .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id))
+        CreateMap<UserRegistrationDto, ApplicationUser>()
             .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
             .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email));
         #endregion
