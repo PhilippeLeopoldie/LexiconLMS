@@ -111,7 +111,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     }
 
 
-    /*[HttpPost]
+    [HttpPost("add-student")]
     [Authorize(Roles = "Teacher")]
     [SwaggerOperation(Summary = "Add student ", Description = "Add student to course")]
     [SwaggerResponse(StatusCodes.Status200OK, "Student added successfully")]
@@ -124,7 +124,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     {
         await serviceManager.CourseService.AddStudentToCourseAsync(userId, courseId);
         return Ok();
-    }*/
+    }
 
     [HttpPut("{courseId:int}")]
     [Authorize (Roles = "Teacher")]
