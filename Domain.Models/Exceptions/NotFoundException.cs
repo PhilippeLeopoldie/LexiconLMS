@@ -28,3 +28,10 @@ public class CourseNotFoundException : NotFoundException
     {
     }
 }
+
+public class UserNotFoundException : NotFoundException
+{
+    public UserNotFoundException(string userId) : base($"No user with id: {userId}  found!")
+    {
+    }
+}
