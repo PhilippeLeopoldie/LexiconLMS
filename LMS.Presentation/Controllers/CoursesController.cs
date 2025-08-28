@@ -55,11 +55,6 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     )
     {
         ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
-        /*if (userId == Guid.Empty)
-        {
-            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
-        }*/
-
         var (course, metaData) = await serviceManager.CourseService.GetCourseForUserAsync(
             userId,
             includeModules,
