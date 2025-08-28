@@ -1,0 +1,42 @@
+﻿@using LMS.Blazor.Components.Account
+@using LMS.Blazor.Services
+@using LMS.Shared.DTOs.CourseDtos
+
+<div class="border border-info rounded">
+    <div style="overflow-x: scroll; overflow-y: clip">
+        @foreach (var user in users)
+        {
+            <UserCard user="user" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public UserListType? UserListType { get; set; }
+    [Parameter]
+    public bool IncludeSelf { get; set; } = false;
+    [CascadingParameter]
+    private HttpContext Context { get; set; } = default!;
+
+    private IEnumerable<CourseDto>? users { get; set; } = [];
+
+    [Inject]
+    private IdentityUserAccessor IdentityUserAccessor { get; set; } = default!;
+    [Inject]
+    private IHttpClientFactory HttpClientFactory { get; set; } = default!;
+    [Inject]
+    private IApiCaller api { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //UserListType ??= UserListType.ForCourse;
+
+        var user = await IdentityUserAccessor.GetRequiredUserAsync(Context);
+
+        var course = await api.GetAsync<CourseDto>($"api/courses/{user.CourseId}?includeUsers=Students", typeof(CourseDto));
+        if (!IncludeSelf)
+            users = course.Students
+                .Where(s => s.Id != user.Id);
+    }
+}
