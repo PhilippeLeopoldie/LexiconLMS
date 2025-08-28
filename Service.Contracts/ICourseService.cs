@@ -23,6 +23,8 @@ public interface ICourseService
 
     Task<(CourseDto?, MetaData)> GetCourseForUserAsync(string userId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false);
     Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForModificationDto courseDto);
+    Task AddStudentToCourseAsync(string userId, int courseId, bool trackChanges = true);
+    Task AddTeacherToCourseAsync(string userId, int courseId, bool trackChanges = true);
     Task UpdateCourseAsync(int courseId, CourseForModificationDto courseDto);
     Task DeleteCourseAsync(int courseId);
 }
