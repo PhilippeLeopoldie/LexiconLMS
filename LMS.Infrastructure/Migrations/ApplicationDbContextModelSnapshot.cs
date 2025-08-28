@@ -22,6 +22,21 @@ namespace Companies.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserCourse", b =>
+                {
+                    b.Property<int>("CoursesId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TeachersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CoursesId", "TeachersId");
+
+                    b.HasIndex("TeachersId");
+
+                    b.ToTable("ApplicationUserCourse");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
                 {
                     b.Property<int>("Id")
@@ -175,12 +190,7 @@ namespace Companies.Infrastructure.Migrations
                     b.Property<DateTime>("Starts")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("TeacherId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("TeacherId");
 
                     b.ToTable("Courses");
                 });
@@ -409,6 +419,21 @@ namespace Companies.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ApplicationUserCourse", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Course", null)
+                        .WithMany()
+                        .HasForeignKey("CoursesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("TeachersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
                 {
                     b.HasOne("Domain.Models.Entities.ActivityType", "Type")
@@ -435,15 +460,6 @@ namespace Companies.Infrastructure.Migrations
                         .HasForeignKey("CourseId");
 
                     b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.Course", b =>
-                {
-                    b.HasOne("Domain.Models.Entities.ApplicationUser", "Teacher")
-                        .WithMany("Courses")
-                        .HasForeignKey("TeacherId");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Document", b =>
@@ -549,8 +565,6 @@ namespace Companies.Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
-                    b.Navigation("Courses");
-
                     b.Navigation("Documents");
                 });
 

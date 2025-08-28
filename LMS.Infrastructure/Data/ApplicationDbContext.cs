@@ -36,14 +36,14 @@ namespace LMS.Infrastructure.Data
                 .WithMany(c => c.Students)
                 .HasForeignKey(u => u.CourseId);
 
-            /*builder.Entity<ApplicationUser>()
+            builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Courses)
-                .WithMany(c => c.Teachers);*/
+                .WithMany(c => c.Teachers);
 
-            builder.Entity<Course>()
+            /*builder.Entity<Course>()
             .HasOne(c => c.Teacher)
             .WithMany(u => u.Courses)
-            .HasForeignKey(c => c.TeacherId);
+            .HasForeignKey(c => c.TeacherId);*/
 
             builder.Entity<Document>()
                 .HasOne(d => d.Course)

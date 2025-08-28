@@ -26,12 +26,12 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
             query = query.Include(course => course.Students);
 
         if (includeUsers == UserRole.Teacher)
-            query = query.Include(course => course.Teacher);
+            query = query.Include(course => course.Teachers);
 
         if (includeUsers == UserRole.All)
         {
             query = query.Include(course => course.Students);
-            query = query.Include(course => course.Teacher);
+            query = query.Include(course => course.Teachers);
         }
 
 

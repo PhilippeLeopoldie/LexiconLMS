@@ -10,8 +10,8 @@ public record CourseDto
     public string Description { get; init; } = string.Empty;
     public DateTime Starts { get; init; }
     public DateTime Ends { get; set; }
-    //public IEnumerable<UserDto>? Teachers { get; init; } = null;
-    public UserDto? Teacher { get; init; } = null;
+    public IEnumerable<UserDto>? Teachers { get; init; } = null;
+    //public UserDto? Teacher { get; init; } = null;
     public IEnumerable<UserDto>? Students { get; init; } = null;
     public IEnumerable<ModuleDto>? Modules { get; init; } = null;
 }
