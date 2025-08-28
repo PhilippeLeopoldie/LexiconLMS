@@ -12,7 +12,15 @@ public interface ICourseService
         bool includeActivities = false,
         RequestParams requestParams = null!,
         bool trackChanges = false);
-    Task<CourseDto?> GetCourseByIdAsync(int courseId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false);
+
+    Task<CourseDto?> GetCourseByIdAsync(
+        int courseId,
+        UserRole? includeUsers = null,
+        bool includeModules = false,
+        bool includeActivities = false,
+        RequestParams requestParams = null!,
+        bool trackChanges = false);
+
     Task<(CourseDto?, MetaData)> GetCourseForUserAsync(string userId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false);
     Task<(CourseDto courseDto, int createdCourseId)> CreateCourseAsync(CourseForModificationDto courseDto);
     Task UpdateCourseAsync(int courseId, CourseForModificationDto courseDto);

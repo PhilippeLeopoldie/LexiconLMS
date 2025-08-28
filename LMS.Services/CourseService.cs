@@ -59,11 +59,31 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         return (courses, pagedList.MetaData);
     }
 
-    public async Task<CourseDto?> GetCourseByIdAsync(int courseId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
+    public async Task<CourseDto?> GetCourseByIdAsync(
+        int courseId,
+        UserRole? includeUsers = null,
+        bool includeModules = false,
+        bool includeActivities = false,
+        RequestParams requestParams = null!,
+        bool trackChanges = false)
     {
         var query = unitOfWork.CourseRepository
             .FindByCondition(c => c.Id == courseId);
 
+        // include Users
+        if (includeUsers == UserRole.Student)
+            query = query.Include(course => course.Students);
+
+        if (includeUsers == UserRole.Teacher)
+            query = query.Include(course => course.Teachers);
+
+        if (includeUsers == UserRole.All)
+        {
+            query = query.Include(course => course.Students);
+            query = query.Include(course => course.Teachers);
+        }
+        
+        // include Modules and Activities
         if (includeModules)
         {
             query = query.Include(c => c.Modules);

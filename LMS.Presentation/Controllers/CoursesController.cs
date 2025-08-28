@@ -55,6 +55,10 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     )
     {
         ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
+        /*if (userId == Guid.Empty)
+        {
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
+        }*/
 
         var (course, metaData) = await serviceManager.CourseService.GetCourseForUserAsync(
             userId,
@@ -77,12 +81,18 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Id not found")]
     public async Task<ActionResult<CourseDto>> GetCourseByIdAsync(
-        int courseId, 
+        int courseId,
+        [FromQuery] UserRole? includeUsers = null,
         [FromQuery] bool includeModules = false, 
         [FromQuery] bool includeActivities = false,
         [FromQuery] RequestParams requestParams = null!)
     {
-        var course = await serviceManager.CourseService.GetCourseByIdAsync(courseId, includeModules, includeActivities, requestParams);
+        var course = await serviceManager.CourseService.GetCourseByIdAsync(
+            courseId,
+            includeUsers,
+            includeModules,
+            includeActivities,
+            requestParams);
         if (course == null)
             return NotFound($"Course with ID {courseId} not found.");
         return Ok(course);
