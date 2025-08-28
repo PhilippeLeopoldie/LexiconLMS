@@ -1,11 +1,159 @@
-﻿@page "/"
+﻿@using LMS.Blazor.Client.Shared.Components
+@page "/"
 @attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
+<AuthorizeView Context="authContext" Roles="Teacher">
+    <Authorized >
+        <!-- Authorized content is in the MainLayout -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col p-4">
+                    <h2>Lärarens dashboard | @authContext.User.Identity?.Name!</h2>
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 col-md-3">
+                            <StatTile Label="Totala kurser" Value="12">
+                            <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <StatTile Label="Studenter" Value="245">
+                            <Icon><i class="bi bi-calendar-event"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <StatTile Label="Inlämningar" Value="18">
+                            <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <StatTile Label="Aktiviteter" Value="28">
+                            <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                            </StatTile>
+                        </div>
+                    </div>
 
-<h1>LMS starter template</h1>
+                    <div class="row g-3">
+                        <div class="col-12 ">
+                            <Section Title="Kurshantering"
+                                     Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
+                                    HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa kurs</a>"))">
+                            <ul class="list-unstyled mb-0">
+                                    <CourseRow Title="Frontend Development" Sub="23 studenter • 5 moduler">
+                                <Icon><i class="bi bi-cpu"></i></Icon>
+                                <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                </CourseRow>
+                                    <CourseRow Title="UX Design Principles" Sub="19 studenter • 8 moduler">
+                                <Icon><i class="bi bi-bezier2"></i></Icon>
+                                <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                </CourseRow>
+                                    <CourseRow Title="Project Management" Sub="14 studenter • 2 moduler">
+                                <Icon><i class="bi bi-kanban"></i></Icon>
+                                <Suffix><Badge Color="warning">Startar snart</Badge></Suffix>
+                                </CourseRow>
+                            </ul>
+                            </Section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView Context="authContext" Roles="Student">
+    <Authorized>
+        <!-- Authorized content is in the MainLayout -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col p-4">
+                    <h2>Välkommen tillbaka, @authContext.User.Identity?.Name!</h2>
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 col-md-4">
+                            <StatTile Label="Aktiva kurser" Value="3" Subtext="Javascript">
+                                <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <StatTile Label="Kommande aktiviteter" Value="5" Subtext="Nästa 7 dagar">
+                                <Icon><i class="bi bi-calendar-event"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <StatTile Label="Väntande inlämningar" Value="2" Subtext="Kräver uppmärksamhet">
+                                <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                            </StatTile>
+                        </div>
+                    </div>
 
-<h2>You can use this template as a starter template or build one from scratch!</h2>
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-6">
+                            <Section Title="Mina kurser"
+                                     Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))">
+                                <ul class="list-unstyled mb-0">
+                                    <CourseRow Title="Frontend Development" Sub="15 jan – 30 apr 2025">
+                                        <Icon><i class="bi bi-cpu"></i></Icon>
+                                        <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                    </CourseRow>
+                                    <CourseRow Title="UX Design Principles" Sub="1 feb – 15 maj 2025">
+                                        <Icon><i class="bi bi-bezier2"></i></Icon>
+                                        <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                    </CourseRow>
+                                    <CourseRow Title="Project Management" Sub="1 mar – 30 jun 2025">
+                                        <Icon><i class="bi bi-kanban"></i></Icon>
+                                        <Suffix><Badge Color="warning">Startar snart</Badge></Suffix>
+                                    </CourseRow>
+                                </ul>
+                            </Section>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <ListCard Title="Kommande aktiviteter" >
+
+                                @foreach (var itm in _upcoming)
+                                {
+                                    <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi {itm.Icon}'></i>"))"
+                                                  Title="@itm.Title" Subtitle="@itm.Course"
+                                                  Meta="@(builder => builder.AddContent(0, itm.Time))"
+                                                  Actions="@(builder => builder.AddMarkupContent(0,""))" />
+
+                                }
+                            </ListCard>
+                        </div>
+                        <div class="col-12">
+                            <ListCard Title="Senaste dokument">
+                                <li class="lms-listcard__item">
+                                    <div class="lms-listcard__left">
+                                        <span class="lms-avatar"><i class="bi bi-filetype-pdf"></i></span>
+                                        <div class="lms-listcard__text">
+                                            <div class="lms-listcard__title">React Hooks Guide.pdf</div>
+                                            <div class="lms-listcard__subtitle">Frontend Development</div>
+                                        </div>
+                                    </div>
+                                    <div class="lms-listcard__right">
+                                        <a class="btn btn-sm btn-outline-secondary">Öppna</a>
+                                    </div>
+                                </li>
+                            </ListCard>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 <AuthMessage/>
+
+@code {
+    record Upcoming(string Icon, string Title, string Course, string Time);
+    IEnumerable<Upcoming> _upcoming = new[]
+    {
+    new Upcoming("bi-lightning-charge", "React Components Workshop", "Frontend Development", "Idag 14:00 – 16:00"),
+    new Upcoming("bi-journal-text", "Portfolio inlämning", "UX Design Principles", "Deadline: imorgon 23:59"),
+    new Upcoming("bi-megaphone", "Föreläsning: Design Systems", "UX Design Principles", "15 jan 10:00 – 12:00")
+    };
+
+}
+
 

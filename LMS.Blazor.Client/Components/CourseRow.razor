@@ -1,0 +1,31 @@
+﻿<li class="lms-course">
+    <div class="lms-course__left">
+        <span class="lms-course__icon">@Icon</span>
+        <div>
+            <div class="lms-course__title">@Title</div>
+            @if (!string.IsNullOrWhiteSpace(Sub))
+            {
+                <div class="lms-course__sub">@Sub</div>
+            }
+        </div>
+    </div>
+
+    <div class="lms-course__right">
+        @Suffix
+        @if (HasMenu)
+        {
+            <button class="btn btn-sm btn-link lms-course__menu" @onclick="OnMenuClick">
+                <i class="bi bi-three-dots"></i>
+            </button>
+        }
+    </div>
+</li>
+
+@code {
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Sub { get; set; }
+    [Parameter] public bool HasMenu { get; set; } = true;
+    [Parameter] public RenderFragment? Suffix { get; set; }
+    [Parameter] public EventCallback OnMenuClick { get; set; }
+}

@@ -1,0 +1,21 @@
+﻿<div class="lms-tile">
+    <div class="lms-tile__meta">
+        <span class="lms-tile__label">@Label</span>
+        @if (Icon is not null)
+        {
+            <span class="lms-tile__icon">@Icon</span>
+        }
+    </div>
+    <div class="lms-tile__value">@Value</div>
+    @if (!string.IsNullOrWhiteSpace(Subtext))
+    {
+        <div class="lms-tile__sub">@Subtext</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "0";
+    [Parameter] public string? Subtext { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+}

@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+<div class="lms-section">
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <div class="lms-section__header">
+            <div class="lms-section__title">
+                @if (Icon is not null)
+                {
+                    <span class="lms-section__icon">@Icon</span>
+                }
+                <h2>@Title</h2>
+            </div>
+            <div class="lms-section__actions">
+                @HeaderActions
+            </div>
+        </div>
+    }
+    <div class="lms-section__body">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public RenderFragment? HeaderActions { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

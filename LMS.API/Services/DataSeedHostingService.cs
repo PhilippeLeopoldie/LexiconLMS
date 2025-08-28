@@ -1,5 +1,4 @@
 ﻿using Bogus;
-using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +27,6 @@ public class DataSeedHostingService : IHostedService
         using var scope = serviceProvider.CreateScope();
 
         var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-        if (!env.IsDevelopment()) return;
 
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         if (await context.Users.AnyAsync(cancellationToken)) return;
@@ -42,10 +40,14 @@ public class DataSeedHostingService : IHostedService
         try
         {
             await AddRolesAsync([TeacherRole, StudentRole]);
-            await AddDemoUsersAsync();
-            await AddUsersAsync(20);
-//            await AddCoursesAsync(5);
             await AddActivityTypesAsync(context);
+
+            if (env.IsDevelopment())
+            {
+                await AddDemoUsersAsync();
+                await AddUsersAsync(20);
+                //    await AddCoursesAsync(5);
+            }
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)

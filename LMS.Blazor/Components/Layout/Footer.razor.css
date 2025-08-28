@@ -1,0 +1,13 @@
+﻿footer {
+    background-color: var(--bs-tertiary-bg);
+    border-top: 1px solid var(--bs-border-color);
+    box-shadow: 0 .8em 1.2em var(--bs-black);
+    width: 100vw;
+}
+@media (min-width: 768px) {
+    footer {
+        position: fixed;
+        bottom: 0;
+        z-index: 1000;
+    }
+}

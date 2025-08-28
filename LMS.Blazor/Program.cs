@@ -1,5 +1,4 @@
 using Domain.Models.Entities;
-using LMS.Blazor;
 using LMS.Blazor.Client.Services;
 using LMS.Blazor.Components;
 using LMS.Blazor.Components.Account;
@@ -31,6 +30,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 //builder.Services.AddScoped<IApiService, ClientApiService>();
 builder.Services.AddScoped<IApiService, ServerNoopApiService>();
 builder.Services.AddScoped<IAuthReadyService, ServerNoopAuthReadyService>();
+builder.Services.AddScoped<ThemeService>();
+
 
 // Authentication setup
 builder.Services.AddAuthentication(options =>

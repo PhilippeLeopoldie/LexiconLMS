@@ -7,6 +7,9 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddScoped<IApiService, ClientApiService>();
 builder.Services.AddScoped<IAuthReadyService, AuthReadyService>();
 
+
+builder.Services.AddScoped<ThemeService>();
+
 builder.Services.AddHttpClient("BffClient", cfg =>
 {
     cfg.BaseAddress = new Uri(builder.Configuration["BffClient"] ?? throw new Exception("BffClient address is missing."));

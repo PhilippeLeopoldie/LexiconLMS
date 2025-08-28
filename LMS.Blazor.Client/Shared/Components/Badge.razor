@@ -1,0 +1,5 @@
+﻿<span class="lms-badge @Color">@ChildContent</span>
+@code {
+    [Parameter] public string Color { get; set; } = "neutral"; // neutral | info | success | danger | warning
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
