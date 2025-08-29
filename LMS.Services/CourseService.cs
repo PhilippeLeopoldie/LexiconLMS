@@ -128,7 +128,7 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         (ApplicationUser user, Course course) = await UserAndCourseValidation(userId, courseId, trackChanges, UserRole.Student);
 
         var roles = await userManager.GetRolesAsync(user);
-        if (!roles.Contains("Student"))
+        if (!roles.Contains(UserRole.Student.ToString()))
             throw new UserIsNotStudentException(userId);
 
         if (course.Students.Any(student => student.Id == userId))
@@ -143,7 +143,7 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         (ApplicationUser user, Course course) = await UserAndCourseValidation(userId, courseId, trackChanges, UserRole.Teacher);
 
         var roles = await userManager.GetRolesAsync(user); 
-        if(!roles.Contains("Teacher"))
+        if(!roles.Contains(UserRole.Teacher.ToString()))
             throw new UserIsNotTeacherException(userId);
         
         if (course.Teachers.Any(teacher => teacher.Id == userId))
