@@ -127,6 +127,10 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
     {
         (ApplicationUser user, Course course) = await UserAndCourseValidation(userId, courseId, trackChanges);
 
+        var roles = await userManager.GetRolesAsync(user);
+        if (!roles.Contains("Student"))
+            throw new UserIsNotStudentException(userId);
+
         if (course.Students.Any(student => student.Id == userId))
             throw new DuplicateStudentInCourseException(userId, courseId);
 
@@ -137,6 +141,10 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
     public async Task AddTeacherToCourseAsync(string userId, int courseId, bool trackChanges = true)
     {
         (ApplicationUser user, Course course) = await UserAndCourseValidation(userId, courseId, trackChanges);
+
+        var roles = await userManager.GetRolesAsync(user); 
+        if(!roles.Contains("Teacher"))
+            throw new UserIsNotTeacherException(userId);
 
         if (course.Teachers.Any(teacher => teacher.Id == userId))
             throw new DuplicateTeacherInCourseException(userId, courseId);
