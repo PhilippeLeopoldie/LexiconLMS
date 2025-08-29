@@ -10,7 +10,22 @@ namespace LMS.Infrastructure.Repositories;
 public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Course>(context), ICourseRepository
 {
     public async Task<Course?> GetCourseByIdAsync(int id, bool trackChanges = false) =>
-        await FindByCondition(course => course.Id.Equals(id), trackChanges).FirstOrDefaultAsync();
+        await FindByCondition(course => course.Id.Equals(id), trackChanges)
+        .FirstOrDefaultAsync();
+
+    public  async Task<Course?> GetCourseByIdByUserRoleAsync(int courseId, UserRole userRole ,bool trackChanges = false)
+    {
+        var query = FindByCondition(course => course.Id.Equals(courseId), trackChanges);
+
+        if (userRole.Equals(UserRole.Student))
+            query = query.Include(c => c.Students);
+
+        if (userRole.Equals(UserRole.Teacher))
+            query = query.Include(c => c.Teachers);
+
+        return await query.FirstOrDefaultAsync();
+    }
+        
 
     public async Task<PagedList<Course>> GetAllCoursesAsync(
         UserRole? includeUsers = null,
