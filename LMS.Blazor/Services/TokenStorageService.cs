@@ -44,7 +44,7 @@ public class TokenStorageService : ITokenStorage
             throw new InvalidOperationException("No refresh token available.");
         }
 
-        var client = httpClientFactory.CreateClient("APIClient");
+        var client = httpClientFactory.CreateClient("LmsAPIClient");
         var response = await client.PostAsJsonAsync("api/token/refresh", new TokenDto(tokens.AccessToken, tokens.RefreshToken));
 
         if (!response.IsSuccessStatusCode)

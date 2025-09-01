@@ -13,7 +13,6 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     public async Task<T?> CallApiAsync<T>(string endpoint, CancellationToken cancellationToken = default)
     {
         await authReady.WaitAsync();
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"proxy?endpoint={endpoint}");
         var response = await httpClient.SendAsync(requestMessage, cancellationToken);
 
@@ -25,7 +24,6 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         response.EnsureSuccessStatusCode();
 
-        var demoDtos = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
-        return demoDtos;
+        return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
     }
 }

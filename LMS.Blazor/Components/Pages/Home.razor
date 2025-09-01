@@ -1,5 +1,4 @@
-﻿@using LMS.Blazor.Client.Shared.Components
-@page "/"
+﻿@page "/"
 @attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
@@ -10,23 +9,23 @@
             <div class="row">
                 <div class="col p-4">
                     <h2>Lärarens dashboard | @authContext.User.Identity?.Name!</h2>
-                    <div class="row g-2 mb-3">
-                        <div class="col-12 col-md-3">
+                    <div class="row g-2 mb-3 ">
+                        <div class="col-6 col-md-3">
                             <StatTile Label="Totala kurser" Value="12">
                             <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
                             </StatTile>
                         </div>
-                        <div class="col-12 col-md-3">
+                        <div class="col-6 col-md-3">
                             <StatTile Label="Studenter" Value="245">
                             <Icon><i class="bi bi-calendar-event"></i></Icon>
                             </StatTile>
                         </div>
-                        <div class="col-12 col-md-3">
+                        <div class="col-6 col-md-3">
                             <StatTile Label="Inlämningar" Value="18">
                             <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
                             </StatTile>
                         </div>
-                        <div class="col-12 col-md-3">
+                        <div class="col-6 col-md-3">
                             <StatTile Label="Aktiviteter" Value="28">
                             <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
                             </StatTile>

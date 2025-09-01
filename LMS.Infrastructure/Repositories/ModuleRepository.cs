@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
+using LMS.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -19,7 +20,7 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
     {
         var query = FindByCondition(module => module.CourseId.Equals(courseId), trackChanges);
 
-        if(requestParams.IncludeActivities)
+        if (requestParams.IncludeActivities)
         {
             query = query.Include(module => module.Activities);
         }
@@ -33,13 +34,13 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
     {
         var query = FindByCondition(expression, trackChanges);
 
-        if (includeActivities) 
+        if (includeActivities)
             query = query.Include(module => module.Activities);
 
         return await query.FirstOrDefaultAsync();
     }
 
-    
+
 
     public async Task<bool?> HasOverlappingAsync(
         int courseId,
@@ -51,7 +52,7 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         var query = Context.Modules.Where(module => module.CourseId == courseId);
         if (query is null) return null;
 
-        if(excludeModuleId is not null)
+        if (excludeModuleId is not null)
             query = query.Where(module => module.Id != excludeModuleId);
 
         return await query.AnyAsync(module => startsAt < module.EndsAt && endsAt > module.StartsAt);
@@ -59,18 +60,20 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
 
     public async Task<bool> CourseExistAsync(int courseId)
     {
-        if(courseId <= 0) return false;
+        if (courseId <= 0) return false;
         return await Context.Courses.AnyAsync(course => course.Id == courseId);
     }
 
     private static IQueryable<Module> ApplyOrdering(IQueryable<Module> modules, RequestParams requestParams)
     {
-        if (string.IsNullOrEmpty(requestParams.OrderBy)) return modules;
+        if (requestParams.OrderBy == null) return modules.OrderBy(m => m.StartsAt).ThenBy(m => m.Name);
 
-        return requestParams.OrderBy.ToLower() switch
+        return requestParams.OrderBy switch
         {
-            "name" => modules.OrderBy(t => t.Name),
-            "startdate" => modules.OrderBy(t => t.StartsAt),
+            OrderByParams.NameAsc => modules.OrderBy(m => m.Name),
+            OrderByParams.NameDesc => modules.OrderByDescending(t => t.Name),
+            OrderByParams.DateAsc => modules.OrderBy(m => m.StartsAt).ThenBy(m => m.Name),
+            OrderByParams.DateDesc => modules.OrderByDescending(m => m.StartsAt).ThenBy(m => m.Name),
             _ => modules
         };
     }

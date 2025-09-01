@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
+using LMS.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infrastructure.Repositories;
@@ -107,14 +108,14 @@ public class DocumentRepository(ApplicationDbContext context) : RepositoryBase<D
 
     private static IQueryable<Document> ApplyOrdering(IQueryable<Document> documents, RequestParams requestParams)
     {
-        if (string.IsNullOrEmpty(requestParams.OrderBy)) return documents;
+        if (requestParams.OrderBy == null) return documents.OrderBy(d => d.CreatedAt).ThenBy(d => d.Name);
 
-        return requestParams.OrderBy.ToLower() switch
+        return requestParams.OrderBy switch
         {
-            "name" => documents.OrderBy(t => t.Name),
-            "created" => documents.OrderBy(t => t.CreatedAt),
-            "filetype" => documents.OrderBy(t => t.FileType),
-            "size" => documents.OrderBy(t => t.Size),
+            OrderByParams.NameAsc => documents.OrderBy(t => t.Name),
+            OrderByParams.NameDesc => documents.OrderByDescending(t => t.Name),
+            OrderByParams.DateAsc => documents.OrderBy(t => t.CreatedAt).ThenBy(d => d.Name),
+            OrderByParams.DateDesc => documents.OrderByDescending(t => t.CreatedAt).ThenBy(d => d.Name),
             _ => documents
         };
     }

@@ -4,13 +4,17 @@
     flex-direction: column;
 }
 
-main {
-    flex: 1;
-}
 .row {
     --bs-gutter-x: 0!important;
 }
 
+main {
+    flex: 1;
+}
+
+.article {
+    min-height: calc(100vh - 7rem);
+}
 
 @media (max-width: 767.98px) {
 
@@ -32,16 +36,5 @@ main {
             right: 0.75rem;
             top: 0.5rem;
         }
-}
-.lms-header {
-    height: 3.5rem;
-    background: var(--bs-body-bg);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.lms-footer {
-    background: var(--bs-body-bg);
 }
 

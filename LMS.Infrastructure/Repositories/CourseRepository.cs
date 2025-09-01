@@ -20,7 +20,7 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
         bool trackChanges = false)
     {
         var query = FindAll(trackChanges);
-        
+
 
         if (includeUsers == UserRole.Student)
             query = query.Include(course => course.Students);
@@ -35,7 +35,7 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
         }
 
 
-            if (includeModules)
+        if (includeModules)
         {
             query = query.Include(c => c.Modules);
             if (includeActivities)
@@ -51,16 +51,17 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
 
     private static IQueryable<Course> ApplyOrdering(IQueryable<Course> courses, RequestParams requestParams)
     {
-        if (string.IsNullOrEmpty(requestParams.OrderBy)) return courses
+        if (requestParams.OrderBy == null) return courses
             .OrderBy(c => c.Starts)
             .ThenBy(c => c.Name);
 
-        return requestParams.OrderBy.ToLower() switch
+        return requestParams.OrderBy switch
         {
-            "name" => courses.OrderBy(c => c.Name),
-            "startdate" => courses.OrderBy(c => c.Starts).ThenBy(c => c.Name),
+            OrderByParams.NameAsc => courses.OrderBy(c => c.Name),
+            OrderByParams.NameDesc => courses.OrderByDescending(c => c.Name),
+            OrderByParams.DateAsc => courses.OrderBy(c => c.Starts).ThenBy(c => c.Name),
+            OrderByParams.DateDesc => courses.OrderByDescending(c => c.Starts).ThenBy(c => c.Name),
             _ => courses
         };
     }
-
 }
