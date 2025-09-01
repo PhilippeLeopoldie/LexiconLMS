@@ -1,24 +1,10 @@
-﻿@using LMS.Blazor.Client.Services
+﻿@using LMS.Shared.DTOs.ModuleDtos
 @using LMS.Blazor.Client.Shared.Components
-@using LMS.Shared.DTOs.ModuleDtos
-@using Microsoft.AspNetCore.Authorization
 
-@page "/modules/{courseId}"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-@attribute [Authorize(Roles = "Teacher")]
-
-<PageTitle>Moduler</PageTitle>
-
 <h3>Modules</h3>
-@if (modules == null)
-{
-    <p>Laddar moduler...</p>
-}
-else
-{
-    <AuthorizeView Context="authContext" Roles="Teacher">
-        <Authorized>
-            <div class="container-fluid">
+
+<div class="container-fluid">
                 <div class="row">
                     <div class="col p-4">
                         <div class="row g-3">
@@ -27,7 +13,7 @@ else
                                          Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
                                         HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa modul</a>"))">
                                     <ul class="list-unstyled mb-0">
-                                        @if (modules.Count == 0)
+                                        @if (modules?.Count == 0)
                                         {
                                             <p>Denna kurs har inga moduler...</p>
                                         }
@@ -54,22 +40,7 @@ else
                 </div>
             </div>
 
-        </Authorized>
-    </AuthorizeView>
-}
-
 @code {
     [Parameter]
-    public string courseId { get; set; } = string.Empty;
-
-    [Inject]
-    private IApiService _apiService { get; set; } = default!;
-
-    private List<ModuleDto>? modules;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}:int/Module");
-        modules = response?.ToList();
-    }
+    public List<ModuleDto>? modules { get; set; } = [];
 }
