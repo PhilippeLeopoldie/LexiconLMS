@@ -1,6 +1,7 @@
 ﻿using LMS.Blazor.Client.Services;
 using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
+using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.Enums;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -9,28 +10,36 @@ using System.Web;
 namespace LMS.Blazor.Client.Pages;
 public partial class ModuleActivities : ComponentBase
 {
-    private IEnumerable<ActivityTypeDto>? activityTypes = default!;
-    private string? filterText;
-    private int selectedActivityTypeId = 0;
-
-    private IEnumerable<ActivityDto> upcomingActivities = [];
-    private IEnumerable<ActivityDto> pastActivities = [];
-    private DateTime? firstUpcomingDate;
 
     [Inject]
     private IApiService _apiService { get; set; } = default!;
-    public string? BodyFragment;
 
     [Parameter]
-    public int ModuleId { get; set; }
+    public int moduleId { get; set; }
 
     [Parameter]
-    public string ModuleName { get; set; } = string.Empty;
+    public int courseId { get; set; }
 
-    private IEnumerable<ActivityDto>? activities = default!;
+    private ModuleDto? module;
+    private IEnumerable<ActivityTypeDto>? activityTypes = default!;
+    private IEnumerable<ActivityDto>? activities = [];
+    private IEnumerable<ActivityDto> upcomingActivities = [];
+    private IEnumerable<ActivityDto> pastActivities = [];
+    private string? filterText;
+    private int selectedActivityTypeId = 0;
+    private DateTime? firstUpcomingDate;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            module = await _apiService.CallApiAsync<ModuleDto>($"/api/courses/{courseId}/Module/{moduleId}?includeActivities=false");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Fel vid hämtning av modul: {ex.Message}");
+            activities = [];
+        }
         await LoadActivities();
     }
 
@@ -53,7 +62,7 @@ public partial class ModuleActivities : ComponentBase
             var requestParams = new RequestParams() { SearchTerm = filterText, Page = 1, OrderBy = OrderByParams.DateAsc, PageSize = 100 };
             var queryString = ObjectToQueryString(requestParams);
 
-            activities = await _apiService.CallApiAsync<IEnumerable<ActivityDto>>($"api/modules/{ModuleId}/activities?{queryString}");
+            activities = await _apiService.CallApiAsync<IEnumerable<ActivityDto>>($"api/modules/{moduleId}/activities?{queryString}");
             activities = activities ?? [];
 
             if (selectedActivityTypeId != 0)

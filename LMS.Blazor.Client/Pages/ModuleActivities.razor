@@ -1,11 +1,15 @@
-﻿@using LMS.Blazor.Client.Components
-@page "/modules/{moduleId:int}"
+﻿@page "/courses/{courseId:int}/modules/{moduleId:int}/activities"
 
 @attribute [Authorize(Roles = "Student,Teacher")]
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
-<h3 class="my-5">Aktiviteter i Modul: @ModuleName</h3>
+@if(module is not null)
+{
+    <PageTitle>@module.Name</PageTitle>
+
+    <h3 class="my-5">Aktiviteter i Modul: @module.Name</h3>
+}
 
 @if (activities == null)
 {
@@ -49,24 +53,19 @@ else
                         <h5 class="schedule-date mb-3 mt-5">@dateGroup.Key.ToString("dd MMMM yyyy")</h5>
                         <div class="activity-grid row">
                         @foreach (var activity in dateGroup.OrderBy(a => a.StartsAt))
-                        {                                      
-                            @if (activity.Documents.Any())
-                            {
-                                BodyFragment = $"<i class='bi bi-file-earmark-text'></i><p>{activity.Documents.Count()} dokument</p>";
-                            }
-                            else
-                            {
-                                BodyFragment = "<i class='bi bi-file-earmark-x'></i><p>Inga dokument</p>";
-                            }
+                        {
+                            var bodyFragment = (activity.Documents.Any())
+                                ? $"<i class='bi bi-file-earmark-text'></i><p>{activity.Documents.Count()} dokument</p>"
+                                : "<i class='bi bi-file-earmark-x'></i><p>Inga dokument</p>";
                             <CardItemLarge CssColor="@GetCssColorForActivityType(activity.ActivityType?.Id)"
                                             Title="@activity.Name"
                                             BodyText="@activity.Description"
                                             TopInfoText="@activity.ActivityType?.Name"
                                             TopInfoFragment="@(builder => builder.AddMarkupContent(0, @$"<span>{activity.StartsAt.ToString("HH:mm")} - {activity.EndsAt.ToString("HH:mm")}</span>"))"
-                                            BodyFragment="@(builder => builder.AddMarkupContent(0, @$"{BodyFragment}"))">
+                                            BodyFragment="@(builder => builder.AddMarkupContent(0, @$"{bodyFragment}"))">
                                 <Actions>
                                     <div class="card-actions">
-                                                <NavLink class="card-link btn btn-link " href="@($"/module/{ModuleId}/activity/{activity.Id}")">
+                                                <NavLink class="card-link btn btn-link " href="@($"/module/{moduleId}/activity/{activity.Id}")">
                                             Gå till aktivitet
                                         </NavLink>
                                                        
@@ -115,23 +114,19 @@ else
                     <div class="accordion-body activity-grid">
                         @foreach (var activity in dateGroup.OrderBy(a => a.StartsAt))
                         {
-                        @if (activity.Documents.Any())
-                        {
-                            BodyFragment = $"<i class='bi bi-file-earmark-text'></i><p>{activity.Documents.Count()} dokument</p>";
-                        }
-                        else
-                        {
-                            BodyFragment = "<i class='bi bi-file-earmark-x'></i><p>Inga dokument</p>";
-                        }
+                           var bodyFragment = (activity.Documents.Any())
+                                ? $"<i class='bi bi-file-earmark-text'></i><p>{activity.Documents.Count()} dokument</p>"
+                                : "<i class='bi bi-file-earmark-x'></i><p>Inga dokument</p>";     
+                       
                         <CardItemLarge CssColor="@GetCssColorForActivityType(activity.ActivityType?.Id)"
                                         Title="@activity.Name"
                                         BodyText="@activity.Description"
                                         TopInfoText="@activity.ActivityType?.Name"
                                         TopInfoFragment="@(builder => builder.AddMarkupContent(0, @$"<span>{activity.StartsAt.ToString("HH:mm")} - {activity.EndsAt.ToString("HH:mm")}</span>"))"
-                                        BodyFragment="@(builder => builder.AddMarkupContent(0, @$"{BodyFragment}"))">
+                                        BodyFragment="@(builder => builder.AddMarkupContent(0, @$"{bodyFragment}"))">
                             <Actions>
                                 <div class="card-actions">
-                                    <NavLink class="card-link btn btn-link " href="@($"/module/{ModuleId}/activity/{activity.Id}")">
+                                    <NavLink class="card-link btn btn-link " href="@($"/module/{moduleId}/activity/{activity.Id}")">
                                         Gå till aktivitet
                                     </NavLink>
 
