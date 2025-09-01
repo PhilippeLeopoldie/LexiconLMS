@@ -1,0 +1,45 @@
+﻿@using LMS.Blazor.Client.Services
+@using LMS.Blazor.Client.Shared.Components
+@using LMS.Shared.DTOs.ModuleDtos
+@using Microsoft.AspNetCore.Authorization
+
+@page "/modules-teacher"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@attribute [Authorize(Roles ="Teacher")]
+
+<PageTitle>Moduler</PageTitle>
+
+<h1>Teacher</h1>
+@if (modules == null)
+{
+    <p>Laddar moduler...</p>
+}
+else
+{
+    <AuthorizeView Context="authContext" Roles="Teacher">
+        <Authorized>
+            <Modules modules=@modules/>
+        </Authorized>
+    </AuthorizeView>
+}
+
+@code {
+    [Parameter]
+    public int courseId { get; set; } = 16;//temporary value for testing
+    
+    public List<ModuleDto>? modules { get; set; } = [];
+    public bool includeActivities { get; set; } = true;//temporary value for testing
+
+    [Inject]
+    private IApiService _apiService { get; set; } = default!;
+    
+    
+    
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}:int/Module?IncludeActivities={includeActivities}");
+        modules = response?.ToList();
+    }
+}
