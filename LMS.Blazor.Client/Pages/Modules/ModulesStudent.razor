@@ -10,7 +10,13 @@
 <PageTitle>Moduler</PageTitle>
 
 <h1>Student</h1>
-@if (modules == null)
+@if(!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        Fel: @errorMessage
+    </div>
+}
+else if (modules == null)
 {
     <p>Laddar moduler...</p>
 }
@@ -33,12 +39,20 @@ else
     private IApiService _apiService { get; set; } = default!;
 
     private List<ModuleDto>? modules;
-    
-    
+    private string? errorMessage;
+
+
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}:int/Module?IncludeActivities={includeActivities}");
-        modules = response?.ToList();
+        try
+        {
+            var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}:int/Module?IncludeActivities={includeActivities}");
+            modules = response?.ToList();
+        }
+        catch(Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
     }
 }
