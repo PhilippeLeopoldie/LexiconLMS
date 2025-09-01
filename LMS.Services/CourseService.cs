@@ -101,7 +101,13 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         return mapper.Map<CourseDto>(result);
     }
 
-    public async Task<(CourseDto?, MetaData)> GetCourseForUserAsync(string userId, bool includeModules = false, bool includeActivities = false, RequestParams requestParams = null!, bool trackChanges = false)
+    public async Task<(CourseDto?, MetaData)> GetCourseForUserAsync(
+        string userId, 
+        UserRole? includeUsers = null, 
+        bool includeModules = false, 
+        bool includeActivities = false, 
+        RequestParams requestParams = null!, 
+        bool trackChanges = false)
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
@@ -109,6 +115,21 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
 
         var query = unitOfWork.CourseRepository
             .FindByCondition(c => c.Id == user.CourseId, trackChanges);
+        
+        // include Users
+        if (includeUsers == UserRole.Student)
+            query = query.Include(course => course.Students);
+
+        if (includeUsers == UserRole.Teacher)
+            query = query.Include(course => course.Teachers);
+
+        if (includeUsers == UserRole.All)
+        {
+            query = query.Include(course => course.Students);
+            query = query.Include(course => course.Teachers);
+        }
+        
+        // include Modules and Activities
         if (includeModules)
         {
             query = query.Include(c => c.Modules);

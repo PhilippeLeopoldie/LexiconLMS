@@ -48,7 +48,8 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     [SwaggerResponse(StatusCodes.Status403Forbidden, "Access denied")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Student not found")]
     public async Task<ActionResult<CourseDto>> GetCourseForStudentAsync(
-        string userId, 
+        string userId,
+        [FromQuery] UserRole? includeUsers = null,
         [FromQuery] bool includeModules = false,
         [FromQuery] bool includeActivities = false,
         [FromQuery] RequestParams requestParams = null!
@@ -57,6 +58,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
         ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
         var (course, metaData) = await serviceManager.CourseService.GetCourseForUserAsync(
             userId,
+            includeUsers,
             includeModules,
             includeActivities,
             requestParams
