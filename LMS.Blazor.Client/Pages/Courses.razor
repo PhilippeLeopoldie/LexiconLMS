@@ -1,0 +1,69 @@
+﻿@using LMS.Blazor.Client.Services
+@using LMS.Blazor.Client.Shared.Components
+@using LMS.Shared.DTOs.CourseDtos
+@using Microsoft.AspNetCore.Authorization
+
+@page "/courses"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@attribute [Authorize(Roles = "Teacher")]
+
+<PageTitle>Kurser</PageTitle>
+
+<h3>Kurser</h3>
+@if (courses == null)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <AuthorizeView Context="authContext" Roles="Teacher">
+        <Authorized>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col p-4">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <Section Title="Kurser"
+                                         Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
+                                        HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa kurs</a>"))">
+                                    <ul class="list-unstyled mb-0">
+                                        @if (courses.Count == 0)
+                                        {
+                                            <p>Inga kurser tillgängliga. Skapa en ny kurs för att komma igång!</p>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var course in courses) 
+                                            {
+                                                var moduleCount = course.Modules?.Count() ?? 0;
+                                                var studentCount = course.Students?.Count() ?? 0;
+                                                <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")">
+                                                    <Icon><i class="bi bi-cpu"></i></Icon>
+                                                    <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                                </CourseRow>
+                                            }
+                                        }
+                                    </ul>
+                                </Section>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </Authorized>
+    </AuthorizeView>
+}
+
+@code {
+    [Inject]
+    private IApiService _apiService { get; set; } = default!;
+
+    private List<CourseDto>? courses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _apiService.CallApiAsync<IEnumerable<CourseDto>>("api/courses?null&includeModules=true&includeActivities=false");
+        courses = response?.ToList();
+    }
+}

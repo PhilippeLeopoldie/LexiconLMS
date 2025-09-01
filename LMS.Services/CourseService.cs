@@ -122,6 +122,39 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         .FirstOrDefaultAsync(),
         meta);
     }
+
+    public async Task AddStudentToCourseAsync(string userId, int courseId, bool trackChanges = true)
+    {
+        (ApplicationUser user, Course course) = await UserAndCourseValidation(userId, courseId, trackChanges, UserRole.Student);
+
+        var roles = await userManager.GetRolesAsync(user);
+        if (!roles.Contains(UserRole.Student.ToString()))
+            throw new UserIsNotStudentException(userId);
+
+        if (course.Students.Any(student => student.Id == userId))
+            throw new DuplicateStudentInCourseException(userId, courseId);
+
+        course.Students.Add(user);
+        await unitOfWork.CompleteAsync();
+    }
+
+    public async Task AddTeacherToCourseAsync(string userId, int courseId, bool trackChanges = true)
+    {
+        (ApplicationUser user, Course course) = await UserAndCourseValidation(userId, courseId, trackChanges, UserRole.Teacher);
+
+        var roles = await userManager.GetRolesAsync(user); 
+        if(!roles.Contains(UserRole.Teacher.ToString()))
+            throw new UserIsNotTeacherException(userId);
+        
+        if (course.Teachers.Any(teacher => teacher.Id == userId))
+            throw new DuplicateTeacherInCourseException(userId, courseId);
+
+        course.Teachers.Add(user);
+        await unitOfWork.CompleteAsync();
+    }
+
+    
+
     public async Task UpdateCourseAsync(int courseId, CourseForModificationDto courseDto)
     {
         EnsureNotNull(courseDto, "Course data is null.");
@@ -159,5 +192,21 @@ public class CourseService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<A
         {
             throw new Exception("An unexpected error occurred while deleting the course.", ex);
         }
+    }
+
+    private async Task<(ApplicationUser user, Course course)> UserAndCourseValidation(
+        string userId,
+        int courseId,
+        bool trackChanges,
+        UserRole userRole = 0
+        )
+    {
+        var user = await userManager.FindByIdAsync(userId)
+                    ?? throw new UserNotFoundException(userId);
+
+        var course = await unitOfWork.CourseRepository.GetCourseByIdByUserRoleAsync(courseId, userRole, trackChanges)
+            ?? throw new CourseNotFoundException(courseId);
+
+        return (user, course);
     }
 }

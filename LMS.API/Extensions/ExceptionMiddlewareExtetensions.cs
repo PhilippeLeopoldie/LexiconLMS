@@ -58,6 +58,15 @@ public static class ExceptionMiddlewareExtensions
                                 detail: conflictException.Message,
                                 instance: context.Request.Path);
                             break;
+                        case UserRoleException userRoleException:
+                            statusCode = StatusCodes.Status403Forbidden;
+                            problemDetails = problemDetailsFactory.CreateProblemDetails(
+                                context,
+                                statusCode,
+                                title: userRoleException.Title,
+                                detail: userRoleException.Message,
+                                instance: context.Request.Path);
+                            break;
                         default:
                             statusCode = StatusCodes.Status500InternalServerError;
                             problemDetails = problemDetailsFactory.CreateProblemDetails(
