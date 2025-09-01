@@ -1,0 +1,10 @@
+﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<div class="fader-box">
+    <p>@text</p>
+</div>
+
+@code {
+    [Parameter] public string? text { get; set; }
+
+}
