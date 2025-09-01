@@ -1,4 +1,4 @@
-﻿@rendermode InteractiveWebAssembly  //@(new InteractiveWebAssemblyRenderMode(prerender: false))
+﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using Domain.Models.Entities
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.CourseDtos
@@ -10,15 +10,15 @@
     }
     else
     {
-        <div class="lms-section__header">
-            <div class="lms-section__title">
+    <div class="lms-section__header">
+        <div class="lms-section__title">
                 <h2>@course?.Name</h2> <span class="lms-section__sub lms-section__right">@FormatDateRange(course?.Starts, course?.Ends)</span>
-            </div>
         </div>
-        <div class="lms-section__body">
-            <FaderBox text="@course?.Description" />
+    </div>
+    <div class="lms-section__body">
+        <FaderBox text="@course?.Description" />
             <StudentList Title="Students in Your course" Students="@course?.Students" ExcludeSelf="true" />
-        </div>
+    </div>
     }
 </div>
 
