@@ -1,0 +1,49 @@
+@using LMS.Shared.DTOs.UserDtos
+
+@if (string.IsNullOrEmpty(Title) && (Students == null || !Students.Any()))
+{
+    <p>No students found.</p>
+}
+else
+{
+    <div class="student-list">
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <h4>@Title</h4>
+        }
+        @if (Students != null && Students.Any())
+        {
+            <ul>
+                @foreach (var student in FilteredStudents)
+                {
+                    <li>@student.UserName (<a href="mailto:@student.Email">@student.Email</a>)</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No students enrolled.</p>
+        }
+    </div>
+}
+
+
+@code {
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public bool? ExcludeSelf { get; set; } = false;
+    [Parameter] public IEnumerable<UserDto>? Students { get; set; }
+
+    private IEnumerable<UserDto>? FilteredStudents
+    {
+        get
+        {
+            if (ExcludeSelf == true && Students != null)
+            {
+                var currentUserEmail = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Identity?.Name;
+                return Students.Where(s => s.Email != currentUserEmail);
+            }
+            return Students;
+        }
+    }
+}
