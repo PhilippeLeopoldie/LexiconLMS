@@ -46,7 +46,8 @@ builder.Services
     .AddCascadingAuthenticationState();
 
 // Database setup
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -64,11 +65,15 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 // Email sender (no-op in this case)
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+builder.Services.AddScoped<TokenRefreshHandler>();
+
 // HTTP Client configuration
 builder.Services.AddHttpClient("LmsAPIClient", cfg =>
-{
-    cfg.BaseAddress = new Uri(builder.Configuration["LmsAPIBaseAddress"] ?? throw new Exception("LmsAPIBaseAddress is missing."));
-});
+    {
+        cfg.BaseAddress = new Uri(builder.Configuration["LmsAPIBaseAddress"]
+            ?? throw new Exception("LmsAPIBaseAddress is missing."));
+    })
+    .AddHttpMessageHandler<TokenRefreshHandler>();
 
 // Password hashing configuration
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 10000);

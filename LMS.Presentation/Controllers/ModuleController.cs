@@ -11,7 +11,7 @@ using System.Text.Json;
 
 namespace LMS.Presentation.Controllers;
 
-[Route("api/courses/{courseId}:int/[controller]")]
+[Route("api/courses/{courseId:int}/[controller]")]
 [ApiController]
 [Authorize]
 public class ModuleController : ControllerBase
@@ -81,7 +81,7 @@ public class ModuleController : ControllerBase
         var (module, patchDto) = await _serviceManager.ModuleService.GetModuleForPatchAsync(courseId, id);
 
         patchDocument.ApplyTo(patchDto, ModelState);
-        if(!TryValidateModel(patchDto))
+        if (!TryValidateModel(patchDto))
             return ValidationProblem(ModelState);
 
         await _serviceManager.ModuleService.ApplyModulePatchAsync(module, patchDto);

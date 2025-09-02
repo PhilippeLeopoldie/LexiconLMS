@@ -1,0 +1,8 @@
+﻿.spinner-border {
+    border-right: .1em solid #e91e1e;
+    border-bottom: .2em solid #e91e1e;
+    border-left: .3em solid #e91e1e;
+    border-top: .01em solid transparent;
+    -webkit-animation: spinner-border 1s linear infinite;
+    animation: spinner-border 1s linear infinite;
+}

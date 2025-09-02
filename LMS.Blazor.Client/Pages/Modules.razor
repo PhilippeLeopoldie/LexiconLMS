@@ -1,9 +1,4 @@
-﻿@using LMS.Blazor.Client.Services
-@using LMS.Blazor.Client.Shared.Components
-@using LMS.Shared.DTOs.ModuleDtos
-@using Microsoft.AspNetCore.Authorization
-
-@page "/modules/{courseId}"
+﻿@page "/modules/{courseId:int}"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @attribute [Authorize(Roles = "Teacher")]
 
@@ -12,7 +7,7 @@
 <h3>Modules</h3>
 @if (modules == null)
 {
-    <p>Laddar moduler...</p>
+    <Spinner />
 }
 else
 {
@@ -37,7 +32,7 @@ else
                                             {
                                                 var activityCount = module.Activities?.Count() ?? 0;
 
-                                                <NavLink class="nav-link" href=@($"activity/{module.Id}") Match=@NavLinkMatch.All>
+                                                <NavLink class="nav-link" href="@($"/courses/{courseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
                                                     <CourseRow Title="@module.Name" Sub="@($"{activityCount} Aktiviteter")">
                                                         <Icon><i class="bi bi-cpu"></i></Icon>
                                                         <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
@@ -60,7 +55,7 @@ else
 
 @code {
     [Parameter]
-    public string courseId { get; set; } = string.Empty;
+    public int courseId { get; set; }
 
     [Inject]
     private IApiService _apiService { get; set; } = default!;
@@ -69,7 +64,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}:int/Module");
+        var requestParams = new ModuleRequestParams() { OrderBy = OrderByParams.DateAsc, PageSize = 100, IncludeActivities = true };
+        var queryString = ObjectToQueryString(requestParams);
+
+        var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module?{queryString}");
         modules = response?.ToList();
+    }
+
+    public string ObjectToQueryString(object obj)
+    {
+        var properties = from p in obj.GetType().GetProperties()
+                         where p.GetValue(obj, null) != null
+                         select p.Name + "=" + HttpUtility.UrlEncode(p.GetValue(obj, null)!.ToString());
+
+        return string.Join("&", properties.ToArray());
     }
 }

@@ -50,7 +50,6 @@
         margin-left: 1em;
         overflow-y: auto;
         width: 20rem;
-        position: sticky;
         border-radius: var(--bs-border-radius-lg);
     }
 

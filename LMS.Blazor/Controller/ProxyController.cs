@@ -1,47 +1,35 @@
-﻿using LMS.Blazor.Services;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Web;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace LMS.Blazor.Controller;
 
 [Route("proxy")]
 [ApiController]
-public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage tokenService) : ControllerBase
+public class ProxyController(IHttpClientFactory httpClientFactory) : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-    private readonly ITokenStorage _tokenService = tokenService;
 
     public async Task<IActionResult> Proxy(string endpoint, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(endpoint);
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userId == null)
-            return Unauthorized();
-
-        var accessToken = await _tokenService.GetAccessTokenAsync(userId);
-
-        //ToDo: Before continue look for expired accesstoken and call refresh enpoint instead.
-        //Tip: Look in TokenStorageService whats allready implementet
-        //Use delegatinghandler on HttpClient or separate service to extract this logic!
-
-        if (string.IsNullOrEmpty(accessToken))
-            return Unauthorized();
 
         var client = _httpClientFactory.CreateClient("LmsAPIClient");
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var queryString = Request.QueryString.Value;
-        var targetUriBuilder = new UriBuilder($"{client.BaseAddress}{endpoint}");
-        if (!string.IsNullOrEmpty(queryString))
+        var rawQuery = Request.QueryString.Value;
+        string endpointPath = endpoint;
+        string extraQuery = string.Empty;
+
+        if (!string.IsNullOrEmpty(rawQuery))
         {
-            var queryParams = HttpUtility.ParseQueryString(queryString);
-            queryParams.Remove("endpoint");
+            int firstQ = rawQuery.IndexOf('?');
+            int secondQ = rawQuery.IndexOf('?', firstQ + 1);
 
-            targetUriBuilder.Query = queryParams.ToString();
+            if (secondQ >= 0 && secondQ + 1 < rawQuery.Length)
+                extraQuery = rawQuery.Substring(secondQ + 1);
         }
+
+        var targetUriBuilder = new UriBuilder($"{client.BaseAddress}{endpointPath}");
+        if (!string.IsNullOrEmpty(extraQuery))
+            targetUriBuilder.Query = extraQuery;
 
         var method = new HttpMethod(Request.Method);
         var requestMessage = new HttpRequestMessage(method, targetUriBuilder.Uri);
@@ -62,7 +50,7 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
         var response = await client.SendAsync(requestMessage, cancellationToken);
 
         return !response.IsSuccessStatusCode
-            ? Unauthorized()
+            ? StatusCode((int)response.StatusCode)
             : StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
     }
 }
