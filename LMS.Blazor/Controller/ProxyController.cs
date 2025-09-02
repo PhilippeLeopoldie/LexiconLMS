@@ -33,7 +33,7 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
         var client = _httpClientFactory.CreateClient("LmsAPIClient");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var queryString = Request.QueryString.Value;
+        var queryString = Request.QueryString.Value.Substring(1).Split('?')[1];
         var targetUriBuilder = new UriBuilder($"{client.BaseAddress}{endpoint}");
         if (!string.IsNullOrEmpty(queryString))
         {
