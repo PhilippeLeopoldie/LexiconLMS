@@ -26,4 +26,29 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
     }
+
+    public async Task<T?> PostApiAsync<T>(string endpoint,object data, CancellationToken cancellationToken = default)
+    {
+        await authReady.WaitAsync();
+        var json = JsonSerializer.Serialize(data, _jsonSerializerOptions);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"proxy?endpoint={endpoint}")
+        {
+            Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+        };
+        var response = await httpClient.SendAsync(requestMessage, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+           || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            navigationManager.NavigateTo("AccessDenied");
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        return await JsonSerializer.DeserializeAsync<T>(
+            await response.Content.ReadAsStreamAsync(),
+            _jsonSerializerOptions,
+            CancellationToken.None
+            );
+    }
 }
