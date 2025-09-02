@@ -6,11 +6,13 @@
     height: 3.5rem;
     display: flex;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
         white-space: nowrap;
-        margin-left: 1.5rem;
         text-decoration: none;
     }
 
@@ -22,6 +24,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+.dropdown-item:focus, .dropdown-item:hover {
+    color: var(--bs-link-hover-color);
+    background-color: transparent;
+}
 
 @media (max-width: 767.98px) {
     .top-row {
@@ -36,17 +43,11 @@
 
 @media (min-width: 768px) {
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
+    .top-row.auth ::deep a:first-child {
+        flex: 1;
+        text-align: right;
+        width: 0;
     }
-
-        .top-row.auth ::deep a:first-child {
-            flex: 1;
-            text-align: right;
-            width: 0;
-        }
 
     .top-row, article {
         padding-left: 2rem !important;

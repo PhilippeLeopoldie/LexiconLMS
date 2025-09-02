@@ -1,0 +1,39 @@
+﻿.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, min(12rem));
+    grid-auto-rows: 15rem;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.form-control,
+.form-select,
+.accordion {
+    background-color: var(--lms-surface);
+    box-shadow: var(--bs-box-shadow);
+}
+
+.accordion {
+    border-radius: var(--lms-radius);
+}
+
+.accordion-button {
+        background-color: var(--lms-surface);
+    color: var(--lms-text);
+}
+.accordion-button:not(.collapsed) {
+        background-color: var(--lms-surface);
+    color: var(--lms-text);
+    box-shadow: inset 0 -1px 0 var(--lms-border);
+}
+
+.card-actions {
+    display: flex;
+    flex-direction: row;
+    width:100%;
+    justify-content: space-between;
+}
+    .card-actions .btn:hover {
+        color: var(--bs-link-hover-color)!important;
+        text-decoration:underline!important;
+    }

@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.Common;
+using LMS.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -48,13 +49,14 @@ public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<A
 
     private static IQueryable<Activity> ApplyOrdering(IQueryable<Activity> activities, RequestParams requestParams)
     {
-        if (string.IsNullOrEmpty(requestParams.OrderBy)) return activities;
+        if (requestParams.OrderBy == null) return activities.OrderBy(a => a.StartsAt).ThenBy(a => a.Name);
 
-        return requestParams.OrderBy.ToLower() switch
+        return requestParams.OrderBy switch
         {
-            "name" => activities.OrderBy(t => t.Name),
-            "startdate" => activities.OrderBy(t => t.StartsAt),
-            "enddate" => activities.OrderBy(t => t.EndsAt),
+            OrderByParams.NameAsc => activities.OrderBy(a => a.Name),
+            OrderByParams.NameDesc => activities.OrderByDescending(a => a.Name),
+            OrderByParams.DateAsc => activities.OrderBy(a => a.StartsAt).ThenBy(a => a.Name),
+            OrderByParams.DateDesc => activities.OrderByDescending(a => a.StartsAt).ThenBy(a => a.Name),
             _ => activities
         };
     }

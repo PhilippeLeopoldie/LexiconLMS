@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\ModuleActivities.razor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\ModuleActivities.razor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
     <PackageReference Include="microsoft.aspnetcore.components.webassembly.authentication" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />

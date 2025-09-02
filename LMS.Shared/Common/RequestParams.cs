@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using LMS.Shared.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace LMS.Shared.Common;
 
@@ -10,7 +11,7 @@ public class RequestParams
     [Range(2, 100)]
     public int PageSize { get; set; } = 5;
 
-    public string? OrderBy { get; set; }
+    public OrderByParams? OrderBy { get; set; }
     public string? SearchTerm { get; set; }
 }
 

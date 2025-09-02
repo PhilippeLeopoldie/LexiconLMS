@@ -1,0 +1,31 @@
+<div class="lms-listcard-item" >
+    <div class="lms-listcard-item__header">
+        <span class="lms-listcard-item__info" style="color: var(--lms-@CssColor)">@TopInfoText</span>
+        <span class="lms-listcard-item__time">@TopInfoFragment</span>
+    </div>
+    <div class="lms-listcard-item__body">
+        <div class="lms-listcard-item__title">@Title</div>
+        @if (!string.IsNullOrWhiteSpace(BodyText))
+        {
+            <div class="lms-listcard-item__text text-truncate">@BodyText</div>
+        }
+        @if (BodyFragment is not null)
+        {
+            <div class="lms-listcard-item__extra-info">@BodyFragment</div>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="lms-listcard-item__actions">@Actions</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string CssColor { get; set; } = string.Empty;
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? BodyText { get; set; }
+    [Parameter] public string? TopInfoText { get; set; }
+    [Parameter] public RenderFragment? TopInfoFragment { get; set; }
+    [Parameter] public RenderFragment? BodyFragment { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+}

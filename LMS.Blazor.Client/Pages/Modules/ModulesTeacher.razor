@@ -45,7 +45,7 @@ else
     {
         try
         {
-            var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}:int/Module?IncludeActivities={includeActivities}");
+            var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module?IncludeActivities={includeActivities}");
             modules = response?.ToList();
         }
         catch (Exception ex)
