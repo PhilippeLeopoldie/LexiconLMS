@@ -3,54 +3,22 @@
 @using LMS.Shared.DTOs.ModuleDtos
 @using Microsoft.AspNetCore.Authorization
 
-@page "/modules-teacher"
+@page "/teacher/courses/{courseId:int}/modules"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @attribute [Authorize(Roles ="Teacher")]
 
 <PageTitle>Moduler</PageTitle>
 
-<h1>Teacher</h1>
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">
-        Fel: @errorMessage
-    </div>
-}
-else if (modules == null)
-{
-    <p>Laddar moduler...</p>
-}
-else
-{
+<h1>Lärare</h1>
+
     <AuthorizeView Context="authContext" Roles="Teacher">
         <Authorized>
-            <Modules modules=@modules/>
+            <Modules courseId=@courseId/>
         </Authorized>
     </AuthorizeView>
-}
 
 @code {
     [Parameter]
-    public int courseId { get; set; } = 16;//temporary value for testing
-
-    public List<ModuleDto>? modules { get; set; } = [];
-    public bool includeActivities { get; set; } = true;//temporary value for testing
-
-    [Inject]
-    private IApiService _apiService { get; set; } = default!;
-    private string? errorMessage;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module?IncludeActivities={includeActivities}");
-            modules = response?.ToList();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-    }
+    public int courseId { get; set; }//temporary value for testing
+    
 }
