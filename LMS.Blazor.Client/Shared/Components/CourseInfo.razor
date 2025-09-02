@@ -1,18 +1,25 @@
-﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+﻿@rendermode InteractiveWebAssembly  //@(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using Domain.Models.Entities
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.CourseDtos
 
 <div class="lms-section">
-    <div class="lms-section__header">
-        <div class="lms-section__title">
-            <h3>@course?.Name</h3> @FormatDateRange(course?.Starts, course?.Ends)
+    @if (course == null)
+    {
+        <p>Loading course information...</p>
+    }
+    else
+    {
+        <div class="lms-section__header">
+            <div class="lms-section__title">
+                <h2>@course?.Name</h2> <span class="lms-section__sub lms-section__right">@FormatDateRange(course?.Starts, course?.Ends)</span>
+            </div>
         </div>
-    </div>
-    <div class="lms-section__body">
-        <FaderBox text="@course?.Description" />
-        <StudentList Title="Students in Your course" Students="@course?.Students" />
-    </div>
+        <div class="lms-section__body">
+            <FaderBox text="@course?.Description" />
+            <StudentList Title="Students in Your course" Students="@course?.Students" ExcludeSelf="true" />
+        </div>
+    }
 </div>
 
 @code {
@@ -23,7 +30,7 @@
     protected override async Task OnInitializedAsync()
     {
         //var user = authContext.
-        course = await apiService.CallApiAsync<CourseDto>($"api/courses/{courseId}"); //?includeModules=true&includeActivities=false");
+        course = await apiService.CallApiAsync<CourseDto>($"api/courses/{courseId}?includeUsers=Student");
     }
 
     private string FormatDateRange(DateTime? start, DateTime? end)
