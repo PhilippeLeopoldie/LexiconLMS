@@ -13,10 +13,10 @@ else
         }
         @if (Students != null && Students.Any())
         {
-            <ul>
+            <ul class="list-unstyled mb-0">
                 @foreach (var student in FilteredStudents)
                 {
-                    <li>@student.UserName (<a href="mailto:@student.Email">@student.Email</a>)</li>
+                    <StudentCard Student="student" />
                 }
             </ul>
         }
