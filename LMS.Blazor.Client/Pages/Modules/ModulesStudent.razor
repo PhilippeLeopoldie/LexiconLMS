@@ -3,7 +3,6 @@
 @using LMS.Shared.DTOs.ModuleDtos
 @using Microsoft.AspNetCore.Authorization
 
-@* @page "/modules-student" *@
 @page "/student/courses/{courseId:int}/modules"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @attribute [Authorize(Roles ="Student")]
