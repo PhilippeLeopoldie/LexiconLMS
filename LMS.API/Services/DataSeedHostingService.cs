@@ -136,13 +136,17 @@ public class DataSeedHostingService : IHostedService
         var teacher = new ApplicationUser
         {
             UserName = "teacher@test.com",
-            Email = "teacher@test.com"
+            Email = "teacher@test.com",
+            FirstName = "Fröken",
+            LastName = "Lärarinna"
         };
 
         var student = new ApplicationUser
         {
             UserName = "student@test.com",
-            Email = "student@test.com"
+            Email = "student@test.com",
+            FirstName = "Eleven",
+            LastName = "Studerande"
         };
 
         await AddUsersToDb([teacher, student]);
@@ -158,6 +162,8 @@ public class DataSeedHostingService : IHostedService
     {
         var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
         {
+            e.FirstName = f.Name.FirstName();
+            e.LastName = f.Name.LastName();
             e.Email = f.Person.Email;
             e.UserName = f.Person.Email;
         });
