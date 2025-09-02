@@ -2,7 +2,6 @@
 @using LMS.Blazor.Client.Shared.Components
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-<h3>Modules</h3>
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <div class="alert alert-danger">
@@ -20,9 +19,7 @@ else
                     <div class="col p-4">
                         <div class="row g-3">
                             <div class="col-12">
-                                <Section Title="Moduler"
-                                         Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
-                                        HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa modul</a>"))">
+                                <Section>
                                     <ul class="list-unstyled mb-0">
                                         @if (modules?.Count == 0)
                                         {
@@ -41,7 +38,6 @@ else
                                                 </NavLink>
                                             }
                                         }
-
                                     </ul>
                                 </Section>
                             </div>
