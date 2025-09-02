@@ -33,7 +33,6 @@ else
                                             @foreach (var module in modules)
                                             {
                                                 var activityCount = module.Activities?.Count() ?? 0;
-                                                 @* <NavLink class="nav-link" href=@($"activity/{module.Id}") Match=@NavLinkMatch.All> *@
                                                 <NavLink class="nav-link" href="@($"/courses/{courseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
                                                     <CourseRow Title="@module.Name" Sub="@($"{activityCount} Aktiviteter")">
                                                         <Icon><i class="bi bi-cpu"></i></Icon>
