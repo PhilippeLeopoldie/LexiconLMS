@@ -1,0 +1,14 @@
+@using LMS.Shared.DTOs.UserDtos
+<li>
+    <div class="lms-tile">
+        <span class="lms-tile__icon">
+            <i class="fas fa-user-graduate"></i>
+        </span>
+        <span class="lms-tile__label">
+            @Student.UserName (<a href="mailto:@Student.Email">@Student.Email</a>)
+        </span>
+    </div></li>
+
+@code {
+    [Parameter] public UserDto Student { get; set; } = default!;
+}
