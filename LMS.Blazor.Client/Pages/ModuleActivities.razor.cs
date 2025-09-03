@@ -33,7 +33,7 @@ public partial class ModuleActivities : ComponentBase
     {
         try
         {
-            module = await _apiService.CallApiAsync<ModuleDto>($"/api/courses/{courseId}/Module/{moduleId}?includeActivities=false");
+            module = await _apiService.CallApiAsync<ModuleDto>($"api/courses/{courseId}/module/{moduleId}");
         }
         catch (HttpRequestException ex)
         {
@@ -102,15 +102,15 @@ public partial class ModuleActivities : ComponentBase
 
     private async Task DeleteActivity(int activityId)
     {
-        //try
-        //{
-        //    await _apiService.DeleteAsync($"api/activities/{activityId}");
-        //    await LoadActivities();
-        //}
-        //catch (HttpRequestException ex)
-        //{
-        //    Console.WriteLine($"Fel vid borttagning: {ex.Message}");
-        //}
+        try
+        {
+            await _apiService.DeleteAsync($"api/modules/{moduleId}/activities/{activityId}");
+            await LoadActivities();
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Fel vid borttagning: {ex.Message}");
+        }
     }
 
 

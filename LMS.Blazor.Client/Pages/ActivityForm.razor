@@ -1,0 +1,86 @@
+﻿@page "/courses/{courseId:int}/modules/{moduleId:int}/activities/createactivity"
+@page "/courses/{courseId:int}/modules/{moduleId:int}/activities/editactivity/{activityId:int}"
+@using Microsoft.AspNetCore.Identity
+
+@attribute [Authorize(Roles = "Teacher")]
+
+@inject IApiService _apiService
+@inject NavigationManager _navigationManager
+
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+<PageTitle>@(IsEditMode ? "Redigera aktivitet" : "Skapa aktivitet")</PageTitle>
+
+<Section Title="@(IsEditMode ? "Redigera aktivitet" : "Skapa aktivitet")" >
+    <ChildContent>
+
+        <div class="p-3">
+        @if (isLoading)
+        {
+            <Spinner EntityName="@(IsEditMode ? "aktivitet" : "modul")" />
+        }
+        else
+        {
+            <h3>@(IsEditMode ? "Redigera aktivitet" : "Skapa aktivitet") för @module?.Name</h3>
+            <hr />
+
+            <EditForm Model="@activityDto" OnValidSubmit="HandleSubmit" FormName="ActivityForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="row g-6">
+                    <div class="col-sm-6 mb-3">
+                        <label for="name" class="form-label">Namn</label>
+                        <InputText id="name" class="form-control" @bind-Value="activityDto.Name" />
+                        <ValidationMessage For="@(() => activityDto.Name)" />
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <label for="type" class="form-label">Aktivitetstyp</label>
+                        <InputSelect id="type" class="form-select" @bind-Value="activityDto.ActivityTypeId">
+                            @if (activityTypes != null)
+                            {
+                                @foreach (var type in activityTypes)
+                                {
+                                    <option value="@type.Id">@type.Name</option>
+                                }
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => activityDto.ActivityTypeId)" />
+                    </div>
+                </div>
+        
+                <div class="row g-6">
+                    <div class="col-sm-6 mb-3">
+                        <label for="startsAt" class="form-label">Starttid</label>
+                        <InputText id="startsAt" type="datetime-local" class="form-control" @bind-Value="activityDto.StartsAtText" />
+                        <ValidationMessage For="@(() => activityDto.StartsAtText)" />
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <label for="endsAt" class="form-label">Sluttid</label>
+                        <InputText  id="endsAt" type="datetime-local" class="form-control" @bind-Value="activityDto.EndsAtText" />
+                        <ValidationMessage For="@(() => activityDto.EndsAtText)" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Beskrivning</label>
+                    <InputTextArea id="description" class="form-control" @bind-Value="activityDto.Description" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">@(IsEditMode ? "Spara" : "Skapa")</button>
+                    <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Avbryt</button>
+                </div>
+            </EditForm>
+        }
+        </div>
+    </ChildContent>
+</Section>
+
+
