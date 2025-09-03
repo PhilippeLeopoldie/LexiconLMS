@@ -13,12 +13,14 @@ else
         }
         @if (Students != null && Students.Any())
         {
-            <ul class="list-unstyled mb-0">
+            <div class="row">
+                <!--            <ul class="list-unstyled mb-0">-->
                 @foreach (var student in FilteredStudents)
                 {
                     <StudentCard Student="student" />
                 }
-            </ul>
+                    <!--            </ul>-->
+            </div>
         }
         else
         {
