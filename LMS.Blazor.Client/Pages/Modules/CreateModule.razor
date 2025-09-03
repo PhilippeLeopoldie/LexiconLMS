@@ -68,7 +68,7 @@
             };
     try
         {
-            var created = await _apiService.PostApiAsync<ModuleDto?>($"api/courses/{CourseId}/module", module);
+             await _apiService.PostAsync($"api/courses/{CourseId}/module", module);
 
             _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
         }
