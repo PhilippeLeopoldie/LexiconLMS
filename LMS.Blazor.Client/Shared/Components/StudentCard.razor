@@ -1,12 +1,12 @@
 @using LMS.Shared.DTOs.UserDtos
 <!--<li>-->
-<a href="api/users/@Student.Id">
-    <div class="col-3 lms-tile">
+<a class="col-3 lms-tile" href="proxy?endpoint=api/users/@Student.Id">
+    <div>
         <span class="lms-tile__icon">
             <icon><img src="images/Person.png" alt="Person" /></icon>
         </span>
         <span class="lms-tile__label">
-            @Student.UserName<br/>
+            @Student.FullName<br/>
             <a href="mailto:@Student.Email">@Student.Email</a>
         </span>
     </div>
