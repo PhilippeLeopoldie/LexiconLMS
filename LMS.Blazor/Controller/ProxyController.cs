@@ -18,19 +18,7 @@ public class ProxyController(IHttpClientFactory httpClientFactory) : ControllerB
         string endpointPath = endpoint;
         string extraQuery = string.Empty;
 
-        //ToDo: Before continue look for expired accesstoken and call refresh enpoint instead.
-        //Tip: Look in TokenStorageService whats allready implementet
-        //Use delegatinghandler on HttpClient or separate service to extract this logic!
-
-        if (string.IsNullOrEmpty(accessToken))
-            return Unauthorized();
-
-        var client = _httpClientFactory.CreateClient("LmsAPIClient");
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-        var queryString = Request.QueryString.Value.Substring(1).Split('?')[1];
-        var targetUriBuilder = new UriBuilder($"{client.BaseAddress}{endpoint}");
-        if (!string.IsNullOrEmpty(queryString))
+        if (!string.IsNullOrEmpty(rawQuery))
         {
             int firstQ = rawQuery.IndexOf('?');
             int secondQ = rawQuery.IndexOf('?', firstQ + 1);
