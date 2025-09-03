@@ -1,0 +1,30 @@
+﻿@using LMS.Blazor.Client.Services
+@using LMS.Blazor.Client.Shared.Components
+@using LMS.Shared.DTOs.ModuleDtos
+@using Microsoft.AspNetCore.Authorization
+
+@page "/courses/{courseId:int}/modules"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@* @attribute [Authorize(Roles ="Teacher")] *@
+
+<PageTitle>Moduler</PageTitle>
+
+
+
+<AuthorizeView Context="authContext" Roles="Teacher">
+    <Authorized>
+            <ModulesComponent courseId=@courseId/>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Context="authContext" Roles="Student">
+    <Authorized>
+        <ModulesComponent courseId=@courseId />
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int courseId { get; set; }
+    
+}

@@ -1,19 +1,21 @@
-﻿@page "/modules/{courseId:int}"
+﻿@using LMS.Shared.DTOs.ModuleDtos
+@using LMS.Blazor.Client.Shared.Components
+
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-@attribute [Authorize(Roles = "Teacher")]
-
-<PageTitle>Moduler</PageTitle>
-
 <h3>Modules</h3>
-@if (modules == null)
+@if (!string.IsNullOrEmpty(errorMessage))
 {
-    <Spinner />
+    <div class="alert alert-danger">
+        Fel: @errorMessage
+    </div>
+}
+else if (isLoading)
+{
+    <p>Laddar moduler...</p>
 }
 else
 {
-    <AuthorizeView Context="authContext" Roles="Teacher">
-        <Authorized>
-            <div class="container-fluid">
+<div class="container-fluid">
                 <div class="row">
                     <div class="col p-4">
                         <div class="row g-3">
@@ -22,7 +24,7 @@ else
                                          Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
                                         HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa modul</a>"))">
                                     <ul class="list-unstyled mb-0">
-                                        @if (modules.Count == 0)
+                                        @if (modules?.Count == 0)
                                         {
                                             <p>Denna kurs har inga moduler...</p>
                                         }
@@ -31,7 +33,6 @@ else
                                             @foreach (var module in modules)
                                             {
                                                 var activityCount = module.Activities?.Count() ?? 0;
-
                                                 <NavLink class="nav-link" href="@($"/courses/{courseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
                                                     <CourseRow Title="@module.Name" Sub="@($"{activityCount} Aktiviteter")">
                                                         <Icon><i class="bi bi-cpu"></i></Icon>
@@ -48,34 +49,52 @@ else
                     </div>
                 </div>
             </div>
-
-        </Authorized>
-    </AuthorizeView>
 }
-
 @code {
+
+
+    private List<ModuleDto>? modules { get; set; } = [];
     [Parameter]
     public int courseId { get; set; }
 
     [Inject]
     private IApiService _apiService { get; set; } = default!;
 
-    private List<ModuleDto>? modules;
+    private string? errorMessage;
+    private bool isLoading { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
     {
-        var requestParams = new ModuleRequestParams() { OrderBy = OrderByParams.DateAsc, PageSize = 100, IncludeActivities = true };
+        var requestParams = new ModuleRequestParams()
+        {
+            OrderBy = OrderByParams.DateAsc,
+            PageSize = 100,
+            IncludeActivities = true
+        };
         var queryString = ObjectToQueryString(requestParams);
 
-        var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module?{queryString}");
-        modules = response?.ToList();
-    }
+        isLoading = true;
+        try
+        {
+            var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module?{queryString}");
+            modules = response?.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
 
+    }
+    //convert object to query string, ex: OrderBy=DateAsc&PageSize=100&IncludeActivities=True
     public string ObjectToQueryString(object obj)
     {
-        var properties = from p in obj.GetType().GetProperties()
-                         where p.GetValue(obj, null) != null
-                         select p.Name + "=" + HttpUtility.UrlEncode(p.GetValue(obj, null)!.ToString());
+        var properties = from property in obj.GetType().GetProperties()
+                         where property.GetValue(obj, null) != null
+                         select property.Name + "=" + HttpUtility.UrlEncode(property.GetValue(obj, null)!.ToString());
 
         return string.Join("&", properties.ToArray());
     }
