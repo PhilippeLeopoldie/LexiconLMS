@@ -35,5 +35,9 @@
         {
             await ThemeService.InitializeThemeAsync();
         }
+        else
+        {
+            await ThemeService.ApplyThemeAsync();
+        }
     }
 }
