@@ -11,7 +11,7 @@
     <Authorized>
         <EditForm Model=@formModel OnValidSubmit="@HandleValidSubmit" FormName="Register">
             <DataAnnotationsValidator />
-            <ValidationSummary />
+            
 
             <div class="mb-3">
                 <label for="name" class="form-label">Namn:</label>
@@ -36,9 +36,13 @@
                 <InputDate id="endsAt" class="form-control" @bind-Value="formModel.EndsAt" TValue="DateTime" />
                 <ValidationMessage For="@(() => formModel.EndsAt)" />
             </div>
-
+            <ValidationSummary />
             <button type="submit" class="btn btn-primary">Skapa modul</button>
         </EditForm>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
     </Authorized>
 </AuthorizeView>
 
