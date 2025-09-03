@@ -14,7 +14,7 @@
     <Section Title="Moduler"
              Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))"
              HeaderActions="@(authContext.User.IsInRole("Teacher")
-                              ? (builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa modul</a>"))
+                                           ? (builder => builder.AddMarkupContent(0, $"<a href='/courses/{courseId}/modules/create' class='btn btn-primary'>+ Skapa modul</a>"))
                               : null)">
         <ModulesComponent courseId="@courseId" />
     </Section>
