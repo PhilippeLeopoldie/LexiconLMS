@@ -9,17 +9,21 @@ else
     <div class="student-list">
         @if (!string.IsNullOrEmpty(Title))
         {
-            <h4>@Title</h4>
+            <div class="lms-section__sub">
+                <h2>@Title</h2>
+            </div>
         }
         @if (Students != null && Students.Any())
         {
             <div class="row">
-                <!--            <ul class="list-unstyled mb-0">-->
-                @foreach (var student in FilteredStudents)
-                {
-                    <StudentCard Student="student" />
-                }
+                <div class="scrollerX">
+                    <!--            <ul class="list-unstyled mb-0">-->
+                    @foreach (var student in FilteredStudents)
+                    {
+                        <StudentCard Student="student" />
+                    }
                     <!--            </ul>-->
+                </div>
             </div>
         }
         else
