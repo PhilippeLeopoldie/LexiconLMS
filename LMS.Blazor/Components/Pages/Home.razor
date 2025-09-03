@@ -17,7 +17,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col p-4">
-                    <h2>Lärarens dashboard | @authContext.User.Identity?.Name!</h2>
+                    <h2>Lärarens dashboard | @User?.FullName</h2>
                     <div class="row g-2 mb-3 ">
                         <div class="col-6 col-md-3">
                             <StatTile Label="Totala kurser" Value="12">
@@ -74,7 +74,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col p-4">
-                    <h2>Välkommen tillbaka, @authContext.User.Identity?.Name!</h2>
+                    <h2>Välkommen tillbaka, @User?.FullName!</h2>
                     <div class="row g-2 mb-3">
                         <div class="col-12 col-md-4">
                             <StatTile Label="Aktiva moduler" Value="3" Subtext="Javascript">
@@ -161,6 +161,7 @@
 
 @code {
     public int courseId { get; set; }
+    public ApplicationUser? User { get; set; } = null!;
 
     record Upcoming(string Icon, string Title, string Course, string Time);
     IEnumerable<Upcoming> _upcoming = new[]
@@ -175,8 +176,8 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var authUser = authState.User;
         var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await UserManager.FindByIdAsync(userId);
-        courseId = (int)user.CourseId;
+        User = await UserManager.FindByIdAsync(userId);
+        courseId = (int)User.CourseId;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
