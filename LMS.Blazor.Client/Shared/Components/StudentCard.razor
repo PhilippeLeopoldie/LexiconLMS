@@ -1,14 +1,16 @@
 @using LMS.Shared.DTOs.UserDtos
 <!--<li>-->
-    <div class="col lms-tile">
+<a href="api/users/@Student.Id">
+    <div class="col-3 lms-tile">
         <span class="lms-tile__icon">
-            <icon><i class="bs bs-icon"></i></icon>
+            <icon><img src="images/Person.png" alt="Person" /></icon>
         </span>
         <span class="lms-tile__label">
             @Student.UserName<br/>
             <a href="mailto:@Student.Email">@Student.Email</a>
         </span>
     </div>
+</a>
 <!--</li>-->
 
 @code {
