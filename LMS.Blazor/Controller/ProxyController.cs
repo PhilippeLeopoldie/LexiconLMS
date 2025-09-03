@@ -61,8 +61,20 @@ public class ProxyController(IHttpClientFactory httpClientFactory) : ControllerB
 
         var response = await client.SendAsync(requestMessage, cancellationToken);
 
-        return !response.IsSuccessStatusCode
-            ? StatusCode((int)response.StatusCode)
-            : StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        foreach (var header in response.Headers)
+        {
+            Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        foreach (var header in response.Content.Headers)
+        {
+            Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        Response.Headers.Remove("transfer-encoding");
+
+        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+
+        Response.StatusCode = (int)response.StatusCode;
+        return File(contentStream, contentType);
     }
 }
