@@ -60,7 +60,7 @@ public class UsersController(IServiceManager serviceManager) : ControllerBase
 
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "Teacher")]
+    [Authorize]
     [SwaggerOperation(Summary = "Get user by id", Description = "Retrieve a single user by it's id.")]
     [SwaggerResponse(StatusCodes.Status200OK, "User retrieved successfully", typeof(UserBasicDto))]
     public async Task<ActionResult<UserBasicDto>> GetUserById(string id)
