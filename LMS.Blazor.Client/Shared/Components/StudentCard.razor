@@ -1,13 +1,15 @@
 @using LMS.Shared.DTOs.UserDtos
-<li>
-    <div class="lms-tile">
+<!--<li>-->
+    <div class="col lms-tile">
         <span class="lms-tile__icon">
-            <i class="fas fa-user-graduate"></i>
+            <icon><i class="bs bs-icon"></i></icon>
         </span>
         <span class="lms-tile__label">
-            @Student.UserName (<a href="mailto:@Student.Email">@Student.Email</a>)
+            @Student.UserName<br/>
+            <a href="mailto:@Student.Email">@Student.Email</a>
         </span>
-    </div></li>
+    </div>
+<!--</li>-->
 
 @code {
     [Parameter] public UserDto Student { get; set; } = default!;
