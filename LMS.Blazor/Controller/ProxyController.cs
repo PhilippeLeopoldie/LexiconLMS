@@ -37,13 +37,25 @@ public class ProxyController(IHttpClientFactory httpClientFactory) : ControllerB
         if (method != HttpMethod.Get && Request.ContentLength > 0)
         {
             requestMessage.Content = new StreamContent(Request.Body);
+
+            if (!string.IsNullOrWhiteSpace(Request.ContentType))
+            {
+                requestMessage.Content.Headers.TryAddWithoutValidation("Content-Type", Request.ContentType);
+            }
         }
 
         foreach (var header in Request.Headers)
         {
             if (!header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase))
             {
-                requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                if (requestMessage.Content != null && header.Key.StartsWith("Content-", StringComparison.OrdinalIgnoreCase))
+                {
+                    requestMessage.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                }
+                else
+                {
+                    requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                }
             }
         }
 
