@@ -1,0 +1,80 @@
+﻿@using LMS.Blazor.Client.Models
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@attribute [Authorize(Roles = "Teacher")]
+@page "/courses/{courseId:int}/modules/create"
+
+<h3>Skapa ny modul</h3>
+
+<AuthorizeView Context="authContext" Roles="Teacher">
+    <Authorized>
+        <EditForm Model=@formModel OnValidSubmit="@HandleValidSubmit" FormName="Register">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Namn:</label>
+                <InputText @bind-Value="formModel.Name" id="name"></InputText>
+                <ValidationMessage For="@(() => formModel.Name)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Beskrivning</label>
+                <InputTextArea id="description" class="form-control" @bind-Value="formModel.Description" />
+                <ValidationMessage For="@(() => formModel.Description)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="startsAt" class="form-label">StartDatumOchTid</label>
+                <InputDate id="startsAt" class="form-control" @bind-Value="formModel.StartsAt" TValue="DateTime" />
+                <ValidationMessage For="@(() => formModel.StartsAt)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="endsAt" class="form-label">SlutDatumOchTid</label>
+                <InputDate id="endsAt" class="form-control" @bind-Value="formModel.EndsAt" TValue="DateTime" />
+                <ValidationMessage For="@(() => formModel.EndsAt)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Skapa modul</button>
+        </EditForm>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Inject]
+    private IApiService _apiService { get; set; } = default!;
+
+    private string? errorMessage;
+
+    [Inject]
+    private NavigationManager _navigationManager { get; set; } = default!;
+
+    [Parameter]
+    public int CourseId { get; set; }
+
+    private ModuleFormModel formModel = new();
+    
+
+    private async Task HandleValidSubmit()
+    {
+    var module = new ModuleCreateDto
+            {
+                Name = formModel.Name,
+                Description = formModel.Description,
+                StartsAt = formModel.StartsAt,
+                EndsAt = formModel.EndsAt
+            };
+    try
+        {
+            var created = await _apiService.PostApiAsync<ModuleDto?>($"api/courses/{CourseId}/module", module);
+
+            _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+        }
+        catch(Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}
