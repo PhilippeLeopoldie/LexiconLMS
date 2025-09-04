@@ -180,7 +180,7 @@
         var authUser = authState.User;
         var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
         User = await UserManager.FindByIdAsync(userId);
-        courseId = (int)User.CourseId;
+        courseId = User.CourseId ??= -1;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
