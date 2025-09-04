@@ -12,7 +12,13 @@
 
     <div class="lms-course__right">
         @Suffix
-        @if (HasMenu)
+        @if (MenuContent != null)
+        {
+            <div class="custom-menu">
+                @MenuContent
+            </div>
+        }
+        else if (HasMenu)
         {
             <button class="btn btn-sm btn-link lms-course__menu" @onclick="OnMenuClick">
                 <i class="bi bi-three-dots"></i>
@@ -28,4 +34,6 @@
     [Parameter] public bool HasMenu { get; set; } = true;
     [Parameter] public RenderFragment? Suffix { get; set; }
     [Parameter] public EventCallback OnMenuClick { get; set; }
+    [Parameter] public RenderFragment? MenuContent { get; set; }
+
 }
