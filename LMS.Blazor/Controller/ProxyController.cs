@@ -37,20 +37,44 @@ public class ProxyController(IHttpClientFactory httpClientFactory) : ControllerB
         if (method != HttpMethod.Get && Request.ContentLength > 0)
         {
             requestMessage.Content = new StreamContent(Request.Body);
+
+            if (!string.IsNullOrWhiteSpace(Request.ContentType))
+            {
+                requestMessage.Content.Headers.TryAddWithoutValidation("Content-Type", Request.ContentType);
+            }
         }
 
         foreach (var header in Request.Headers)
         {
             if (!header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase))
             {
-                requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                if (requestMessage.Content != null && header.Key.StartsWith("Content-", StringComparison.OrdinalIgnoreCase))
+                {
+                    requestMessage.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                }
+                else
+                {
+                    requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                }
             }
         }
 
         var response = await client.SendAsync(requestMessage, cancellationToken);
 
-        return !response.IsSuccessStatusCode
-            ? StatusCode((int)response.StatusCode)
-            : StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        foreach (var header in response.Headers)
+        {
+            Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        foreach (var header in response.Content.Headers)
+        {
+            Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        Response.Headers.Remove("transfer-encoding");
+
+        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+
+        Response.StatusCode = (int)response.StatusCode;
+        return File(contentStream, contentType);
     }
 }
