@@ -6,19 +6,19 @@
 <div class="lms-section">
     @if (course == null)
     {
-        <Spinner EntityName="din kurs..." />
+        <Spinner EntityName="din kurs" />
     }
     else
     {
     <div class="lms-section__header">
         <div class="lms-section__title">
                 <h2>@course?.Name</h2> <span class="lms-section__sub lms-section__right">@FormatDateRange(course?.Starts, course?.Ends)</span>
+            </div>
         </div>
-    </div>
-    <div class="lms-section__body">
-        <FaderBox text="@course?.Description" />
-            <StudentList Title="Students in Your course" Students="@course?.Students" ExcludeSelf="true" />
-    </div>
+        <div class="lms-section__body">
+            <FaderBox text="@course?.Description" />
+            <StudentList Title="Andra elever i din kurs" Students="@course?.Students" ExcludeSelf="true" />
+        </div>
     }
 </div>
 
