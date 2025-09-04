@@ -1,16 +1,30 @@
 ﻿@using LMS.Blazor.Client.Models
 @using System.ComponentModel.DataAnnotations
-<h3>ModuleForm</h3>
+
 
 <EditForm Model=@FormModel OnValidSubmit="@OnValidSubmit" FormName="Register">
     <DataAnnotationsValidator />
-
-
-    <div class="mb-3">
-        <label for="name" class="orm-label">Namn:</label>
-        <InputText @bind-Value="FormModel.Name" id="name"></InputText>
-        <ValidationMessage For="@(() => FormModel.Name)" />
+    <div class="row g-6">
+        <div class="mb-3">
+            <label for="name" class="form-label">Namn</label>
+            <InputText id="name" class="form-control" @bind-Value="FormModel.Name"></InputText>
+            <ValidationMessage For="@(() => FormModel.Name)" />
+        </div>
     </div>
+    <div class="row g-6">
+        <div class="col-sm-6 mb-3">
+            <label for="startsAt" class="form-label">StartDatum</label>
+            <InputDate id="startsAt" class="form-control" @bind-Value="FormModel.StartsAt" />
+            <ValidationMessage For="@(() => FormModel.StartsAt)" />
+        </div>
+
+        <div class="col-sm-6 mb-3">
+            <label for="endsAt" class="form-label">SlutDatum</label>
+            <InputDate id="endsAt" class="form-control" @bind-Value="FormModel.EndsAt" />
+            <ValidationMessage For="@(() => FormModel.EndsAt)" />
+        </div>
+    </div>
+    
 
     <div class="mb-3">
         <label for="description" class="form-label">Beskrivning</label>
@@ -18,24 +32,25 @@
         <ValidationMessage For="@(() => FormModel.Description)" />
     </div>
 
-    <div class="mb-3">
-        <label for="startsAt" class="form-label">StartDatumOchTid</label>
-        <InputDate id="startsAt" class="form-control" @bind-Value="FormModel.StartsAt" TValue="DateTime" />
-        <ValidationMessage For="@(() => FormModel.StartsAt)" />
-    </div>
-
-    <div class="mb-3">
-        <label for="endsAt" class="form-label">SlutDatumOchTid</label>
-        <InputDate id="endsAt" class="form-control" @bind-Value="FormModel.EndsAt" TValue="DateTime" />
-        <ValidationMessage For="@(() => FormModel.EndsAt)" />
-    </div>
+    
     <ValidationSummary />
-    <button type="submit" class="btn btn-primary">Spara</button>
+    <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Spara</button>
+        <button type="button" class="btn btn-secondary" @onclick="@NavigateBack">Avbryt</button>
+    </div>
 </EditForm>
 @code {
-    [Parameter]
-    public ModuleFormModel FormModel { get; set; } = new ModuleFormModel();
+    [Parameter] public ModuleFormModel FormModel { get; set; } = new ModuleFormModel();
 
-    [Parameter]
-    public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public int CourseId { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+
+
+    private void NavigateBack()
+    {
+        _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+    }
 }
