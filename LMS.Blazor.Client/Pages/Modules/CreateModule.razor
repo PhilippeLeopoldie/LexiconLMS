@@ -9,7 +9,11 @@
 
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
-        <ModuleForm FormModel="@formModel" OnValidSubmit="@HandleValidSubmit"/>
+        <ModuleForm 
+            FormModel="@formModel" 
+            OnValidSubmit="@HandleValidSubmit"
+            CourseId="CourseId"
+            />
     
         @if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -31,26 +35,31 @@
     public int CourseId { get; set; }
 
     private ModuleFormModel formModel = new();
-    
+
 
     private async Task HandleValidSubmit()
     {
-    var module = new ModuleCreateDto
+        var module = new ModuleCreateDto
             {
                 Name = formModel.Name,
                 Description = formModel.Description,
                 StartsAt = formModel.StartsAt,
                 EndsAt = formModel.EndsAt
             };
-    try
+        try
         {
-             await _apiService.PostAsync($"api/courses/{CourseId}/module", module);
+            await _apiService.PostAsync($"api/courses/{CourseId}/module", module);
 
-            _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+            NavigateBack();
         }
         catch(Exception ex)
         {
             errorMessage = ex.Message;
         }
+    }
+
+    private void NavigateBack()
+    {
+        _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
     }
 }
