@@ -1,0 +1,73 @@
+﻿@page "/courses/createcourse"
+@page "/courses/editcourse/{courseId:int}"
+
+@using LMS.Blazor.Client.Services
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@attribute [Authorize(Roles = "Teacher")]
+
+@inject IApiService _apiService
+@inject NavigationManager _navigationManager
+
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+<PageTitle>@(IsEditMode ? "Redigera kurs" : "Skapa kurs")</PageTitle>
+
+<Section title="@(IsEditMode ? "Redigera kurs" : "Skapa kurs")">
+    <ChildContent>
+
+        <div class="p-3">
+            @if (isLoading)
+            {
+                <Spinner EntityName="@(IsEditMode ? "kurs" : "kurs")" />
+            }
+            else
+            {
+                <h3>@(IsEditMode ? "Redigera kurs" : "Skapa kurs")</h3>
+                <hr />
+
+                <EditForm Model="@courseDto" OnValidSubmit="HandleSubmit" FormName="CourseForm">
+                    <DataAnnotationsValidator />
+                    <ValidationsSummary />
+
+                    <div class="row g-6">
+                        <div class="col-sm-6 mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <InputText id="name" class="form-control" @bind-Value="courseDto.Name" />
+                            <ValidationMessage For="@(() => courseDto.Name)" />
+                        </div>
+                    </div>
+
+                    <div class="row g-6">
+                        <div class="col-sm-6 mb-3">
+                            <label for="startAt" class="form-label">Starttid</label>
+                            <InputText id="startAt" type="datetime-local" class="form-control" @bind-Value="courseDto.StartsAtText" />
+                            <ValidationMessage For="@(() => courseDto.StartsAtText)" />
+                        </div>
+
+                        <div class="col-sm-6 mb-3">
+                            <label for="endsAt" class="form-label">Sluttid</label>
+                            <InputText id="endsAt" typeof="datetime-local" class="form-control" @bind-Value="courseDto.EndsAtText" />
+                            <ValidationMessage For="@(() => courseDto.EndsAtText)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Beskrivning</label>
+                        <InputTextArea id="description" class="form-control" @bind-Value="courseDto.Description" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">@(IsEditMode ? "Spara" : "Skapa")</button>
+                        <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Avbryt</button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </ChildContent>
+</Section>
