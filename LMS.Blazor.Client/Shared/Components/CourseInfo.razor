@@ -6,7 +6,7 @@
 <div class="lms-section">
     @if (course == null)
     {
-        <Spinner EntityName="din kurs..." />
+        <Spinner EntityName="din kurs" />
     }
     else
     {
@@ -17,7 +17,7 @@
         </div>
         <div class="lms-section__body">
             <FaderBox text="@course?.Description" />
-            <StudentList Title="Students in Your course" Students="@course?.Students" ExcludeSelf="true" />
+            <StudentList Title="Andra elever i din kurs" Students="@course?.Students" ExcludeSelf="true" />
         </div>
     }
 </div>
