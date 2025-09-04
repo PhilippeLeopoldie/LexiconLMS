@@ -68,6 +68,7 @@ public class CoursesController(IServiceManager serviceManager) : ControllerBase
     }
 
     [HttpGet("{courseId:int}")]
+    [ActionName(nameof(GetCourseByIdAsync))]
     [Authorize(Roles = "Teacher, Student")]
     [SwaggerOperation(Summary = "Get course by id", Description = "Retrieve a single course by it's id.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Course retrieved successfully", typeof(CourseDto))]
