@@ -1,0 +1,41 @@
+﻿@using LMS.Blazor.Client.Models
+@using System.ComponentModel.DataAnnotations
+<h3>ModuleForm</h3>
+
+<EditForm Model=@FormModel OnValidSubmit="@OnValidSubmit" FormName="Register">
+    <DataAnnotationsValidator />
+
+
+    <div class="mb-3">
+        <label for="name" class="orm-label">Namn:</label>
+        <InputText @bind-Value="FormModel.Name" id="name"></InputText>
+        <ValidationMessage For="@(() => FormModel.Name)" />
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Beskrivning</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="FormModel.Description" />
+        <ValidationMessage For="@(() => FormModel.Description)" />
+    </div>
+
+    <div class="mb-3">
+        <label for="startsAt" class="form-label">StartDatumOchTid</label>
+        <InputDate id="startsAt" class="form-control" @bind-Value="FormModel.StartsAt" TValue="DateTime" />
+        <ValidationMessage For="@(() => FormModel.StartsAt)" />
+    </div>
+
+    <div class="mb-3">
+        <label for="endsAt" class="form-label">SlutDatumOchTid</label>
+        <InputDate id="endsAt" class="form-control" @bind-Value="FormModel.EndsAt" TValue="DateTime" />
+        <ValidationMessage For="@(() => FormModel.EndsAt)" />
+    </div>
+    <ValidationSummary />
+    <button type="submit" class="btn btn-primary">Spara</button>
+</EditForm>
+@code {
+    [Parameter]
+    public ModuleFormModel FormModel { get; set; } = new ModuleFormModel();
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+}
