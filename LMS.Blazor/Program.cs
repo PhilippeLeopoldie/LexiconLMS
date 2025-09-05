@@ -27,8 +27,7 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
 // API service
-//builder.Services.AddScoped<IApiService, ClientApiService>();
-builder.Services.AddScoped<IApiService, ServerNoopApiService>();
+builder.Services.AddScoped<IApiService, ServerApiService>();
 builder.Services.AddScoped<IAuthReadyService, ServerNoopAuthReadyService>();
 builder.Services.AddScoped<ThemeService>();
 

@@ -3,7 +3,7 @@
 @attribute [Authorize(Roles = "Student,Teacher")]
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-<PageTitle>Aktiviteter i Modul: @module.Name</PageTitle>
+<PageTitle>Aktiviteter i Modul@(module is not null ? $": {module.Name}" : "")</PageTitle>
 
 @if(module is not null)
 {

@@ -1,0 +1,80 @@
+@page "/users/create"
+@page "/users/edit/{userId}"
+@attribute [Authorize]
+
+@inject IApiService _apiService
+@inject NavigationManager _navigationManager
+@inject AuthenticationStateProvider _auth
+
+<PageTitle>@(IsEditMode ? "Redigera användare" : "Skapa användare")</PageTitle>
+
+@if (isLoading)
+{
+    <Spinner EntityName="@(IsEditMode ? "användare" : "användare")" />
+}
+else
+{
+    <h3>@(IsEditMode ? "Redigera användare" : "Skapa användare")</h3>
+    <hr />
+
+    <EditForm Model="user" OnValidSubmit="HandleSubmit" FormName="UserForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Förnamn</label>
+            <InputText class="form-control" @bind-Value="user.FirstName" />
+            <ValidationMessage For="@(() => user.FirstName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Efternamn</label>
+            <InputText class="form-control" @bind-Value="user.LastName" />
+            <ValidationMessage For="@(() => user.LastName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Telefon</label>
+            <InputText class="form-control" @bind-Value="user.PhoneNumber" />
+        </div>
+
+        @if (CanEditEmail)
+        {
+            <div class="mb-3">
+                <label class="form-label">E-post</label>
+                <InputText class="form-control" @bind-Value="user.Email" />
+                <ValidationMessage For="@(() => user.Email)" />
+            </div>
+        }
+        else if (IsEditMode)
+        {
+            <div class="mb-3">
+                <label class="form-label">E-post</label>
+                <InputText class="form-control" Value="@user.Email" Disabled />
+            </div>
+        }
+
+        @if (IsTeacher)
+        {
+            <div class="mb-3">
+                <label class="form-label">Roll</label>
+                <InputSelect class="form-select" @bind-Value="user.Role">
+                    <option value="Student">Student</option>
+                    <option value="Teacher">Teacher</option>
+                </InputSelect>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">@(IsEditMode ? "Spara" : "Skapa")</button>
+            <button class="btn btn-secondary" type="button" @onclick="NavigateBack">Avbryt</button>
+        </div>
+    </EditForm>
+}
+
+

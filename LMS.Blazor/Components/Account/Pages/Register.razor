@@ -1,36 +1,55 @@
-﻿@page "/Account/Register"
+﻿@page "/Account/CompleteRegistration"
 
 @using System.ComponentModel.DataAnnotations
-@using System.Text
-@using System.Text.Encodings.Web
+@using LMS.Shared.DTOs.AuthDtos
+@using LMS.Shared.Enums
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
 @using LMS.Blazor.Data
 
-@inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
-@inject ILogger<Register> Logger
+@inject IApiService ApiService
 @inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register</PageTitle>
+<PageTitle>Slutför registrering</PageTitle>
+<Section Title="Slutför registrering" >
+<h2>Välkommen! Slutför din registrering genom att ange ditt lösenord.</h2>
 
-<h1>Register</h1>
-
+<Section>
 <div class="row">
     <div class="col-md-4">
         <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="CompleteRegistration" FormName="register">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
+            <h2>Slutför din registrering</h2>
             <hr />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" disabled="true" />
                 <label for="email">Email</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
+            </div>
+            @if (!string.IsNullOrEmpty(InvitedUserName))
+            {
+                <div class="form-floating mb-3">
+                    <input type="text" value="@InvitedUserName" class="form-control" disabled />
+                    <label for="name">Namn</label>
+                </div>
+            }
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="Förnamn" />
+                <label for="firstName">Förnamn</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Efternamn" />
+                <label for="lastName">Efternamn</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.PhoneNumber" class="form-control" autocomplete="tel" placeholder="Telefonnummer" />
+                <label for="phoneNumber">Telefonnummer</label>
+                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
@@ -42,20 +61,17 @@
                 <label for="confirm-password">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Slutför registrering</button>
         </EditForm>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
 </div>
+</Section>
+</Section>
 
 @code {
-    private IEnumerable<IdentityError>? identityErrors;
+    private string? errorMessage;
+    private string? InvitedUserName;
+    private ApplicationUser? invitedUser;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -63,66 +79,76 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
 
-    //Use API to add users!!!!
-    public async Task RegisterUser(EditContext editContext)
+    private string? Message => errorMessage;
+
+    protected override async Task OnInitializedAsync()
     {
-        var user = CreateUser();
-
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
-
-        if (!result.Succeeded)
+        if (!string.IsNullOrEmpty(Email))
         {
-            identityErrors = result.Errors;
+            Input.Email = Email;
+            
+            invitedUser = await UserManager.FindByEmailAsync(Email);
+            if (invitedUser != null)
+            {
+                InvitedUserName = invitedUser.FullName;
+                
+                Input.FirstName = invitedUser.FirstName ?? "";
+                Input.LastName = invitedUser.LastName ?? "";
+                Input.PhoneNumber = invitedUser.PhoneNumber ?? "";
+                Input.UserName = invitedUser.UserName ?? "";
+                
+                if (await UserManager.HasPasswordAsync(invitedUser))
+                {
+                    RedirectManager.RedirectTo("Account/Login");
+                    return;
+                }
+            }
+            else
+            {
+                errorMessage = "Ogiltig inbjudan. Användaren hittades inte.";
+                return;
+            }
+        }
+        else
+        {
+            errorMessage = "Ingen e-postadress angiven. Denna sida är endast för slutförande av inbjudningar.";
+        }
+    }
+
+    public async Task CompleteRegistration(EditContext editContext)
+    {
+        if (invitedUser == null)
+        {
+            errorMessage = "Ogiltig inbjudan.";
             return;
         }
 
-        Logger.LogInformation("User created a new account with password.");
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
-
-        //await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
-    }
-
-    private ApplicationUser CreateUser()
-    {
         try
         {
-            return Activator.CreateInstance<ApplicationUser>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
+            var registrationDto = new UserRegistrationDto
+            {
+                Email = Input.Email,
+                UserName = Input.UserName,
+                Password = Input.Password,
+                FirstName = Input.FirstName,
+                LastName = Input.LastName,
+                PhoneNumber = Input.PhoneNumber
+            };
+            await ApiService.PostAsync("api/auth/register", registrationDto);
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
+            RedirectManager.RedirectTo("Account/Login");
         }
-        return (IUserEmailStore<ApplicationUser>)UserStore;
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Ett fel uppstod vid registrering: {ex.Message}";
+        }
+        catch (Exception)
+        {
+            errorMessage = "Ett oväntat fel uppstod. Försök igen.";
+        }
     }
 
     private sealed class InputModel
@@ -131,6 +157,21 @@
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Användarnamn")]
+        public string UserName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Förnamn")]
+        public string FirstName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Efternamn")]
+        public string LastName { get; set; } = "";
+
+        [Display(Name = "Telefonnummer")]
+        public string PhoneNumber { get; set; } = "";
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
