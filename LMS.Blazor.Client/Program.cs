@@ -9,6 +9,7 @@ builder.Services.AddScoped<IAuthReadyService, AuthReadyService>();
 
 
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<ModuleStateService>();
 
 builder.Services.AddHttpClient("BffClient", cfg =>
 {
