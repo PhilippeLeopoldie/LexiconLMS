@@ -110,7 +110,7 @@
                     </div>
 
                     <div class="row g-2 mb-3">
-                        <div class="col-12">
+                        <div class="col-12 col-md-12">
                             <CourseInfo courseId="@courseId" />
                         </div>
                     </div>
@@ -193,7 +193,7 @@
         var authUser = authState.User;
         var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
         User = await UserManager.FindByIdAsync(userId);
-        courseId = User.CourseId ??= -1;
+        courseId = User.CourseId ??= 0;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
