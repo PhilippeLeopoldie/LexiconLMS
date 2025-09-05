@@ -1,4 +1,5 @@
 using LMS.Shared.DTOs.UserDtos;
+using LMS.Shared.Enums;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel.DataAnnotations;
 
@@ -25,16 +26,18 @@ public partial class UserForm
         {
             if (IsEditMode)
             {
-                var existing = await _apiService.CallApiAsync<UserDto>($"api/users/{userId}");
+                var existing = await _apiService.CallApiAsync<UserBasicDto>($"api/users/{userId}");
                 if (existing != null)
                 {
                     user = new UserFormModel
                     {
-                        FirstName = existing.UserName ?? string.Empty,
-                        LastName = string.Empty,
-                        PhoneNumber = null,
+                        UserName = existing.UserName,
                         Email = existing.Email,
-                        Role = "Student"
+                        FirstName = existing.FirstName,
+                        LastName = existing.LastName,
+                        PhoneNumber = existing.PhoneNumber,
+                        Role = existing.Role,
+                        CourseId = existing.CourseId
                     };
                 }
             }
@@ -56,22 +59,13 @@ public partial class UserForm
             isLoading = true;
             if (IsEditMode)
             {
-                var edit = new UserUpdateDto
-                {
-                    UserName = user.FirstName + (string.IsNullOrWhiteSpace(user.LastName) ? string.Empty : $" {user.LastName}"),
-                    Email = CanEditEmail ? user.Email : null
-                };
+                var role = IsTeacher ? user.Role : UserRole.Student;
+                var courseId = IsTeacher ? user.CourseId : null;
+                var edit = new UserUpdateDto(user.UserName, user.Email, null, user.FirstName, user.LastName, user.PhoneNumber, role, courseId);
+
                 await _apiService.PutAsync($"api/users/{userId}", edit);
             }
-            else
-            {
-                var create = new UserCreationDto
-                {
-                    UserName = user.FirstName + (string.IsNullOrWhiteSpace(user.LastName) ? string.Empty : $" {user.LastName}"),
-                    Email = user.Email!
-                };
-                await _apiService.PostAsync("api/users", create);
-            }
+
             NavigateBack();
         }
         catch (HttpRequestException ex)
@@ -92,16 +86,16 @@ public partial class UserForm
     private sealed class UserFormModel
     {
         [Required]
-        public string FirstName { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+
         [Required]
-        public string LastName { get; set; } = string.Empty;
         [EmailAddress]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
+
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? PhoneNumber { get; set; }
-        public string Role { get; set; } = "Student";
-        [Required]
-        [MinLength(6)]
-        public string? Password { get; set; }
+        public UserRole Role { get; set; } = UserRole.Student;
         public int? CourseId { get; set; }
     }
 

@@ -1,4 +1,3 @@
-@page "/users/create"
 @page "/users/edit/{userId}"
 @attribute [Authorize]
 
@@ -10,7 +9,7 @@
 
 @if (isLoading)
 {
-    <Spinner EntityName="@(IsEditMode ? "användare" : "användare")" />
+    <Spinner EntityName="användare" />
 }
 else
 {
@@ -22,19 +21,23 @@ else
         <ValidationSummary />
 
         <div class="mb-3">
-            <label class="form-label">Förnamn</label>
+            <label class="form-label">Användarnamn</label>
+            <InputText class="form-control" @bind-Value="user.UserName" />
+            <ValidationMessage For="@(() => user.UserName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Förnamn (valfritt)</label>
             <InputText class="form-control" @bind-Value="user.FirstName" />
-            <ValidationMessage For="@(() => user.FirstName)" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Efternamn</label>
+            <label class="form-label">Efternamn (valfritt)</label>
             <InputText class="form-control" @bind-Value="user.LastName" />
-            <ValidationMessage For="@(() => user.LastName)" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Telefon</label>
+            <label class="form-label">Telefon (valfritt)</label>
             <InputText class="form-control" @bind-Value="user.PhoneNumber" />
         </div>
 
@@ -50,18 +53,32 @@ else
         {
             <div class="mb-3">
                 <label class="form-label">E-post</label>
-                <InputText class="form-control" Value="@user.Email" Disabled />
+                <InputText class="form-control" @bind-value="user.Email" Disabled />
+            </div>
+        }
+
+        @if (!IsEditMode)
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>Lösenord:</strong> Användaren kommer att få ett e-postmeddelande med en länk för att skapa sitt eget lösenord.
             </div>
         }
 
         @if (IsTeacher)
         {
             <div class="mb-3">
-                <label class="form-label">Roll</label>
+                <label class="form-label">Roll (valfritt)</label>
                 <InputSelect class="form-select" @bind-Value="user.Role">
                     <option value="Student">Student</option>
                     <option value="Teacher">Teacher</option>
                 </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Kurs ID (valfritt)</label>
+                <InputNumber class="form-control" @bind-Value="user.CourseId" />
+                <small class="form-text text-muted">Lämna tomt för lärare eller om studenten inte ska kopplas till en kurs ännu.</small>
             </div>
         }
 
