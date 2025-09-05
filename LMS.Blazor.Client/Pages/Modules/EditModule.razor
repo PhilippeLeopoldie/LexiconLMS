@@ -3,7 +3,7 @@
 @attribute [Authorize(Roles = "Teacher")]
 @page "/courses/{courseId:int}/module/{moduleId:int}/edit"
 
-<h3>EditModule</h3>
+
 
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
