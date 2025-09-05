@@ -25,7 +25,7 @@ else
                             <div class="col-12">
                                 <Section Title="Kurser"
                                          Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
-                                        HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/' class='btn btn-primary'>+ Skapa kurs</a>"))">
+                                        HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/courses/createcourse' class='btn btn-primary'>+ Skapa kurs</a>"))">
                                     <ul class="list-unstyled mb-0">
                                         @if (courses.Count == 0)
                                         {
