@@ -134,3 +134,7 @@ h1:focus {
     white-space: nowrap;
     border-width: 0;
 }
+
+.lexiconlogo {
+    background-color: white;
+}
