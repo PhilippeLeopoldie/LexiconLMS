@@ -38,7 +38,7 @@ else
                                                             MenuContent="@ModuleMenu(module)"
                                                         >
                                                             <Icon><i class="bi bi-cpu"></i></Icon>
-                                                            <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                                            <Suffix><DateBadge Start="@module.StartsAt" End="@module.EndsAt" /></Suffix>
                                                         </CourseRow>
                                                     </NavLink>
                                         </div>
