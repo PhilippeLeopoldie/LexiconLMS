@@ -1,15 +1,10 @@
 ﻿@page "/Account/CompleteRegistration"
+@rendermode InteractiveServer 
 
-@using System.ComponentModel.DataAnnotations
-@using LMS.Shared.DTOs.AuthDtos
-@using LMS.Shared.Enums
-@using Microsoft.AspNetCore.Identity
-@using LMS.Blazor.Data
-
-@inject IApiService ApiService
-@inject NavigationManager NavigationManager
-@inject UserManager<ApplicationUser> UserManager
-@inject IdentityRedirectManager RedirectManager
+@inject ILogger<Login> logger
+@inject IApiService apiService
+@inject NavigationManager navigationManager
+@inject UserManager<ApplicationUser> userManager
 
 <PageTitle>Slutför registrering</PageTitle>
 <Section Title="Slutför registrering" >
@@ -18,7 +13,7 @@
 <Section>
 <div class="row">
     <div class="col-md-4">
-        <StatusMessage Message="@Message" />
+        <StatusMessage Message="@errorMessage" />
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="CompleteRegistration" FormName="register">
             <DataAnnotationsValidator />
             <h2>Slutför din registrering</h2>
@@ -71,7 +66,7 @@
 @code {
     private string? errorMessage;
     private string? InvitedUserName;
-    private ApplicationUser? invitedUser;
+     private ApplicationUser? invitedUser;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -82,27 +77,26 @@
     [SupplyParameterFromQuery]
     private string? Email { get; set; }
 
-    private string? Message => errorMessage;
-
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(Email))
         {
             Input.Email = Email;
-            
-            invitedUser = await UserManager.FindByEmailAsync(Email);
+
+            invitedUser = await userManager.FindByEmailAsync(Email);
             if (invitedUser != null)
             {
-                InvitedUserName = invitedUser.FullName;
-                
+                InvitedUserName = invitedUser.UserName;
+
                 Input.FirstName = invitedUser.FirstName ?? "";
                 Input.LastName = invitedUser.LastName ?? "";
                 Input.PhoneNumber = invitedUser.PhoneNumber ?? "";
                 Input.UserName = invitedUser.UserName ?? "";
-                
-                if (await UserManager.HasPasswordAsync(invitedUser))
+
+                if (await userManager.HasPasswordAsync(invitedUser))
                 {
-                    RedirectManager.RedirectTo("Account/Login");
+                    navigationManager.NavigateTo("/Account/Login", forceLoad: true);
+                    logger.LogDebug("User already has password");
                     return;
                 }
             }
@@ -137,17 +131,19 @@
                 LastName = Input.LastName,
                 PhoneNumber = Input.PhoneNumber
             };
-            await ApiService.PostAsync("api/auth/register", registrationDto);
+            await apiService.PostAsync("api/auth/register", registrationDto);
 
-            RedirectManager.RedirectTo("Account/Login");
+            navigationManager.NavigateTo("/Account/Login", forceLoad: true);
         }
         catch (HttpRequestException ex)
         {
-            errorMessage = $"Ett fel uppstod vid registrering: {ex.Message}";
+            errorMessage = $"Ett fel uppstod vid registrering.";
+            logger.LogWarning(ex.Message);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            errorMessage = "Ett oväntat fel uppstod. Försök igen.";
+            errorMessage ="Ett oväntat fel uppstod. Försök igen.";
+            logger.LogWarning(ex.Message);
         }
     }
 
