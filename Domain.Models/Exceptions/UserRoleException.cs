@@ -17,14 +17,14 @@ public class UserRoleException : Exception
 
 public class UserIsNotTeacherException : UserRoleException
 {
-    public UserIsNotTeacherException(string userId) : base($"User with ID '{userId}' does not have the required 'Teacher' role.")
+    public UserIsNotTeacherException(string userId) : base($"Användaren med ID '{userId}' har inte den nödvändiga rollen 'Lärare'.")
     {
     }
 }
 
 public class UserIsNotStudentException : UserRoleException
 {
-    public UserIsNotStudentException(string userId) : base($"User with ID '{userId}' doesn't have a 'Student' role.")
+    public UserIsNotStudentException(string userId) : base($"Användaren med ID '{userId}' har inte rollen 'Elev'.")
     {
     }
 }

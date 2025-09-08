@@ -10,28 +10,28 @@ public  class NotFoundException : Exception
 
 public class ModuleNotFoundException : NotFoundException
 {
-    public ModuleNotFoundException(int id, int courseId) : base($"The Module with id: {id}  is not found in course with id: {courseId}!")
+    public ModuleNotFoundException(int id, int courseId) : base($"Modulen med id: {id} hittades inte i kursen med id: {courseId}!")
     {
     }
-    public ModuleNotFoundException(int id) : base($"The Module with id: {id}  is not found!")
+    public ModuleNotFoundException(int id) : base($"Modulen med id: {id} hittades inte!")
     {
     }
 
-    public ModuleNotFoundException(string name) : base($"The Module '{name}' is not found!")
+    public ModuleNotFoundException(string name) : base($"Modulen '{name}' hittades inte!")
     {
     }
 }
 
 public class CourseNotFoundException : NotFoundException
 {
-    public CourseNotFoundException(int courseId) : base($"No Course with id: {courseId}  found!")
+    public CourseNotFoundException(int courseId) : base($"Ingen kurs med id: {courseId} hittades!")
     {
     }
 }
 
 public class UserNotFoundException : NotFoundException
 {
-    public UserNotFoundException(string userId) : base($"No user with id: {userId}  found!")
+    public UserNotFoundException(string userId) : base($"Ingen användare med id: {userId} hittades!")
     {
     }
 }

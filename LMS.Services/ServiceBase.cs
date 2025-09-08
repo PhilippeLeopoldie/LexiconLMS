@@ -25,6 +25,6 @@ public abstract class ServiceBase
     protected static void ValidateDateRange(DateTime? startDate, DateTime? endDate)
     {
         if (startDate.HasValue && endDate.HasValue && startDate.Value >= endDate.Value)
-            throw new BadRequestException("Start date must be before end date.");
+            throw new BadRequestException("Startdatum måste vara före slutdatum.");
     }
 }
