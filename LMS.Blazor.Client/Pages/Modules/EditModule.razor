@@ -22,29 +22,20 @@
 </AuthorizeView>
 
 @code {
-    [Parameter]
-    public ModuleDto? Module { get; set; } 
-    [Parameter]
-    public int CourseId { get; set; }
-    [Parameter]
-    public int ModuleId { get; set; }
+    [Parameter] public ModuleDto? Module { get; set; } 
+    [Parameter] public int CourseId { get; set; }
+    [Parameter] public int ModuleId { get; set; }
 
     [Inject] private IApiService _apiService { get; set; } = default!;
-
-    [Inject] private ModuleStateService ModuleState { get; set; } = default!;
+    [Inject] private ModuleStateService _moduleState { get; set; } = default!;
+    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
 
     private string? errorMessage;
-
-    [Inject]
-    private NavigationManager _navigationManager { get; set; } = default!;
-
-
-
     private ModuleFormModel formModel = new();
 
     protected override async Task OnInitializedAsync()
     {
-        Module = ModuleState.Module;
+        Module = _moduleState.Module;
         if(Module is not null)
         {
             formModel.Name = Module.Name;
@@ -88,7 +79,6 @@
     private async Task OnSubmit()
     {
         var result = await HandleValidSubmit();
-
         if (result.Success)
         {
             _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
@@ -98,5 +88,4 @@
             errorMessage = result.ErrorMessage;
         }
     }
-
 }
