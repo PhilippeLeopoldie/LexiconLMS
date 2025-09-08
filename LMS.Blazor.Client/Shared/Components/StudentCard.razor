@@ -1,5 +1,5 @@
 @using LMS.Shared.DTOs.UserDtos
-<!--<li>-->
+
 <a class="col-3 lms-tile" href="/Users?user=@Student.Id">
     <div>
         <span class="lms-tile__icon">
@@ -11,7 +11,6 @@
         </span>
     </div>
 </a>
-<!--</li>-->
 
 @code {
     [Parameter] public UserDto Student { get; set; } = default!;

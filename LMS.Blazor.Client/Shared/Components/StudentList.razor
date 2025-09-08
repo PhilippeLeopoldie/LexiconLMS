@@ -2,7 +2,7 @@
 
 @if (string.IsNullOrEmpty(Title) && (Students == null || !Students.Any()))
 {
-    <p>No students found.</p>
+    <p>Inga studenter funna.</p>
 }
 else
 {
@@ -17,18 +17,16 @@ else
         {
             <div class="row">
                 <div class="scrollerX">
-                    <!--            <ul class="list-unstyled mb-0">-->
                     @foreach (var student in FilteredStudents)
                     {
                         <StudentCard Student="student" />
                     }
-                    <!--            </ul>-->
                 </div>
             </div>
         }
         else
         {
-            <p>No students enrolled.</p>
+            <p>Inga studenter anmälda.</p>
         }
     </div>
 }
