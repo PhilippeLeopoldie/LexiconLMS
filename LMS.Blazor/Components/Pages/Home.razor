@@ -1,33 +1,58 @@
-﻿@page "/"
+﻿@using LMS.Blazor.Client.Services
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@page "/"
 @attribute [Authorize]
+
+@inject IApiService ApiService
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 <AuthorizeView Context="authContext" Roles="Teacher">
-    <Authorized >
+    <Authorized>
         <!-- Authorized content is in the MainLayout -->
         <div class="container-fluid">
             <div class="row">
                 <div class="col p-4">
-                    <h2>Lärarens dashboard | @authContext.User.Identity?.Name!</h2>
+                    <h2>Lärarens dashboard | @User?.FullName</h2>
                     <div class="row g-2 mb-3 ">
                         <div class="col-6 col-md-3">
                             <StatTile Label="Totala kurser" Value="12">
-                            <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
+                                <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
                             </StatTile>
                         </div>
                         <div class="col-6 col-md-3">
                             <StatTile Label="Studenter" Value="245">
-                            <Icon><i class="bi bi-calendar-event"></i></Icon>
+                                <Icon><i class="bi bi-calendar-event"></i></Icon>
                             </StatTile>
                         </div>
                         <div class="col-6 col-md-3">
                             <StatTile Label="Inlämningar" Value="18">
-                            <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                                <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
                             </StatTile>
                         </div>
                         <div class="col-6 col-md-3">
                             <StatTile Label="Aktiviteter" Value="28">
-                            <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                                <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
                             </StatTile>
                         </div>
                     </div>
@@ -39,18 +64,18 @@
                                     HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='courses/createcourse/' class='btn btn-primary'>+ Skapa kurs</a>"))">
                             <ul class="list-unstyled mb-0">
                                     <CourseRow Title="Frontend Development" Sub="23 studenter • 5 moduler">
-                                <Icon><i class="bi bi-cpu"></i></Icon>
-                                <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
-                                </CourseRow>
+                                        <Icon><i class="bi bi-cpu"></i></Icon>
+                                        <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                    </CourseRow>
                                     <CourseRow Title="UX Design Principles" Sub="19 studenter • 8 moduler">
-                                <Icon><i class="bi bi-bezier2"></i></Icon>
-                                <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
-                                </CourseRow>
+                                        <Icon><i class="bi bi-bezier2"></i></Icon>
+                                        <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                    </CourseRow>
                                     <CourseRow Title="Project Management" Sub="14 studenter • 2 moduler">
-                                <Icon><i class="bi bi-kanban"></i></Icon>
-                                <Suffix><Badge Color="warning">Startar snart</Badge></Suffix>
-                                </CourseRow>
-                            </ul>
+                                        <Icon><i class="bi bi-kanban"></i></Icon>
+                                        <Suffix><Badge Color="warning">Startar snart</Badge></Suffix>
+                                    </CourseRow>
+                                </ul>
                             </Section>
                         </div>
                     </div>
@@ -65,7 +90,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col p-4">
-                    <h2>Välkommen tillbaka, @authContext.User.Identity?.Name!</h2>
+                    <h2>Välkommen tillbaka, @User?.FullName!</h2>
                     <div class="row g-2 mb-3">
                         <div class="col-12 col-md-4">
                             <StatTile Label="Aktiva moduler" Value="3" Subtext="Javascript">
@@ -83,6 +108,13 @@
                             </StatTile>
                         </div>
                     </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 col-md-12">
+                            <CourseInfo courseId="@courseId" />
+                        </div>
+                    </div>
+
 
                     <div class="row g-3">
                         <div class="col-12 col-lg-6">
@@ -106,7 +138,7 @@
                         </div>
 
                         <div class="col-12 col-lg-6">
-                            <ListCard Title="Kommande aktiviteter" >
+                            <ListCard Title="Kommande aktiviteter">
 
                                 @foreach (var itm in _upcoming)
                                 {
@@ -136,7 +168,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </Authorized>
@@ -144,6 +175,9 @@
 
 
 @code {
+    public int courseId { get; set; }
+    public ApplicationUser? User { get; set; } = null!;
+
     record Upcoming(string Icon, string Title, string Course, string Time);
     IEnumerable<Upcoming> _upcoming = new[]
     {
@@ -151,6 +185,28 @@
     new Upcoming("bi-journal-text", "Portfolio inlämning", "UX Design Principles", "Deadline: imorgon 23:59"),
     new Upcoming("bi-megaphone", "Föreläsning: Design Systems", "UX Design Principles", "15 jan 10:00 – 12:00")
     };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authUser = authState.User;
+        var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
+        User = await UserManager.FindByIdAsync(userId);
+        courseId = User.CourseId ??= 0;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            var user = await UserManager.FindByEmailAsync(authState.User.Identity.Name);
+
+            //var httpClient = HttpClientFactory.CreateClient("LmsAPIClient");
+            //var response = await httpClient.GetFromJsonAsync<CourseDto>($"/api/courses/{user.CourseId}");
+        }
+    }
 
 }
 

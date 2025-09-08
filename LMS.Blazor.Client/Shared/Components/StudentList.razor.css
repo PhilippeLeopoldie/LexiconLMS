@@ -1,0 +1,30 @@
+﻿.scrollerX {
+    overflow: auto clip;
+    max-height: 85px;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.lms-section__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .lms-section__title h2 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0;
+        color: var(--lms-text);
+        align-items: center;
+    }
+
+.lms-section__sub {
+    font-size: 12px;
+    color: var(--lms-muted);
+}
+
+.lms-section__sub h2 {
+    font-size: inherit;
+    color: var(--lms-muted);
+}

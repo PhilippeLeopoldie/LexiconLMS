@@ -1,0 +1,93 @@
+﻿@using LMS.Blazor.Client.Models
+@rendermode @(new InteractiveWebAssemblyRenderMode())
+@attribute [Authorize(Roles = "Teacher")]
+@page "/courses/{courseId:int}/module/{moduleId:int}/edit"
+
+
+
+<AuthorizeView Context="authContext" Roles="Teacher">
+    <Authorized>
+        <h1>Edit @Module?.Name</h1>
+        <ModuleForm 
+            FormModel="@formModel"
+            OnValidSubmit="@HandleValidSubmit"
+            CourseId="@CourseId"
+        />
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public ModuleDto? Module { get; set; } 
+    [Parameter]
+    public int CourseId { get; set; }
+    [Parameter]
+    public int ModuleId { get; set; }
+
+    [Inject] private IApiService _apiService { get; set; } = default!;
+
+    [Inject] private ModuleStateService ModuleState { get; set; } = default!;
+
+    private string? errorMessage;
+
+    [Inject]
+    private NavigationManager _navigationManager { get; set; } = default!;
+
+
+
+    private ModuleFormModel formModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Module = ModuleState.Module;
+        if(Module is not null)
+        {
+            formModel.Name = Module.Name;
+            formModel.Description = Module.Description;
+            formModel.StartsAt = Module.StartsAt;
+            formModel.EndsAt = Module.EndsAt;
+        }
+    }
+
+    /*private async Task<Result<ModuleDto?>> GetModuleByCourseId(int id)
+    {
+        try
+        {
+            var module = await _apiService.CallApiAsync<ModuleDto>($"/courses/{id}/modules");
+            return Result<ModuleDto?>.Ok(module);
+        }
+        catch (Exception ex)
+        {
+            return Result<ModuleDto?>.Fail(ex.Message);
+        }
+    }*/
+   
+
+    private async Task HandleValidSubmit()
+    {
+
+        var module = new ModuleUpdateDto
+        {
+            Name = formModel.Name,
+            Description = formModel.Description,
+            StartsAt = formModel.StartsAt,
+            EndsAt = formModel.EndsAt
+        };
+        try
+        {
+            await _apiService.PutAsync($"api/courses/{CourseId}/module/{ModuleId}", module);
+
+            _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+
+        }
+    }
+
+}

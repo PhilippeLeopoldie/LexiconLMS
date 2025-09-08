@@ -1,0 +1,55 @@
+@using LMS.Shared.DTOs.UserDtos
+
+@if (string.IsNullOrEmpty(Title) && (Students == null || !Students.Any()))
+{
+    <p>No students found.</p>
+}
+else
+{
+    <div class="student-list">
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <div class="lms-section__sub">
+                <h2>@Title</h2>
+            </div>
+        }
+        @if (Students != null && Students.Any())
+        {
+            <div class="row">
+                <div class="scrollerX">
+                    <!--            <ul class="list-unstyled mb-0">-->
+                    @foreach (var student in FilteredStudents)
+                    {
+                        <StudentCard Student="student" />
+                    }
+                    <!--            </ul>-->
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>No students enrolled.</p>
+        }
+    </div>
+}
+
+
+@code {
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public bool? ExcludeSelf { get; set; } = false;
+    [Parameter] public IEnumerable<UserDto>? Students { get; set; }
+
+    private IEnumerable<UserDto>? FilteredStudents
+    {
+        get
+        {
+            if (ExcludeSelf == true && Students != null)
+            {
+                var currentUserEmail = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Identity?.Name;
+                return Students.Where(s => s.Email != currentUserEmail);
+            }
+            return Students;
+        }
+    }
+}

@@ -30,6 +30,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 builder.Services.AddScoped<IApiService, ServerApiService>();
 builder.Services.AddScoped<IAuthReadyService, ServerNoopAuthReadyService>();
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<ModuleStateService>();
 
 
 // Authentication setup

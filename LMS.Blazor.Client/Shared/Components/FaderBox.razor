@@ -1,0 +1,11 @@
+﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<div class="fader-box">
+    <p>@text</p>
+    <p class="read-more"><a href="#" class="button">Läs mer</a></p>
+</div>
+
+@code {
+    [Parameter] public string? text { get; set; }
+
+}
