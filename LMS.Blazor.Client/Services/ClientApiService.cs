@@ -25,7 +25,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
            || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            navigationManager.NavigateTo("AccessDenied");
+            navigationManager.NavigateTo("/Account/AccessDenied");
             var unauthorizedMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException(string.IsNullOrWhiteSpace(unauthorizedMessage) ? "Access denied" : unauthorizedMessage, null, response.StatusCode);
         }
