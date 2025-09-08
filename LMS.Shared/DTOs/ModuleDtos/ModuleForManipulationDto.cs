@@ -7,12 +7,12 @@ namespace LMS.Shared.DTOs.ModuleDtos;
 
 public record ModuleForManipulationDto
 {
-    [Required(ErrorMessage = "The Name is required")]
+    [Required(ErrorMessage = "Namn måste anges")]
     public required string Name { get; init; }
-    [Required(ErrorMessage = "The Description is required")]
+    [Required(ErrorMessage = "Beskrivning måste anges")]
     public required string Description { get; init; }
-    [Required(ErrorMessage = "The Start date is required")]
+    [Required(ErrorMessage = "Startdatum måste anges")]
     public required DateTime StartsAt { get; init; }
-    [Required(ErrorMessage = "The End date is required")]
+    [Required(ErrorMessage = "Slutdatum måste anges")]
     public required DateTime EndsAt { get; init; }
 }

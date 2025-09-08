@@ -11,7 +11,7 @@
 @inject NavigationManager _navigationManager
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-<PageTitle>@(IsEditMode ? "Redigera kurs" : "Skapa kurs")</PageTitle>
+<PageTitle>@(IsEditMode ? "Redigera" : "Skapa") kurs</PageTitle>
 
 <Section title="@(IsEditMode ? "Redigera kurs" : "Skapa kurs")">
     <ChildContent>
@@ -19,16 +19,16 @@
         <div class="p-3">
             @if (isLoading)
             {
-                <Spinner EntityName="@(IsEditMode ? "kurs" : "kurs")" />
+                <Spinner EntityName="kurs" />
             }
             else
             {
-                <h3>@(IsEditMode ? "Redigera kurs" : "Skapa kurs")</h3>
+                <h3>@(IsEditMode ? "Redigera" : "Skapa") kurs</h3>
                 <hr />
 
                 <EditForm Model="@courseDto" OnValidSubmit="HandleSubmit" FormName="CourseForm">
                     <DataAnnotationsValidator />
-                    <ValidationsSummary />
+                    <ValidationSummary />
 
                     <div class="row g-6">
                         <div class="col-sm-6 mb-3">
