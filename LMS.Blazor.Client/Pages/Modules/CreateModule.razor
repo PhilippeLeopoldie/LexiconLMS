@@ -15,7 +15,6 @@
                     OnValidSubmit="@OnSubmit"
             CourseId="CourseId"
             />
-    
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger">@errorMessage</div>
@@ -24,19 +23,12 @@
 </AuthorizeView>
 
 @code {
-    [Inject]
-    private IApiService _apiService { get; set; } = default!;
-
-    private string? errorMessage;
-
-    [Inject]
-    private NavigationManager _navigationManager { get; set; } = default!;
-
-    [Parameter]
-    public int CourseId { get; set; }
+    [Inject] private IApiService _apiService { get; set; } = default!;
+    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+    [Parameter] public int CourseId { get; set; }
 
     private ModuleFormModel formModel = new();
-
+    private string? errorMessage;
 
     private async Task<Result<bool>> HandleValidSubmit()
     {
@@ -70,7 +62,6 @@
     private async Task OnSubmit()
     {
         var result = await HandleValidSubmit();
-
         if (result.Success)
         {
             _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
