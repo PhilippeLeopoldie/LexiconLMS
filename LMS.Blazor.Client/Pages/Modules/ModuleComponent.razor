@@ -67,7 +67,7 @@ else
                     </button>
 
                     <!-- Delete -->
-                    <button class="dropdown-item btn btn-link text-danger" @onclick="() => Delete()">
+                    <button class="dropdown-item btn btn-link text-danger" @onclick="() => Delete(module)">
                         <i class="bi bi-trash"></i> Ta bort
                     </button>
                 </ul>
@@ -93,9 +93,10 @@ else
         _navigationManager.NavigateTo($"/courses/{CourseId}/module/{module.Id}/edit");
     }
 
-    private void Delete()
+    private void Delete(ModuleDto module)
     {
-        _navigationManager.NavigateTo($"/courses/{CourseId}/modules");// temporary route
+        _moduleState.Module = module;
+        _navigationManager.NavigateTo($"/courses/{CourseId}/modules/{module.Id}/delete");// temporary route
     }
 
 
