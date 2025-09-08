@@ -3,9 +3,9 @@ using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
 using LMS.Shared.DTOs.ModuleDtos;
 using LMS.Shared.Enums;
+using LMS.Shared.Helpers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using System.Web;
 
 namespace LMS.Blazor.Client.Pages;
 public partial class ModuleActivities : ComponentBase
@@ -43,15 +43,6 @@ public partial class ModuleActivities : ComponentBase
         await LoadActivities();
     }
 
-    public string ObjectToQueryString(object obj)
-    {
-        var properties = from p in obj.GetType().GetProperties()
-                         where p.GetValue(obj, null) != null
-                         select p.Name + "=" + HttpUtility.UrlEncode(p.GetValue(obj, null)!.ToString());
-
-        return string.Join("&", properties.ToArray());
-    }
-
     private async Task LoadActivities()
     {
         try
@@ -60,7 +51,7 @@ public partial class ModuleActivities : ComponentBase
             activityTypes = activityTypes ?? [];
 
             var requestParams = new RequestParams() { SearchTerm = filterText, Page = 1, OrderBy = OrderByParams.DateAsc, PageSize = 100 };
-            var queryString = ObjectToQueryString(requestParams);
+            var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
 
             activities = await _apiService.CallApiAsync<IEnumerable<ActivityDto>>($"api/modules/{moduleId}/activities?{queryString}");
             activities = activities ?? [];

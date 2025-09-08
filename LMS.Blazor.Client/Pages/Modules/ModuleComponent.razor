@@ -1,5 +1,6 @@
 ﻿@using LMS.Shared.DTOs.ModuleDtos
 @using LMS.Blazor.Client.Shared.Components
+@using LMS.Shared.Helpers
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -103,7 +104,7 @@ else
             PageSize = 100,
             IncludeActivities = true
         };
-        var queryString = ObjectToQueryString(requestParams);
+        var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
 
         isLoading = true;
         try
@@ -120,14 +121,5 @@ else
             isLoading = false;
         }
 
-    }
-    //convert object to query string, ex: OrderBy=DateAsc&PageSize=100&IncludeActivities=True
-    public string ObjectToQueryString(object obj)
-    {
-        var properties = from property in obj.GetType().GetProperties()
-                         where property.GetValue(obj, null) != null
-                         select property.Name + "=" + HttpUtility.UrlEncode(property.GetValue(obj, null)!.ToString());
-
-        return string.Join("&", properties.ToArray());
-    }
+    }    
 }
