@@ -105,7 +105,9 @@ public class MapperProfile : Profile
         #endregion
 
         #region Users
-        CreateMap<ApplicationUser, UserBasicDto>().ReverseMap();
+        CreateMap<ApplicationUser, UserBasicDto>()
+            .ForMember(d => d.Role, opt => opt.Ignore())
+            .ReverseMap();
         CreateMap<ApplicationUser, UserDto>().ReverseMap();
         CreateMap<UserCreationDto, ApplicationUser>()
             .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))

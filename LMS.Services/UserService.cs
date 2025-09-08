@@ -36,7 +36,6 @@ namespace LMS.Services
         {
             var user = await userManager.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException($"User with ID {id} was not found");
-
             return mapper.Map<UserBasicDto>(user);
         }
 
@@ -74,36 +73,45 @@ namespace LMS.Services
             return mapper.Map<UserBasicDto>(user);
         }
 
-        public async Task UpdateAsync(string id, UserUpdateDto userUpdateDto)
+
+        public async Task<UserBasicDto> UpdateAsync(string id, UserUpdateDto userUpdateDto)
         {
-            var user = await userManager.FindByIdAsync(id)
+            var updatedUser = await userManager.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException($"User with ID {id} was not found");
 
-            try
+            updatedUser.FirstName = userUpdateDto.FirstName;
+            updatedUser.LastName = userUpdateDto.LastName;
+            updatedUser.PhoneNumber = userUpdateDto.PhoneNumber;
+            if (userUpdateDto.CourseId.HasValue)
             {
-                if (!string.IsNullOrEmpty(userUpdateDto.Password))
-                {
-                    var token = await userManager.GeneratePasswordResetTokenAsync(user);
-                    var result = await userManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
-                    if (!result.Succeeded)
-                    {
-                        throw new InvalidOperationException($"Failed to reset password: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-                    }
-                }
 
-                if (userUpdateDto.Role.HasValue && !userUpdateDto.Role.Value.Equals(UserRole.All))
+                if (userUpdateDto.Role == UserRole.Student)
                 {
-                    var currentRoles = await userManager.GetRolesAsync(user);
-                    await userManager.RemoveFromRolesAsync(user, currentRoles);
-                    await userManager.AddToRoleAsync(user, userUpdateDto.Role.Value.ToString());
+                    updatedUser.CourseId = userUpdateDto.CourseId.Value;
                 }
-
-                await unitOfWork.CompleteAsync();
+                else
+                {
+                    updatedUser.CourseId = null;
+                }
             }
-            catch (InvalidOperationException ex)
+
+            if (userUpdateDto.Role.HasValue)
             {
-                throw new Exception($"An error occurred while updating the user: {ex.Message}", ex);
+                var currentRoles = await userManager.GetRolesAsync(updatedUser);
+                var newRole = userUpdateDto.Role.Value.ToString();
+
+                if (newRole != null && !currentRoles.Contains(newRole))
+                {
+                    await userManager.RemoveFromRolesAsync(updatedUser, currentRoles);
+                    await userManager.AddToRoleAsync(updatedUser, newRole);
+                }
             }
+            var result = await userManager.UpdateAsync(updatedUser);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to update user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+            return mapper.Map<UserBasicDto>(updatedUser);
         }
 
         public async Task DeleteAsync(string id)

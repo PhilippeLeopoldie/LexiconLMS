@@ -5,7 +5,6 @@ namespace LMS.Shared.DTOs.UserDtos;
 
 public record UserUpdateDto([Required] string UserName,
                             [EmailAddress] string? Email,
-                            string? Password,
                             string? FirstName,
                             string? LastName,
                             string? PhoneNumber,

@@ -124,7 +124,7 @@ public class UsersController(IServiceManager serviceManager) : ControllerBase
                 return Forbid("Students cannot change their role or course");
         }
 
-        await serviceManager.UserService.UpdateAsync(id, userDto);
+        var result = await serviceManager.UserService.UpdateAsync(id, userDto);
         return NoContent();
     }
 
@@ -153,9 +153,9 @@ public class UsersController(IServiceManager serviceManager) : ControllerBase
     public async Task<IActionResult> AssignRole(string id, [FromBody] UserRole role)
     {
         var user = await serviceManager.UserService.GetByIdAsync(id);
-        var userDto = new UserUpdateDto(user.UserName,
+        var userDto = new UserUpdateDto(
+                                        user.UserName,
                                         user.Email,
-                                        null, // Password
                                         user.FirstName,
                                         user.LastName,
                                         user.PhoneNumber,
@@ -178,9 +178,9 @@ public class UsersController(IServiceManager serviceManager) : ControllerBase
     public async Task<IActionResult> AssignCourse(string id, [FromBody] int courseId)
     {
         var user = await serviceManager.UserService.GetByIdAsync(id);
-        var userDto = new UserUpdateDto(user.UserName,
+        var userDto = new UserUpdateDto(
+                                        user.UserName,
                                         user.Email,
-                                        null, // Password
                                         user.FirstName,
                                         user.LastName,
                                         user.PhoneNumber,

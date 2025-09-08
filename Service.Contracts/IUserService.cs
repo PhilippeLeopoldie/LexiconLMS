@@ -13,7 +13,7 @@ public interface IUserService
                                                                                             bool includeDocuments = false,
                                                                                             bool trackChanges = false);
     Task<UserBasicDto> GetByIdAsync(string id, bool includeDocuments = false, bool trackChanges = false);
-    Task UpdateAsync(string id, UserUpdateDto activityEditDto);
+    Task<UserBasicDto> UpdateAsync(string id, UserUpdateDto activityEditDto);
     Task DeleteAsync(string id);
     Task<UserBasicDto> InviteAsync(UserInviteDto userInviteDto);
 }

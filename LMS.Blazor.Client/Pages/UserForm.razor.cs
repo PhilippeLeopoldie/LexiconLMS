@@ -13,33 +13,31 @@ public partial class UserForm
     private string? errorMessage;
     private UserFormModel user = new();
 
-    private bool IsEditMode => !string.IsNullOrEmpty(userId);
-    private bool IsTeacher { get; set; }
-    private bool CanEditEmail => IsTeacher && !IsEditMode;
-
     protected override async Task OnInitializedAsync()
     {
         var authState = await _auth.GetAuthenticationStateAsync();
-        IsTeacher = authState.User.IsInRole("Teacher");
+        if (!authState.User.IsInRole("Teacher"))
+        {
+            _navigationManager.NavigateTo("/Account/AccessDenied");
+            return;
+        }
 
         try
         {
-            if (IsEditMode)
+            var existing = await _apiService.CallApiAsync<UserBasicDto>($"api/users/{userId}");
+            if (existing != null)
             {
-                var existing = await _apiService.CallApiAsync<UserBasicDto>($"api/users/{userId}");
-                if (existing != null)
+                user = new UserFormModel
                 {
-                    user = new UserFormModel
-                    {
-                        UserName = existing.UserName,
-                        Email = existing.Email,
-                        FirstName = existing.FirstName,
-                        LastName = existing.LastName,
-                        PhoneNumber = existing.PhoneNumber,
-                        Role = existing.Role,
-                        CourseId = existing.CourseId
-                    };
-                }
+                    UserName = existing.UserName,
+                    FullName = $"{existing.FirstName} {existing.LastName}",
+                    Email = existing.Email,
+                    FirstName = existing.FirstName,
+                    LastName = existing.LastName,
+                    PhoneNumber = existing.PhoneNumber,
+                    Role = existing!.Role,
+                    CourseId = existing.CourseId
+                };
             }
         }
         catch (HttpRequestException ex)
@@ -57,15 +55,8 @@ public partial class UserForm
         try
         {
             isLoading = true;
-            if (IsEditMode)
-            {
-                var role = IsTeacher ? user.Role : UserRole.Student;
-                var courseId = IsTeacher ? user.CourseId : null;
-                var edit = new UserUpdateDto(user.UserName, user.Email, null, user.FirstName, user.LastName, user.PhoneNumber, role, courseId);
-
-                await _apiService.PutAsync($"api/users/{userId}", edit);
-            }
-
+            var edit = new UserUpdateDto(user.UserName, user.Email, user.FirstName, user.LastName, user.PhoneNumber, user.Role, user.CourseId);
+            await _apiService.PutAsync($"api/users/{userId}", edit);
             NavigateBack();
         }
         catch (HttpRequestException ex)
@@ -80,13 +71,14 @@ public partial class UserForm
 
     private void NavigateBack()
     {
-        _navigationManager.NavigateTo("/users");
+        _navigationManager.NavigateTo("/Account/UserManagement");
     }
 
     private sealed class UserFormModel
     {
         [Required]
         public string UserName { get; set; } = string.Empty;
+        public string? FullName { get; set; }
 
         [Required]
         [EmailAddress]
@@ -98,7 +90,4 @@ public partial class UserForm
         public UserRole Role { get; set; } = UserRole.Student;
         public int? CourseId { get; set; }
     }
-
 }
-
-
