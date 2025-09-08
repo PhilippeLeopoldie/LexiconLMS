@@ -13,11 +13,7 @@
     <nav class="flex-column">
         <AuthorizeView Roles="Student" Context="authContext">
             <NavItem Href="/" Icon="bi-speedometer2" Text="Översikt" />
-             
-                    
-                    <NavItem Href=@($"/courses/{CourseId}/modules") Icon="bi-list-ul" Text="Moduler" />
-               
-            
+            <NavItem Href=@($"/courses/{CourseId}/modules") Icon="bi-list-ul" Text="Moduler" />
             <NavItem Href="/documents" Icon="bi-file-earmark-check" Text="Inlämningar" />
             <NavItem Href="/demoauth" Icon="bi-people" Text="Demo" />
             <NavItem Href="/settings" Icon="bi-gear" Text="Inställningar" />
