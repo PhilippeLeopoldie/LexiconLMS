@@ -1,4 +1,5 @@
 ﻿@using LMS.Blazor.Client.Models
+@using System.Text.Json
 @rendermode @(new InteractiveWebAssemblyRenderMode())
 @attribute [Authorize(Roles = "Teacher")]
 @page "/courses/{courseId:int}/module/{moduleId:int}/edit"
@@ -10,7 +11,7 @@
         <h1>Edit @Module?.Name</h1>
         <ModuleForm 
             FormModel="@formModel"
-            OnValidSubmit="@HandleValidSubmit"
+            OnValidSubmit="@OnSubmit"
             CourseId="@CourseId"
         />
         @if (!string.IsNullOrEmpty(errorMessage))
@@ -53,23 +54,10 @@
         }
     }
 
-    /*private async Task<Result<ModuleDto?>> GetModuleByCourseId(int id)
-    {
-        try
-        {
-            var module = await _apiService.CallApiAsync<ModuleDto>($"/courses/{id}/modules");
-            return Result<ModuleDto?>.Ok(module);
-        }
-        catch (Exception ex)
-        {
-            return Result<ModuleDto?>.Fail(ex.Message);
-        }
-    }*/
-   
 
-    private async Task HandleValidSubmit()
+    private async Task<Result<bool>> HandleValidSubmit()
     {
-
+        errorMessage = null;
         var module = new ModuleUpdateDto
         {
             Name = formModel.Name,
@@ -80,13 +68,34 @@
         try
         {
             await _apiService.PutAsync($"api/courses/{CourseId}/module/{ModuleId}", module);
-
-            _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+            return Result<bool>.Ok(true);
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            try
+            {
+                using var doc = JsonDocument.Parse(ex.Message);
+                var detail = doc.RootElement.GetProperty("detail").GetString();
+                return Result<bool>.Fail(detail ?? "An error occurred.");
+            }
+            catch
+            {
+                return Result<bool>.Fail("An error occurred.");
+            }
+        }
+    }
 
+    private async Task OnSubmit()
+    {
+        var result = await HandleValidSubmit();
+
+        if (result.Success)
+        {
+            _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
         }
     }
 
