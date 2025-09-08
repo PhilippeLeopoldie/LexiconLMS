@@ -1,0 +1,79 @@
+﻿@using LMS.Blazor.Client.Models
+@using System.Text.Json
+@rendermode @(new InteractiveWebAssemblyRenderMode())
+@attribute [Authorize(Roles = "Teacher")]
+@page "/courses/{CourseId:int}/modules/{ModuleId:int}/delete"
+
+
+<h1>Ta bort Modulen : @Module?.Name</h1>
+
+
+<EditForm Model="this" OnValidSubmit="@OnDelete" FormName="DeleteModuleForm">
+        <button type="submit" class="btn btn-danger">Bekräft</button>
+        <button type="button" class="btn btn-secondary" @onclick="@BackToModules">Avbruten</button>
+    </EditForm>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-3">@errorMessage</div>
+    }
+
+
+@code {
+    [Parameter] public int CourseId { get; set; }
+    [Parameter] public int ModuleId { get; set; }
+    [Parameter] public ModuleDto? Module { get; set; }
+
+    [Inject] private IApiService _apiService { get; set; } = default!;
+    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+    [Inject] private ModuleStateService _moduleState { get; set; } = default!;
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Module = _moduleState.Module;
+
+    }
+    private async Task<Result<bool>> HandleDeletion()
+    {
+        try
+        {
+            await _apiService.DeleteAsync($"api/courses/{CourseId}/module/{ModuleId}");
+            return Result<bool>.Ok(true);
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(ex.Message);
+                var detail = doc.RootElement.GetProperty("detail").GetString();
+                return Result<bool>.Fail(detail ?? "An error occurred.");
+
+            }
+            catch
+            {
+                return Result<bool>.Fail("An error occurred.");
+            }
+        }
+    }
+
+    private void BackToModules()
+    {
+        _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+    }
+
+    private async Task OnDelete()
+    {
+        var result = await HandleDeletion();
+        if (result.Success)
+        {
+            BackToModules();
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
+
+}
