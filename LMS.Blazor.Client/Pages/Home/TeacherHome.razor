@@ -1,0 +1,88 @@
+﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject IApiService ApiService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col p-5">
+            @if(isLoading)
+            {
+                <Spinner EntityName="användare" />
+            }
+            else
+            {
+            <h2 class="mb-3">Lärarens dashboard | @(!string.IsNullOrEmpty(User?.FullName) ? User.FullName : User!.UserName)</h2>
+            <div class="row g-3 mb-3 ">
+                <div class="col-6 col-xl-3">
+                    <StatTile Label="Aktiva kurser" Value="@stats.CoursesCount">
+                        <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
+                    </StatTile>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <StatTile Label="Total elever" Value="@stats.StudentsCount">
+                        <Icon><i class="bi bi-people"></i></Icon>
+                    </StatTile>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <StatTile Label="Inlämningar" Value="@stats.AssignmentsCount">
+                        <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                    </StatTile>
+                </div>
+                <div class="col-6 col-xl-3">
+                    <StatTile Label="Kommande aktiviteter" Value="@stats.UpcomingActivitiesCount">
+                        <Icon><i class="bi bi-activity"></i></Icon>
+                    </StatTile>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12 col-xl-6">
+                    <Section Title="Kurshantering"
+                             Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journals'></i>"))"
+                             HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='courses/createcourse/' class='btn btn-primary'>+ Skapa kurs</a>"))">
+                        <ul class="list-unstyled mb-0">
+                            @if (courses== null || courses.Count() == 0)
+                            {
+                                <p>Inga kurser tillgängliga. Skapa en ny kurs för att komma igång!</p>
+                            }
+                            else
+                            {
+                                @foreach (var course in courses)
+                                {
+                                    <CourseRow Title="@course.Name" Sub="@($"{course.Students?.Count()} studenter • {course.Modules?.Count()} moduler")" HasMenu="false">
+                                        <Icon><i class="bi bi-journal-code"></i></Icon>
+                                        <Suffix><DateBadge Start="@course.Starts" End="@course.Ends"/></Suffix>
+                                    </CourseRow>
+                                }
+                            }
+                        </ul>
+                    </Section>
+                </div>
+                <div class="col-12 col-xl-6">
+                    <ListCard Title="Senaste dokument">
+                        @if (documents == null || documents.Count() == 0)
+                        {
+                            <p>Inga dokument tillgängliga.</p>
+                        }
+                        else
+                        {
+                            @foreach (var itm in documents)
+                            {
+                                <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-file-earmark'></i>"))"
+                                Title="@itm.Name" Subtitle="@itm.Description"
+                                Meta="@(builder => builder.AddContent(0, itm.CreatedAt))"
+                                Actions="@(builder => builder.AddMarkupContent(0,""))" />
+                            }
+                        }
+                    </ListCard>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            }
+        </div>
+    </div>
+</div>
+

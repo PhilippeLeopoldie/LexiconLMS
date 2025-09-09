@@ -8,7 +8,7 @@
 
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
-        <h1>Edit @Module?.Name</h1>
+        <h3>@($"Redigera {Module?.Name} för kurs: {Course?.Name} ({Course?.Starts:d} - {Course?.Ends:d})")</h3>
         <ModuleForm 
             FormModel="@formModel"
             OnValidSubmit="@OnSubmit"
@@ -23,11 +23,13 @@
 
 @code {
     [Parameter] public ModuleDto? Module { get; set; } 
+    [Parameter] public CourseDto? Course { get; set; }
     [Parameter] public int CourseId { get; set; }
     [Parameter] public int ModuleId { get; set; }
 
     [Inject] private IApiService _apiService { get; set; } = default!;
     [Inject] private ModuleStateService _moduleState { get; set; } = default!;
+    [Inject] private CourseStateService _courseState { get; set; } = default!;
     [Inject] private NavigationManager _navigationManager { get; set; } = default!;
 
     private string? errorMessage;
@@ -36,6 +38,7 @@
     protected override async Task OnInitializedAsync()
     {
         Module = _moduleState.Module;
+        Course = _courseState.Course;
         if(Module is not null)
         {
             formModel.Name = Module.Name;

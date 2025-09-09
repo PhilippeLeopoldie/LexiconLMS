@@ -6,10 +6,10 @@
 @attribute [Authorize(Roles = "Teacher")]
 @page "/courses/{courseId:int}/modules/create"
 
-<h3>Skapa ny modul</h3>
 
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
+        <h3>@($"Skapa ny module för kurs: {Course?.Name} ({Course?.Starts:d} - {Course?.Ends:d})")</h3>
         <ModuleForm 
             FormModel="@formModel"
                     OnValidSubmit="@OnSubmit"
@@ -25,11 +25,17 @@
 @code {
     [Inject] private IApiService _apiService { get; set; } = default!;
     [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+    [Inject] private CourseStateService _courseState { get; set; } = default!;
     [Parameter] public int CourseId { get; set; }
-
+    private CourseDto? Course { get; set; }
     private ModuleFormModel formModel = new();
     private string? errorMessage;
 
+
+    protected override async Task OnInitializedAsync()
+    {
+        Course = _courseState.Course;
+    }
     private async Task<Result<bool>> HandleValidSubmit()
     {
         var module = new ModuleCreateDto

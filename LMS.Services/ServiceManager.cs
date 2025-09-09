@@ -11,16 +11,16 @@ public class ServiceManager : IServiceManager
     private Lazy<IDocumentService> documentService;
     private Lazy<IUserService> userService;
     private Lazy<IModuleService> moduleService;
+    private Lazy<IDashboardService> dashboardService;
     public IAuthService AuthService => authService.Value;
     public ICourseService CourseService => courseService.Value;
     public IActivityService ActivityService => activityService.Value;
-
     public IActivityTypeService ActivityTypeService => activityTypeService.Value;
-
     public IDocumentService DocumentService => documentService.Value;
-
     public IUserService UserService => userService.Value;
     public IModuleService ModuleService => moduleService.Value;
+    public IDashboardService DashboardService => dashboardService.Value;
+
 
     public ServiceManager(
         Lazy<IAuthService> authService,
@@ -29,7 +29,8 @@ public class ServiceManager : IServiceManager
         Lazy<IActivityTypeService> activityTypeService,
         Lazy<IDocumentService> documentService,
         Lazy<IUserService> userService,
-        Lazy<IModuleService> moduleService)
+        Lazy<IModuleService> moduleService,
+        Lazy<IDashboardService> dashboardService)
     {
         this.authService = authService;
         this.courseService = courseService;
@@ -38,5 +39,6 @@ public class ServiceManager : IServiceManager
         this.documentService = documentService;
         this.userService = userService;
         this.moduleService = moduleService;
+        this.dashboardService = dashboardService;
     }
 }

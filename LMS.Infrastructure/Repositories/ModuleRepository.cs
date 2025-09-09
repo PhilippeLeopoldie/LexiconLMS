@@ -64,6 +64,15 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
         return await Context.Courses.AnyAsync(course => course.Id == courseId);
     }
 
+    public async Task<int> GetModulesCountAsync(int? courseId) =>
+        await FindByCondition(module => module.CourseId.Equals(courseId)
+                                    , false).CountAsync();
+
+    public async Task<int> GetPassedModulesCountAsync(int? courseId) =>
+        await FindByCondition(module => module.CourseId.Equals(courseId)
+                                     && module.EndsAt < DateTime.Now
+                                    , false).CountAsync();
+
     private static IQueryable<Module> ApplyOrdering(IQueryable<Module> modules, RequestParams requestParams)
     {
         if (requestParams.OrderBy == null) return modules.OrderBy(m => m.StartsAt).ThenBy(m => m.Name);
@@ -77,4 +86,5 @@ public class ModuleRepository(ApplicationDbContext context) : RepositoryBase<Mod
             _ => modules
         };
     }
+
 }
