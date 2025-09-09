@@ -15,7 +15,7 @@ public partial class DateBadge
 
         if (End < now)
         {
-            badgeText = "Paserat";
+            badgeText = "Passerat";
             badgeColor = "neutral";
         }
         else if (Start < now && End > now)
