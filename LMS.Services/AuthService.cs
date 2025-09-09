@@ -82,7 +82,6 @@ public class AuthService : IAuthService
         {
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            //Add more if needed
         };
 
         var roles = await userManager.GetRolesAsync(user);
@@ -93,7 +92,6 @@ public class AuthService : IAuthService
         }
 
         return claims;
-
     }
 
     private SigningCredentials GetSigningCredentials()
@@ -108,22 +106,35 @@ public class AuthService : IAuthService
     {
         ArgumentNullException.ThrowIfNull(userRegistrationDto);
 
-        var isRoleValid = !string.IsNullOrWhiteSpace(userRegistrationDto.Role);
+        var existingUser = await userManager.FindByEmailAsync(userRegistrationDto.Email);
 
-        if (isRoleValid)
-        {
-            var roleExists = await roleManager.RoleExistsAsync(userRegistrationDto.Role!);
-            if (!roleExists)
-                return IdentityResult.Failed(new IdentityError { Description = "Role does not exist" });
-        }
+        if (existingUser != null)
+            return await CompleteInvitationRegistrationAsync(existingUser, userRegistrationDto);
+        else
+            return await CreateNewUserAsync(userRegistrationDto);
+    }
 
+    private async Task<IdentityResult> CompleteInvitationRegistrationAsync(ApplicationUser existingUser, UserRegistrationDto userRegistrationDto)
+    {
+        existingUser.UserName = userRegistrationDto.UserName;
+        existingUser.FirstName = userRegistrationDto.FirstName;
+        existingUser.LastName = userRegistrationDto.LastName;
+        existingUser.PhoneNumber = userRegistrationDto.PhoneNumber;
+
+        var addPasswordResult = await userManager.AddPasswordAsync(existingUser, userRegistrationDto.Password);
+        if (!addPasswordResult.Succeeded)
+            return addPasswordResult;
+
+        var updateResult = await userManager.UpdateAsync(existingUser);
+        return updateResult;
+    }
+
+    private async Task<IdentityResult> CreateNewUserAsync(UserRegistrationDto userRegistrationDto)
+    {
         var user = mapper.Map<ApplicationUser>(userRegistrationDto);
         var result = await userManager.CreateAsync(user, userRegistrationDto.Password);
 
         if (!result.Succeeded) return result;
-
-        if (isRoleValid)
-            result = await userManager.AddToRoleAsync(user, userRegistrationDto.Role!);
 
         return result;
     }

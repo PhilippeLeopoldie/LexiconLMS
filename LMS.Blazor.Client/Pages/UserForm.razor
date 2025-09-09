@@ -1,0 +1,87 @@
+@page "/users/edit/{userId}"
+@attribute [Authorize(Roles = "Teacher")]
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@inject IApiService _apiService
+@inject NavigationManager _navigationManager
+@inject AuthenticationStateProvider _auth
+
+<PageTitle>Redigera användare</PageTitle>
+
+@if (isLoading)
+{
+    <Spinner EntityName="användare" />
+}
+else
+{
+    <Section Title="Redigera användare">
+        <HeaderActions>
+            <button class="btn btn-secondary" type="button" @onclick="NavigateBack">Avbryt</button>
+        </HeaderActions>
+        <ChildContent>
+            <EditForm Model="user" OnValidSubmit="HandleSubmit" FormName="UserForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">Fullständigt namn</label>
+                    <InputText class="form-control" @bind-Value="user.FullName" disabled="true" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Användarnamn</label>
+                    <InputText class="form-control" @bind-Value="user.UserName" disabled="true" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" @bind-Value="user.Email" disabled="true" />
+                    <ValidationMessage For="@(() => user.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Förnamn</label>
+                    <InputText class="form-control" @bind-Value="user.FirstName" />
+                    <ValidationMessage For="() => user.FirstName" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Efternamn</label>
+                    <InputText class="form-control" @bind-Value="user.LastName" />
+                    <ValidationMessage For="() => user.LastName" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Telefonnummer</label>
+                    <InputText class="form-control" @bind-Value="user.PhoneNumber" />
+                    <ValidationMessage For="() => user.PhoneNumber" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Roll</label>
+                    <InputSelect class="form-select" @bind-Value="user.Role">
+                        <option value="Student">Student</option>
+                        <option value="Teacher">Teacher</option>
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Kurs ID (valfritt)</label>
+                    <InputNumber class="form-control" @bind-Value="user.CourseId" />
+                    <small class="form-text text-muted">Lämna tomt för lärare eller om studenten inte ska kopplas till en kurs ännu.</small>
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <div class="d-flex">
+                    <button class="btn btn-primary" type="submit">Spara</button>
+                </div>
+            </EditForm>
+        </ChildContent>
+    </Section>
+
+}
+

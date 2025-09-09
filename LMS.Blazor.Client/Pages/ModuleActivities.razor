@@ -3,7 +3,7 @@
 @attribute [Authorize(Roles = "Student,Teacher")]
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-<PageTitle>Aktiviteter i Modul: @module.Name</PageTitle>
+<PageTitle>Aktiviteter i Modul@(module is not null ? $": {module.Name}" : "")</PageTitle>
 
 @if(module is not null)
 {
@@ -20,7 +20,7 @@ else
         <HeaderActions>
             <div class="lms-row-actions row">
                 <div class=" d-md-flex align-items-center col-md-auto column-gap-3 px-3">
-                    <input type="search" class="form-control border border-secondary" placeholder="Söka på namn..." @bind="filterText" @onkeydown="HandleKeyDown" />
+                    <input type="search" class="form-control border border-secondary" placeholder="Sök på namn..." @bind="filterText" @onkeydown="HandleKeyDown" />
                     @if (activityTypes != null && activityTypes.Any())
                     {
                     <div class="lms_filter">

@@ -105,14 +105,29 @@ public class MapperProfile : Profile
         #endregion
 
         #region Users
-        CreateMap<ApplicationUser, UserBasicDto>().ReverseMap();
+        CreateMap<ApplicationUser, UserBasicDto>()
+            .ForMember(d => d.Role, opt => opt.Ignore())
+            .ReverseMap();
         CreateMap<ApplicationUser, UserDto>().ReverseMap();
         CreateMap<UserCreationDto, ApplicationUser>()
             .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
             .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email));
         CreateMap<UserRegistrationDto, ApplicationUser>()
             .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
-            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email));
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email))
+            .ForMember(d => d.FirstName, opt => opt.MapFrom(s => s.FirstName))
+            .ForMember(d => d.LastName, opt => opt.MapFrom(s => s.LastName))
+            .ForMember(d => d.PhoneNumber, opt => opt.MapFrom(s => s.PhoneNumber));
+        CreateMap<UserUpdateDto, ApplicationUser>()
+            .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.UserName))
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email))
+            .ReverseMap()
+            .ForMember(d => d.Role, opt => opt.Ignore());
+        CreateMap<UserInviteDto, ApplicationUser>()
+            .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.Email))
+            .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email))
+            .ReverseMap()
+            .ForMember(d => d.Role, opt => opt.Ignore());
         #endregion
     }
 }
