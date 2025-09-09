@@ -19,7 +19,7 @@ public class AuthController : ControllerBase
         this.serviceManager = serviceManager;
     }
 
-    [HttpPost]
+    [HttpPost("register")]
     [SwaggerOperation(
         Summary = "Register a new user",
         Description = "Creates a new user account with the provided registration details."

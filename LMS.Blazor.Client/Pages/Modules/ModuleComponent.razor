@@ -1,5 +1,9 @@
-﻿@using LMS.Shared.DTOs.ModuleDtos
+@using LMS.Blazor.Client.Models
+@using LMS.Shared.DTOs.ModuleDtos
 @using LMS.Blazor.Client.Shared.Components
+@using LMS.Shared.Helpers
+@using System.Text.Json
+
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -27,30 +31,30 @@ else
                                         }
                                         else
                                         {
-                                            @foreach (var module in modules)
+                                            @foreach (var module in modules!)
                                             {
                                                 var activityCount = module.Activities?.Count() ?? 0;
                                                 <div class="d-flex w-100">
-                                                    <NavLink class="nav-link flex-grow-1" href="@($"/courses/{CourseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
+                                                    <NavLink class="nav-link flex-grow-1 mt-1" href="@($"/courses/{CourseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
                                                         <CourseRow 
                                                             Title="@($"{module.Name}   ({module.StartsAt:d}  -  {module.EndsAt:d})")" 
                                                             Sub="@($"{activityCount} Aktiviteter")"
                                                             MenuContent="@ModuleMenu(module)"
                                                         >
                                                             <Icon><i class="bi bi-cpu"></i></Icon>
-                                                            <Suffix><Badge Color="info">Aktiv</Badge></Suffix>
+                                                            <Suffix><DateBadge Start="@module.StartsAt" End="@module.EndsAt" /></Suffix>
                                                         </CourseRow>
                                                     </NavLink>
                                         </div>
                                     }
-                                        }
-                                    </ul>
-                                </Section>
-                            </div>
-                        </div>
+                                }
+                            </ul>
+                        </Section>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 }
 @code {
     private RenderFragment ModuleMenu(ModuleDto module) => __builder =>
@@ -76,7 +80,7 @@ else
         
     };
 
-    private List<ModuleDto>? modules { get; set; } = [];
+    /*private List<ModuleDto>? modules { get; set; } = [];
     [Parameter]
     public int CourseId { get; set; }
 
@@ -135,5 +139,5 @@ else
                          select property.Name + "=" + HttpUtility.UrlEncode(property.GetValue(obj, null)!.ToString());
 
         return string.Join("&", properties.ToArray());
-    }
+    }*/
 }

@@ -1,8 +1,6 @@
-@using LMS.Shared.DTOs.UserDtos
-
 @if (string.IsNullOrEmpty(Title) && (Students == null || !Students.Any()))
 {
-    <p>No students found.</p>
+    <p>Inga studenter funna.</p>
 }
 else
 {
@@ -16,19 +14,23 @@ else
         @if (Students != null && Students.Any())
         {
             <div class="row">
-                <div class="scrollerX">
-                    <!--            <ul class="list-unstyled mb-0">-->
-                    @foreach (var student in FilteredStudents)
+                <div class="expand">
+                    @foreach (var student in VisibleStudents!)
                     {
                         <StudentCard Student="student" />
                     }
-                    <!--            </ul>-->
+                    @if (FilteredStudents?.Count() > 3)
+                    {
+                        <button class="btn btn-link" @onclick="ToggleExpanded">
+                            @(IsExpanded ? "< Visa mindre" : $"Visa alla ({FilteredStudents.Count()}) >")
+                        </button>
+                    }
                 </div>
             </div>
         }
         else
         {
-            <p>No students enrolled.</p>
+            <p>Inga studenter anmälda.</p>
         }
     </div>
 }
@@ -39,17 +41,27 @@ else
     [Parameter] public string? Title { get; set; }
     [Parameter] public bool? ExcludeSelf { get; set; } = false;
     [Parameter] public IEnumerable<UserDto>? Students { get; set; }
+    private bool IsExpanded = false;
+
+    private IEnumerable<UserDto> VisibleStudents =>
+        IsExpanded ? FilteredStudents! : FilteredStudents!.Take(3);
+
+    private void ToggleExpanded()
+    {
+        IsExpanded = !IsExpanded;
+    }
 
     private IEnumerable<UserDto>? FilteredStudents
     {
         get
         {
+            IEnumerable<UserDto>? courseStudents = null;
             if (ExcludeSelf == true && Students != null)
             {
                 var currentUserEmail = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Identity?.Name;
-                return Students.Where(s => s.Email != currentUserEmail);
+                courseStudents =  Students.Where(s => s.Email != currentUserEmail);
             }
-            return Students;
+            return courseStudents;
         }
     }
 }

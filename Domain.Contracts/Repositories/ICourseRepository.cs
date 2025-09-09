@@ -15,4 +15,6 @@ public interface ICourseRepository : IRepositoryBase<Course>, IInternalRepositor
         RequestParams requestParams = null!,
         bool trackChanges = false);
     Task<Course?> GetByStudentIdAsync(string studentUserId);
+    Task<int> GetActiveCoursesCountAsync();
+    Task<int> GetActiveStudentsCountAsync();
 }

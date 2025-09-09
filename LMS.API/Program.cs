@@ -1,6 +1,8 @@
 using LMS.API.Extensions;
 using LMS.API.Services;
 using LMS.Infrastructure.Data;
+using LMS.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace LMS.API;
 
@@ -23,6 +25,15 @@ public class Program
         builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MapperProfile>());
         builder.Services.ConfigureCors();
         builder.Services.ConfigureOpenApi();
+
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddSingleton<IEmailSender<ApplicationUser>, FakeEmailSender>();
+        }
+        else
+        {
+            //  riktiga e-postkonfiguration här,
+        }
 
 
         var app = builder.Build();

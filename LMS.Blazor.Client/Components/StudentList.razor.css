@@ -1,8 +1,7 @@
-﻿.scrollerX {
-    overflow: auto clip;
-    max-height: 85px;
+﻿.expand {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    gap: .8em;
 }
 
 .lms-section__title {

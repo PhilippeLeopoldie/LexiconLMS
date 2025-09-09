@@ -12,61 +12,44 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject UserManager<ApplicationUser> UserManager
-@inject IHttpClientFactory HttpClientFactory
+@inject IApiService ApiService
 @inject ITokenStorage TokenStorage
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>Logga in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+<div class="login-form">
+    <div class="row h-100 d-flex justify-content-center align-items-center">
+        <div class="col-md-4">
+            <Section Title="Logga in">
+                <StatusMessage Message="@errorMessage" />
+                <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <h2 class="text-uppercase text-center">Lexicon LMS</h2>
+                    <hr />
+                    <ValidationSummary class="text-danger" role="alert" />
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                        <label for="email" class="form-label">E-post</label>
+                        <ValidationMessage For="() => Input.Email" class="text-danger" />
+                    </div>
+                    <div class="form-floating mb-3">
+                        <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                        <label for="password" class="form-label">Lösenord</label>
+                        <ValidationMessage For="() => Input.Password" class="text-danger" />
+                    </div>
+                    <div class="checkbox mb-3">
+                        <label class="form-label">
+                            <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
+                            Kom ihåg mig
+                        </label>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-100 btn btn-lg btn-primary">Logga in</button>
+                    </div>
+                </EditForm>
+            </Section>
+        </div>
     </div>
 </div>
 
@@ -108,16 +91,26 @@
         ApplicationUser? user = await UserManager.FindByEmailAsync(Input.Email);
         if (user == null)
         {
-            errorMessage = "Email or password is incorrect";
+            errorMessage = "E-post eller lösenord är felaktig";
             return;
         }
 
-        //ToDo: make service of API call to remote server (LMS.API)!
-        var tokens = await GetTokensFromApi(user.UserName!, Input.Password);
-
-        if (tokens is null)
+        var loginRequest = new UserAuthDto { UserName = user.UserName!, Password = Input.Password };
+        TokenDto? tokens = null;
+        
+        try
         {
-            errorMessage = "Failed to login please try again.";
+            tokens = await ApiService.PostWithResponseAsync<TokenDto>("api/auth/login", loginRequest);
+
+            if (tokens is null)
+            {
+                errorMessage = "Misslyckades att logga in. Vänligen försök igen.";
+                return;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Misslyckades att logga in. Vänligen försök igen.";
             return;
         }
 
@@ -144,7 +137,7 @@
         }
         else
         {
-            errorMessage = "Error: Invalid login attempt.";
+            errorMessage = "Fel: Ogiltigt inloggningsförsök.";
         }
     }
 
@@ -158,21 +151,8 @@
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "Kom ihåg mig?")]
         public bool RememberMe { get; set; }
     }
 
-    private async Task<TokenDto?> GetTokensFromApi(string username, string password)
-    {
-        var httpClient = HttpClientFactory.CreateClient("LmsAPIClient");
-        var response = await httpClient.PostAsJsonAsync("api/auth/login", 
-                                                    new UserAuthDto { UserName = username, Password = password });
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return null;
-        }
-
-        return await response.Content.ReadFromJsonAsync<TokenDto>();
-    }
 }

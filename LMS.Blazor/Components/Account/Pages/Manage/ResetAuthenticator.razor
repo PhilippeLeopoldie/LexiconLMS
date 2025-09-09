@@ -16,17 +16,17 @@
 <div class="alert alert-warning" role="alert">
     <p>
         <span class="glyphicon glyphicon-warning-sign"></span>
-        <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
+        <strong>Om du återställer din autentiseringsnyckel kommer din autentiseringsapp sluta fungera tills dess du återkonfigurerar den.</strong>
     </p>
     <p>
-        This process disables 2FA until you verify your authenticator app.
-        If you do not complete your authenticator app configuration you may lose access to your account.
+        Denna process avaktiverar 2FA tills dess du verifierar din autentiseringsapp.
+        Om du inte slutför konfigurationen av din autentiseringsapp kan du förlora åtkomsten till ditt konto.
     </p>
 </div>
 <div>
     <form @formname="reset-authenticator" @onsubmit="OnSubmitAsync" method="post">
         <AntiforgeryToken />
-        <button class="btn btn-danger" type="submit">Reset authenticator key</button>
+        <button class="btn btn-danger" type="submit">Återställ autentiseringsnyckel</button>
     </form>
 </div>
 
@@ -46,7 +46,7 @@
 
         RedirectManager.RedirectToWithStatus(
             "Account/Manage/EnableAuthenticator",
-            "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.",
+            "Din autentiseringsapps nyckel har återställts, du kommer behöva konfigurera autentiseringsappen med den nya nyckeln.",
             HttpContext);
     }
 }

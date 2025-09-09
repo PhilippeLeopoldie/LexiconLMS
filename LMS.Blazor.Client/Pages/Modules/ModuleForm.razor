@@ -41,13 +41,9 @@
 </EditForm>
 @code {
     [Parameter] public ModuleFormModel FormModel { get; set; } = new ModuleFormModel();
-
     [Parameter] public int CourseId { get; set; }
-
     [Parameter] public EventCallback OnValidSubmit { get; set; }
-
     [Inject] private NavigationManager _navigationManager { get; set; } = default!;
-
 
     private void NavigateBack()
     {

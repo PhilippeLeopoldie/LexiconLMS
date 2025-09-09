@@ -25,7 +25,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
            || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            navigationManager.NavigateTo("AccessDenied");
+            navigationManager.NavigateTo("/Account/AccessDenied");
             var unauthorizedMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException(string.IsNullOrWhiteSpace(unauthorizedMessage) ? "Access denied" : unauthorizedMessage, null, response.StatusCode);
         }
@@ -46,9 +46,26 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
     }
 
+    public async Task<(T? Data, string? PaginationHeader)> CallApiWithPaginationAsync<T>(string endpoint, CancellationToken cancellationToken = default)
+    {
+        var response = await SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
+        var paginationHeader = response.Headers.TryGetValues("X-Pagination", out var values)
+            ? values.FirstOrDefault()
+            : null;
+
+        var data = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
+        return (data, paginationHeader);
+    }
+
     public async Task PostAsync(string endpoint, object data, CancellationToken cancellationToken = default)
     {
         await SendAsync(HttpMethod.Post, endpoint, data, cancellationToken);
+    }
+
+    public async Task<T?> PostWithResponseAsync<T>(string endpoint, object data, CancellationToken cancellationToken = default)
+    {
+        var response = await SendAsync(HttpMethod.Post, endpoint, data, cancellationToken);
+        return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
     }
 
     public async Task PutAsync(string endpoint, object data, CancellationToken cancellationToken = default)
