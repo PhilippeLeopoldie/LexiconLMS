@@ -1,5 +1,7 @@
-﻿@using LMS.Shared.DTOs.ModuleDtos
+﻿@using LMS.Blazor.Client.Models
+@using LMS.Shared.DTOs.ModuleDtos
 @using LMS.Blazor.Client.Shared.Components
+@using System.Text.Json
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -97,6 +99,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        
+        isLoading = true;
+        try
+        {
+            await ApiCallResult();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    private async Task<Result<IEnumerable<ModuleDto>>> ApiCall()
+    {
         var requestParams = new ModuleRequestParams()
         {
             OrderBy = OrderByParams.DateAsc,
@@ -104,23 +119,40 @@ else
             IncludeActivities = true
         };
         var queryString = ObjectToQueryString(requestParams);
-
-        isLoading = true;
         try
         {
             var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{CourseId}/Module?{queryString}");
             modules = response?.ToList();
+            return Result<IEnumerable<ModuleDto>>.Ok(response);
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            try
+            {
+                using var doc = JsonDocument.Parse(ex.Message);
+                var detail = doc.RootElement.GetProperty("detail").GetString();
+                return Result<IEnumerable<ModuleDto>>.Fail(detail ?? "An error occurred.");
+            }
+            catch
+            {
+                return Result<IEnumerable<ModuleDto>>.Fail("An error occurred.");
+            }
         }
-        finally
-        {
-            isLoading = false;
-        }
-
     }
+    private async Task ApiCallResult()
+    {
+        errorMessage = null;
+        var result = await ApiCall();
+        if(result.Success)
+        {
+            modules = result?.Data?.ToList();
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
     //convert object to query string, ex: OrderBy=DateAsc&PageSize=100&IncludeActivities=True
     public string ObjectToQueryString(object obj)
     {
