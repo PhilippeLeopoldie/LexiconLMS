@@ -11,17 +11,16 @@
             <Authorized>
                 <div class="d-flex ms-auto align-items-center user-inf"> 
                     @* <form class="w-100 me-3" role="search"> 
-                        <input type="search" class="form-control" placeholder="Search..." aria-label="Search"> 
                     </form>  *@
                     <ThemeSwitcher />
                     <div class="flex-shrink-0 dropdown mx-2"> 
-                    <a href="#" class="d-block fs-3 link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"> 
-                        <i class="bi bi-person-circle"></i>
-                    </a> 
+                        <a href="#" class="d-block fs-3 link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a> 
                     <ul class="dropdown-menu text-small shadow">
                         <li class="dropdown-header">@context.User.Identity?.Name</li>
                         <li>
-                            <a class="dropdown-item" href="Account/Manager">
+                            <a class="dropdown-item" href="/Account/Manage">
                                <i class="bi bi-gear me-2"></i>
                             Inställningar
                             </a></li>
