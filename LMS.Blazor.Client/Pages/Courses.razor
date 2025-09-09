@@ -39,7 +39,7 @@ else
                                                 var studentCount = course.Students?.Count() ?? 0;
 
                                                 <NavLink class="nav-link" href=@($"/courses/{course.Id}/modules") Match=@NavLinkMatch.All>
-                                                    <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")">
+                                                    <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")" MenuContent="@CourseMenu(course)">
                                                         <Icon><i class="bi bi-cpu"></i></Icon>
                                                         <Suffix><DateBadge Start="@course.Starts" End="@course.Ends"/></Suffix>
                                                     </CourseRow>
@@ -59,8 +59,29 @@ else
 }
 
 @code {
-    [Inject]
-    private IApiService _apiService { get; set; } = default!;
+    private RenderFragment CourseMenu(CourseDto course) => __builder =>
+        {
+            <div class="dropstart dropup flex-shrink-0" style="width:5%">
+                <button class="btn btn-link w-100" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="manage-actions dropdown-menu" data-popper-placement="left-start">
+                    <!-- Edit -->
+                    <button class="dropdown-item btn btn-link" @onclick="() => Edit(course)">
+                        <i class="bi bi-pencil-square"></i> Redigera
+                    </button>
+
+                    <!-- Delete -->
+                    <button class="dropdown-item btn btn-link text-danger" @onclick="() => Delete()">
+                        <i class="bi bi-trash"></i> Ta bort
+                    </button>
+                </ul>
+            </div>
+        };
+
+    [Inject] private IApiService _apiService { get; set; } = default!;
+    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+    //[Inject] private CourseStateService _courseState { get; set; } = default!;
 
     private List<CourseDto>? courses;
 
@@ -68,5 +89,16 @@ else
     {
         var response = await _apiService.CallApiAsync<IEnumerable<CourseDto>>("api/courses?includeModules=true&includeActivities=true");
         courses = response?.ToList();
+    }
+
+    private void Edit(CourseDto course)
+    {
+        //_courseState.Course = course;
+        _navigationManager.NavigateTo($"/courses/editcourse/{course.Id}");
+    }
+
+    private void Delete()
+    {
+        _navigationManager.NavigateTo($"/courses");   // temporary route
     }
 }
