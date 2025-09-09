@@ -20,7 +20,14 @@
                 <TopBar />
                 <main class="d-flex flex-nowrap">
                     <article class="content px-4">
-                        <Login />
+                        @if (NavigationManager.ToBaseRelativePath(NavigationManager.Uri).StartsWith("Account/CompleteRegistration"))
+                        {
+                            @Body
+                        }
+                        else
+                        {
+                            <Login />
+                        }
                     </article>
                 </main>
             </NotAuthorized>

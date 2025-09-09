@@ -1,8 +1,14 @@
-﻿namespace LMS.Shared.DTOs.UserDtos;
+﻿using LMS.Shared.Enums;
 
-public record UserBasicDto
-{
-    public string Id { get; set; } 
-    public string? UserName { get; set; }
-    public string? Email { get; set; }
-}
+namespace LMS.Shared.DTOs.UserDtos;
+
+public record UserBasicDto(string Id,
+                          string UserName,
+                          string Email,
+                          string? FirstName,
+                          string? LastName,
+                          string? PhoneNumber,
+                          UserRole Role = UserRole.Student,
+                          int? CourseId = null,
+                          bool HasPassword = false
+                         );
