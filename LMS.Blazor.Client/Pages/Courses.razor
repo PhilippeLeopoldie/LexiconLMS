@@ -1,6 +1,7 @@
 ﻿@using LMS.Blazor.Client.Services
 @using LMS.Blazor.Client.Shared.Components
 @using LMS.Shared.DTOs.CourseDtos
+@using LMS.Shared.Helpers
 @using Microsoft.AspNetCore.Authorization
 
 @page "/courses"
@@ -24,8 +25,8 @@ else
                         <div class="row g-3">
                             <div class="col-12">
                                 <Section Title="Kurser"
-                                         Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))" 
-                                        HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/courses/createcourse' class='btn btn-primary'>+ Skapa kurs</a>"))">
+                                         Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journals'></i>"))"
+                                         HeaderActions="@(builder => builder.AddMarkupContent(0, "<a href='/courses/createcourse' class='btn btn-primary'>+ Skapa kurs</a>"))">
                                     <ul class="list-unstyled mb-0">
                                         @if (courses.Count == 0)
                                         {
@@ -38,9 +39,9 @@ else
                                                 var moduleCount = course.Modules?.Count() ?? 0;
                                                 var studentCount = course.Students?.Count() ?? 0;
 
-                                                <NavLink class="nav-link" href=@($"/courses/{course.Id}/modules") Match=@NavLinkMatch.All>
-                                                    <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")" MenuContent="@CourseMenu(course)">
-                                                        <Icon><i class="bi bi-cpu"></i></Icon>
+                                                <NavLink class="nav-link mt-1" href=@($"/courses/{course.Id}/modules") Match=@NavLinkMatch.All>
+                                                    <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")">
+                                                        <Icon><i class="bi bi-journal-code"></i></Icon>
                                                         <Suffix><DateBadge Start="@course.Starts" End="@course.Ends"/></Suffix>
                                                     </CourseRow>
                                                 </NavLink>
@@ -83,7 +84,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _apiService.CallApiAsync<IEnumerable<CourseDto>>("api/courses?includeModules=true&includeActivities=true");
+        var requestParams = new RequestParams() { OrderBy = OrderByParams.DateDesc, PageSize = 10 };
+        var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
+
+        var response = await _apiService.CallApiAsync<IEnumerable<CourseDto>>($"api/courses/{queryString}&includeModules=true&includeActivities=true");
         courses = response?.ToList();
     }
 

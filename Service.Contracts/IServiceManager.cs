@@ -9,4 +9,5 @@ public interface IServiceManager
     IDocumentService DocumentService { get; }
     IUserService UserService { get; }
     IModuleService ModuleService { get; }
+    IDashboardService DashboardService { get; }
 }

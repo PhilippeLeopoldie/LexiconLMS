@@ -32,7 +32,7 @@ public class Program
         }
         else
         {
-            // Din riktiga e-postkonfiguration här,
+            //  riktiga e-postkonfiguration här,
         }
 
 

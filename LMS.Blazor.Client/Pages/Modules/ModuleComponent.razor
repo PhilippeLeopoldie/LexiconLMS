@@ -1,7 +1,9 @@
-﻿@using LMS.Blazor.Client.Models
+@using LMS.Blazor.Client.Models
 @using LMS.Shared.DTOs.ModuleDtos
 @using LMS.Blazor.Client.Shared.Components
+@using LMS.Shared.Helpers
 @using System.Text.Json
+
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -29,11 +31,11 @@ else
                                         }
                                         else
                                         {
-                                            @foreach (var module in modules)
+                                            @foreach (var module in modules!)
                                             {
                                                 var activityCount = module.Activities?.Count() ?? 0;
                                                 <div class="d-flex w-100">
-                                                    <NavLink class="nav-link flex-grow-1" href="@($"/courses/{CourseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
+                                                    <NavLink class="nav-link flex-grow-1 mt-1" href="@($"/courses/{CourseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
                                                         <CourseRow 
                                                             Title="@($"{module.Name}   ({module.StartsAt:d}  -  {module.EndsAt:d})")" 
                                                             Sub="@($"{activityCount} Aktiviteter")"
@@ -74,6 +76,4 @@ else
             </ul>
         </div>
     };
-
-    
 }
