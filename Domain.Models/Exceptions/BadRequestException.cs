@@ -12,7 +12,7 @@ public  class BadRequestException : Exception
 
 public class InvalidEntryBadRequestException : BadRequestException
 {
-    public InvalidEntryBadRequestException(int id) : base($"Invalid Id: '{id}'")
+    public InvalidEntryBadRequestException(int id) : base($"Ogiltigt ID: '{id}'")
     {
     }
     public InvalidEntryBadRequestException() : base($"No patchDocument")

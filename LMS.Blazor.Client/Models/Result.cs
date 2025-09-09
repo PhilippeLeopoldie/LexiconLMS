@@ -1,4 +1,4 @@
-﻿namespace LMS.Blazor.Client.Pages.Modules;
+﻿namespace LMS.Blazor.Client.Models;
 
 public class Result<T>
 {

@@ -1,6 +1,7 @@
 ﻿@using LMS.Blazor.Client.Models
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel.DataAnnotations
+@using System.Text.Json
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @attribute [Authorize(Roles = "Teacher")]
 @page "/courses/{courseId:int}/modules/create"
@@ -10,34 +11,26 @@
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
         <ModuleForm 
-            FormModel="@formModel" 
-            OnValidSubmit="@HandleValidSubmit"
+            FormModel="@formModel"
+                    OnValidSubmit="@OnSubmit"
             CourseId="CourseId"
             />
-    
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert alert-danger mt-3">@errorMessage</div>
         }
     </Authorized>
 </AuthorizeView>
 
 @code {
-    [Inject]
-    private IApiService _apiService { get; set; } = default!;
-
-    private string? errorMessage;
-
-    [Inject]
-    private NavigationManager _navigationManager { get; set; } = default!;
-
-    [Parameter]
-    public int CourseId { get; set; }
+    [Inject] private IApiService _apiService { get; set; } = default!;
+    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+    [Parameter] public int CourseId { get; set; }
 
     private ModuleFormModel formModel = new();
+    private string? errorMessage;
 
-
-    private async Task HandleValidSubmit()
+    private async Task<Result<bool>> HandleValidSubmit()
     {
         var module = new ModuleCreateDto
             {
@@ -49,17 +42,33 @@
         try
         {
             await _apiService.PostAsync($"api/courses/{CourseId}/module", module);
-
-            NavigateBack();
+            return Result<bool>.Ok(true);
         }
         catch(Exception ex)
         {
-            errorMessage = ex.Message;
+            try
+            {
+                using var doc = JsonDocument.Parse(ex.Message);
+                var detail = doc.RootElement.GetProperty("detail").GetString();
+                return Result<bool>.Fail(detail ?? "An error occurred.");
+            }
+            catch
+            {
+                return Result<bool>.Fail("An error occurred.");
+            }
         }
     }
 
-    private void NavigateBack()
+    private async Task OnSubmit()
     {
-        _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+        var result = await HandleValidSubmit();
+        if (result.Success)
+        {
+            _navigationManager.NavigateTo($"/courses/{CourseId}/modules");
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
     }
 }
