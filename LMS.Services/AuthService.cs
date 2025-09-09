@@ -82,7 +82,7 @@ public class AuthService : IAuthService
         {
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            //Add more if needed
+            //Add more if needed            
             new Claim("courseId", (user.CourseId ?? 0).ToString())
         };
 
