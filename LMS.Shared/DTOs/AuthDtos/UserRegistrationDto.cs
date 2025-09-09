@@ -13,7 +13,8 @@ public record UserRegistrationDto
     [Required]
     public string UserName { get; init; } = string.Empty;
 
-    //Optional if you want to add user to role when you register user
-    //UI have to be updated to support this
-    public string? Role { get; init; } = string.Empty;
+    public string? FirstName { get; init; }
+    public string? LastName { get; init; }
+    public string? PhoneNumber { get; init; }
+
 }

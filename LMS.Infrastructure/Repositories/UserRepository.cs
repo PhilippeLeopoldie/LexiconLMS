@@ -1,82 +1,65 @@
-﻿using AutoMapper;
-using Domain.Contracts.Repositories;
+﻿using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
-using LMS.Shared.DTOs.UserDtos;
+using LMS.Shared.Common;
+using LMS.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LMS.Infrastructure.Repositories;
 
 public class UserRepository(ApplicationDbContext context) : RepositoryBase<ApplicationUser>(context), IUserRepository
 {
-
-    private readonly IMapper mapper;
-
-    public UserRepository(ApplicationDbContext context, IMapper mapper)
-        : this(context)
+    public async Task<PagedList<ApplicationUser>> GetAllUsersAsync(RequestParams requestParams, bool includeDocuments = false, bool trackChanges = false)
     {
-        this.mapper = mapper;
+        var query = FindByCondition(u => u.UserName != null
+                                    && (requestParams.SearchTerm == null
+                                        || u.UserName.ToLower().Contains(requestParams.SearchTerm.ToLower())),
+                                    trackChanges);
+
+        query = ApplyOrdering(query, requestParams);
+        query = includeDocuments ? query.Include(u => u.Documents) : query;
+        return await PagedList<ApplicationUser>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
-
-    public async Task AddUserAsync(ApplicationUser user, bool trackChanges = false)
+    public async Task<PagedList<ApplicationUser>> GetStudentsByCourseAsync(RequestParams requestParams, int courseId, bool includeDocuments = false, bool trackChanges = false)
     {
-        if (user is null)
-            throw new ArgumentNullException(nameof(user));
+        var query = FindByCondition(u => u.UserName != null
+                                    && (requestParams.SearchTerm == null
+                                        || u.UserName.ToLower().Contains(requestParams.SearchTerm.ToLower()))
+                                    && u.CourseId == courseId,
+                                    trackChanges);
 
-        Create(user);
-        
+        query = ApplyOrdering(query, requestParams);
+        query = includeDocuments ? query.Include(u => u.Documents) : query;
+        return await PagedList<ApplicationUser>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
-
-    public async Task DeleteUserAsync(string id, bool trackChanges = false)
+    public async Task<PagedList<ApplicationUser>> GetAllTeachersAsync(RequestParams requestParams, int? courseId, bool includeDocuments = false, bool trackChanges = false)
     {
-        var user = await FindByCondition(u => u.Id == id, trackChanges)
-        .FirstOrDefaultAsync();
+        var query = FindByCondition(u => u.UserName != null
+                                    && (requestParams.SearchTerm == null
+                                        || u.UserName.ToLower().Contains(requestParams.SearchTerm.ToLower()))
+                                    && (courseId == null || u.Courses.Any(c => c.Id == courseId)),
+                                    trackChanges);
 
-        if (user is null)
-            throw new KeyNotFoundException($"User with id {id} was not found.");
-
-        Delete(user);
-        
+        query = ApplyOrdering(query, requestParams);
+        query = includeDocuments ? query.Include(u => u.Documents) : query;
+        return await PagedList<ApplicationUser>.CreateAsync(query, requestParams.Page, requestParams.PageSize);
     }
 
-    
-    public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync(bool trackChanges = false)
+    public async Task<ApplicationUser?> GetUserByIdAsync(string id, bool includeDocuments = false, bool trackChanges = false) =>
+                await FindByCondition(u => u.Id == id, trackChanges)
+                     .FirstOrDefaultAsync();
+
+    private static IQueryable<ApplicationUser> ApplyOrdering(IQueryable<ApplicationUser> users, RequestParams requestParams)
     {
-        return await FindAll(trackChanges)
-            .OrderBy(u => u.UserName)
-            .ToListAsync();
+        if (requestParams.OrderBy == null) return users.OrderBy(u => u.UserName);
+
+        return requestParams.OrderBy switch
+        {
+            OrderByParams.NameAsc => users.OrderBy(u => u.UserName),
+            OrderByParams.NameDesc => users.OrderByDescending(u => u.UserName),
+            _ => users
+        };
     }
-
-
-    public async Task<UserBasicDto?> GetUserByIdAsync(string id, bool trackChanges = false)
-    {
-        var user = await FindByCondition(u => u.Id == id, trackChanges)
-        .FirstOrDefaultAsync();
-
-        return user is null ? null : mapper.Map<UserBasicDto>(user);
-    }
-
-    public async Task UpdateUserAsync(ApplicationUser user, bool trackChanges = false)
-    {
-        var existingUser = await FindByCondition(u => u.Id == user.Id, trackChanges)
-        .FirstOrDefaultAsync();
-
-        if (existingUser is null)
-            throw new KeyNotFoundException($"User with id {user.Id} was not found.");
-
-        // Update the existing user with new values
-        existingUser.UserName = user.UserName;
-        existingUser.Email = user.Email;
-
-        Update(existingUser);
-        await Context.SaveChangesAsync();
-    }
-
 }

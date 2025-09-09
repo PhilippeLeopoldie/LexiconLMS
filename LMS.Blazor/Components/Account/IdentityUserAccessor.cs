@@ -2,20 +2,19 @@
 using Domain.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace LMS.Blazor.Components.Account
+namespace LMS.Blazor.Components.Account;
+
+internal sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
 {
-    internal sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
+    public async Task<ApplicationUser> GetRequiredUserAsync(HttpContext context)
     {
-        public async Task<ApplicationUser> GetRequiredUserAsync(HttpContext context)
+        var user = await userManager.GetUserAsync(context.User);
+
+        if (user is null)
         {
-            var user = await userManager.GetUserAsync(context.User);
-
-            if (user is null)
-            {
-                redirectManager.RedirectToWithStatus("Account/InvalidUser", $"Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'.", context);
-            }
-
-            return user;
+            redirectManager.RedirectToWithStatus("Account/InvalidUser", $"Fel: Kan inte hitta en användare med ID '{userManager.GetUserId(context.User)}'.", context);
         }
+
+        return user;
     }
 }

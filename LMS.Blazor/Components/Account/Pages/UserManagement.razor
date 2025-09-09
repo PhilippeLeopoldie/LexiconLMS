@@ -1,0 +1,243 @@
+@page "/Account/UserManagement"
+@attribute [Authorize(Roles = "Teacher")]
+
+@using System.ComponentModel.DataAnnotations
+@using LMS.Shared.DTOs.UserDtos
+@using LMS.Shared.DTOs.CourseDtos
+@using LMS.Shared.Enums
+@using LMS.Blazor.Data
+
+@inject IApiService ApiService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<PageTitle>Användarhantering</PageTitle>
+
+<Section Title="Användarhantering">
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Användare</h3>
+            <button class="btn btn-primary" @onclick="ToggleInviteForm">
+                @(ShowInviteForm ? "Avbryt" : "Bjud in användare")
+            </button>
+        </div>
+
+        @if (ShowInviteForm)
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Bjud in ny användare</h4>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="InviteInput" OnValidSubmit="InviteUser" FormName="invite">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" role="alert" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="InviteInput.Email" class="form-control" placeholder="E-post" />
+                                    <label for="email">E-post</label>
+                                    <ValidationMessage For="() => InviteInput.Email" class="text-danger" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="InviteInput.FirstName" class="form-control" placeholder="Förnamn" />
+                                    <label for="first-name">Förnamn</label>
+                                    <ValidationMessage For="() => InviteInput.FirstName" class="text-danger" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="InviteInput.LastName" class="form-control" placeholder="Efternamn" />
+                                    <label for="last-name">Efternamn</label>
+                                    <ValidationMessage For="() => InviteInput.LastName" class="text-danger" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputSelect @bind-Value="InviteInput.Role" class="form-control">
+                                        @foreach (var role in Enum.GetValues<UserRole>().Where(r => r != UserRole.All))
+                                        {
+                                            <option value="@role">@role.ToString()</option>
+                                        }
+                                    </InputSelect>
+                                    <label for="role">Roll</label>
+                                    <ValidationMessage For="() => InviteInput.Role" class="text-danger" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputSelect @bind-Value="InviteInput.CourseId" class="form-control">
+                                        <option value="">Välj en kurs...</option>
+                                        @foreach (var course in courses)
+                                        {
+                                            <option value="@course.Id">@course.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <label for="course">Kurs</label>
+                                    <ValidationMessage For="() => InviteInput.CourseId" class="text-danger" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Skicka inbjudan</button>
+                    </EditForm>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert alert-@(isError ? "danger" : "success")">@message</div>
+        }
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Namn</th>
+                        <th>E-post</th>
+                        <th>Roll</th>
+                        <th>Kurs</th>
+                        <th>Status</th>
+                        <th>Åtgärder</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (users != null)
+                    {
+                        @foreach (var user in users)
+                        {
+                            <tr>
+                                <td>@($"{user.FirstName} {user.LastName}".Trim())</td>
+                                <td>@user.Email</td>
+                                <td>@user.Role</td>
+                                <td>@GetCourseName(user.CourseId)</td>
+                                <td>
+                                    @if (user.HasPassword)
+                                    {
+                                        <Suffix><Badge Color="success">Registrerad</Badge></Suffix>
+                                    }
+                                    else
+                                    {
+                                        <Suffix><Badge Color="warning">Väntar på registrering</Badge></Suffix>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => EditUser(user.Id)">
+                                        Redigera
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</Section>
+@code {
+    private bool ShowInviteForm = false;
+    private string? message;
+    private bool isError = false;
+    private List<UserBasicDto>? users;
+    private List<CourseDto>? courses = new();
+
+    [SupplyParameterFromForm]
+    private InviteInputModel InviteInput { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            users = await ApiService.CallApiAsync<List<UserBasicDto>>("api/users");
+            courses = await ApiService.CallApiAsync<List<CourseDto>>("api/courses");
+        }
+        catch (HttpRequestException ex)
+        {
+            message = $"Kunde inte ladda data: {ex.Message}";
+            isError = true;
+        }
+    }
+
+    private async Task InviteUser()
+    {
+        try
+        {
+            var userInviteDto = new UserInviteDto(
+                InviteInput.Email, 
+                InviteInput.FirstName, 
+                InviteInput.LastName, 
+                InviteInput.Role, 
+                string.IsNullOrEmpty(InviteInput.CourseId) ? null : int.Parse(InviteInput.CourseId)
+            );
+
+            await ApiService.PostAsync("api/users/invite", userInviteDto);
+
+            message = "Inbjudan skickad framgångsrikt!";
+            isError = false;
+            ShowInviteForm = false;
+            InviteInput = new();
+            await LoadData();
+        }
+        catch (HttpRequestException ex)
+        {
+            message = $"Ett fel uppstod: {ex.Message}";
+            isError = true;
+        }
+    }
+
+    private string GetCourseName(int? courseId)
+    {
+        if (courseId == null || courses == null)
+            return "Ingen kurs";
+        var course = courses.FirstOrDefault(c => c.Id == courseId);
+        return course?.Name ?? "Okänd kurs";
+    }
+
+    private void EditUser(string userId)
+    {
+        NavigationManager.NavigateTo($"/users/edit/{userId}");
+    }
+
+    private sealed class InviteInputModel
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "E-post")]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Förnamn")]
+        public string FirstName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Efternamn")]
+        public string LastName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Roll")]
+        public UserRole Role { get; set; } = UserRole.Student;
+
+        [Display(Name = "Kurs")]
+        public string? CourseId { get; set; }
+    }
+    private void ToggleInviteForm()
+    {
+        ShowInviteForm = !ShowInviteForm;
+    }
+}

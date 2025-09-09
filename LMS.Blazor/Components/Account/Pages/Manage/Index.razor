@@ -3,6 +3,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using LMS.Blazor.Data
+@using LMS.Shared.Enums
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -11,8 +12,15 @@
 
 <PageTitle>Profile</PageTitle>
 
-<h3>Profile</h3>
 <StatusMessage />
+
+@if (isStudent)
+{
+    <div class="alert alert-info">
+        <strong>Information för studenter:</strong> Du kan endast redigera ditt namn och telefonnummer. E-post, användarnamn, roll och kurs kan endast ändras av en lärare.
+    </div>
+}
+<Section Title="Redigera din profil">
 
 <div class="row">
     <div class="col-md-6">
@@ -20,23 +28,39 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled />
-                <label for="username" class="form-label">Username</label>
+                <input type="text" value="@username" class="form-control"  disabled />
+                <label for="username" class="form-label">Usernamn</label>
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
-                <label for="phone-number" class="form-label">Phone number</label>
+                <input type="email" value="@email" class="form-control" placeholder="e-post adress" disabled />
+                <label for="email" class="form-label">E-post</label>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" class="form-control" placeholder="Vänligen ange förnamn." />
+                <label for="first-name" class="form-label">Förnamn</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" class="form-control" placeholder="Vänligen ange efternamn." />
+                <label for="last-name" class="form-label">Efternamn</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Vänligen ange ditt telefonnummer." />
+                <label for="phone-number" class="form-label">Telefonnummer</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Spara</button>
         </EditForm>
     </div>
 </div>
-
+    </Section>
 @code {
     private ApplicationUser user = default!;
     private string? username;
+    private string? email;
     private string? phoneNumber;
+    private bool isStudent = false;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -48,30 +72,69 @@
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
+        email = await UserManager.GetEmailAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
+        // Kontrollera om användaren är student
+        var roles = await UserManager.GetRolesAsync(user);
+        isStudent = roles.Contains(UserRole.Student.ToString());
+
+        Input.FirstName ??= user.FirstName;
+        Input.LastName ??= user.LastName;
         Input.PhoneNumber ??= phoneNumber;
     }
 
     private async Task OnValidSubmitAsync()
     {
+        var hasChanges = false;
+
+        if (Input.FirstName != user.FirstName)
+        {
+            user.FirstName = Input.FirstName;
+            hasChanges = true;
+        }
+
+        if (Input.LastName != user.LastName)
+        {
+            user.LastName = Input.LastName;
+            hasChanges = true;
+        }
+
         if (Input.PhoneNumber != phoneNumber)
         {
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                RedirectManager.RedirectToCurrentPageWithStatus("Fel: Misslyckades med att spara telefonnummer.", HttpContext);
+                return;
+            }
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            var updateResult = await UserManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                RedirectManager.RedirectToCurrentPageWithStatus("Fel: Misslyckades med att uppdatera profil.", HttpContext);
+                return;
             }
         }
 
         await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+        RedirectManager.RedirectToCurrentPageWithStatus("Din profil är uppdaterad", HttpContext);
     }
 
     private sealed class InputModel
     {
+        [Display(Name = "First name")]
+        public string? FirstName { get; set; }
+
+        [Display(Name = "Last name")]
+        public string? LastName { get; set; }
+
         [Phone]
-        [Display(Name = "Phone number")]
+        [Display(Name = "Telefonnummer")]
         public string? PhoneNumber { get; set; }
     }
 }

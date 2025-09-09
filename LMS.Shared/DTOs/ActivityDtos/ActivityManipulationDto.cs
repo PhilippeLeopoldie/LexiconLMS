@@ -3,13 +3,13 @@
 namespace LMS.Shared.DTOs.ActivityDtos;
 public record ActivityManipulationDto
 {
-    [Required(ErrorMessage = "The Name is required")]
+    [Required(ErrorMessage = "Namn måste anges")]
     public required string Name { get; init; }
     public string? Description { get; init; }
-    [Required(ErrorMessage = "The Start date is required")]
+    [Required(ErrorMessage = "Startdatum måste anges")]
     public required DateTime StartsAt { get; init; }
-    [Required(ErrorMessage = "The End date is required")]
+    [Required(ErrorMessage = "Slutdatum måste anges")]
     public required DateTime EndsAt { get; init; }
-    [Required(ErrorMessage = "The Activity type is required")]
+    [Required(ErrorMessage = "Aktivitetstyp måste anges")]
     public required int ActivityTypeId { get; init; }
 }

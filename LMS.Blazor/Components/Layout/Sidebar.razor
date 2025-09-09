@@ -15,15 +15,11 @@
             <NavItem Href="/" Icon="bi-speedometer2" Text="Översikt" />
             <NavItem Href=@($"/courses/{CourseId}/modules") Icon="bi-list-ul" Text="Moduler" />
             <NavItem Href="/documents" Icon="bi-file-earmark-check" Text="Inlämningar" />
-            <NavItem Href="/demoauth" Icon="bi-people" Text="Demo" />
-            <NavItem Href="/settings" Icon="bi-gear" Text="Inställningar" />
         </AuthorizeView>
         <AuthorizeView Roles="Teacher">
             <NavItem Href="/" Icon="bi-speedometer2" Text="Översikt" />
             <NavItem Href="/courses" Icon="bi-journal-bookmark" Text="Alla kurser" />
-            <NavItem Href="/assignments" Icon="bi-list-check" Text="Alla inlämningar" />
-            <NavItem Href="/demoauth2" Icon="bi-calendar-event" Text="Demoauth2" />
-            <NavItem Href="/user" Icon=" bi-people-fill" Text="Användare" />
+            <NavItem Href="/Account/UserManagement" Icon=" bi-people-fill" Text="Användare" />
         </AuthorizeView>
     </nav>
 </div>
