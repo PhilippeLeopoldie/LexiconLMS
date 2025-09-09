@@ -1,125 +1,127 @@
 ﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @inject IApiService ApiService
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@* @if (authContext.User.Identity?.IsAuthenticated == true && authContext.User.IsInRole("Student") && User?.CourseId.HasValue == true) *@
-@if(User == null)
+
+@if(isLoading)
 {
-    <Spinner EntityName=" användare"/>
+    <Spinner EntityName="användare"/>
 }
 else
 {
-@if ( User?.CourseId.HasValue == true)
-{
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col p-4">
-                <h2>Studentens dashboard | @(!string.IsNullOrEmpty(@User?.FullName) ? User.FullName : @User?.UserName) </h2>
-                <div class="row g-2 mb-3">
-                    <div class="col-12 col-lg-3">
-                        <StatTile Label="Kurs moduler" Value="@stats.ModulesCount" Subtext="Totalt moduler">
-                            <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
-                        </StatTile>
+    @if ( User?.CourseId.HasValue == true)
+    {
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col p-4">
+                    <h2>Studentens dashboard | @(!string.IsNullOrEmpty(@User?.FullName) ? User.FullName : @User?.UserName) </h2>
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 col-lg-3">
+                            <StatTile Label="Kurs moduler" Value="@stats.ModulesCount" Subtext="Totalt moduler">
+                                <Icon><i class="bi bi-grid-3x3-gap"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <StatTile Label="Avslutade moduler" Value="@stats.PassedModulesCount" Subtext="Antal avslutade moduler">
+                                <Icon><i class="bi bi-grid-3x2-gap"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <StatTile Label="Kommande aktiviteter" Value="@stats.UpcomingActivitiesCount" Subtext="Nästa 7 dagar">
+                                <Icon><i class="bi bi-calendar-event"></i></Icon>
+                            </StatTile>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <StatTile Label="Väntande inlämningar" Value="@stats.AssignmentsCount" Subtext="Kräver uppmärksamhet">
+                                <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
+                            </StatTile>
+                        </div>
                     </div>
-                    <div class="col-12 col-lg-3">
-                        <StatTile Label="Avslutade moduler" Value="@stats.PassedModulesCount" Subtext="Antal avslutade moduler">
-                            <Icon><i class="bi bi-grid-3x2-gap"></i></Icon>
-                        </StatTile>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                        <StatTile Label="Kommande aktiviteter" Value="@stats.UpcomingActivitiesCount" Subtext="Nästa 7 dagar">
-                            <Icon><i class="bi bi-calendar-event"></i></Icon>
-                        </StatTile>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                        <StatTile Label="Väntande inlämningar" Value="@stats.AssignmentsCount" Subtext="Kräver uppmärksamhet">
-                            <Icon><i class="bi bi-exclamation-triangle"></i></Icon>
-                        </StatTile>
-                    </div>
-                </div>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-12">
-                        <CourseInfo courseId="@courseId" />
+                    <div class="row g-2 mb-3">
+                        <div class="col-12">
+                            <CourseInfo courseId="@courseId" />
+                        </div>
                     </div>
-                </div>
 
 
-                 <div class="row g-3">
-                   <div class="col-12 col-lg-6">
-                        <Section Title="Mina moduler"
-                                 Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))">
-                        <ul class="list-unstyled mb-0">
-                        @if (modules == null || modules.Count() == 0)
-                        {
-                            <p class="p-3">Moduler saknas för denna kurs. Kontakta kursansvarig för att kontrollera tillgänglighet eller status.</p>
-                        }
-                        else
-                        {
-                            @foreach (var module in modules)
+                     <div class="row g-3">
+                       <div class="col-12 col-lg-6">
+                            <Section Title="Mina moduler"
+                                     Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))">
+                            <ul class="list-unstyled mb-0">
+                            @if (modules == null || modules.Count() == 0)
                             {
-                                <CourseRow Title="@module.Name" Sub="@($"{module.StartsAt:d}  -  {module.EndsAt:d}")" HasMenu="false" >
-                                    <Icon><i class="bi bi-grid-1x2"></i></Icon>
-                                    <Suffix><DateBadge Start="@module.StartsAt" End="@module.EndsAt" /></Suffix>
-                                </CourseRow>
+                                <p class="p-3">Moduler saknas för denna kurs. Kontakta kursansvarig för att kontrollera tillgänglighet eller status.</p>
                             }
-                        }
-                        </ul>
-                        </Section>
-                    </div>
-
-                    <div class="col-12 col-lg-6">
-                        <ListCard Title="Kommande aktiviteter">
-                        @if (upcomingActivities == null || upcomingActivities.Count() == 0)
-                        {
-                                    <p class="p-3">Aktiviteter saknas för denna kurs. Kontakta kursansvarig för att kontrollera tillgänglighet eller status.</p>
-                        }
-                        else
-                        {
-                            @foreach (var itm in upcomingActivities)
+                            else
                             {
-                                    <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-activity'></i>"))"
-                                                  Title="@itm.Name" Subtitle="@itm.ActivityType.Name"
-                                                  Meta="@(builder => builder.AddContent(1, $"{itm.StartsAt:g}  -  {itm.EndsAt:g}"))"
-                                                Actions="@(builder => builder.AddMarkupContent(0,""))" />
-
+                                @foreach (var module in modules)
+                                {
+                                    <CourseRow Title="@module.Name" Sub="@($"{module.StartsAt:d}  -  {module.EndsAt:d}")" HasMenu="false" >
+                                        <Icon><i class="bi bi-grid-1x2"></i></Icon>
+                                        <Suffix><DateBadge Start="@module.StartsAt" End="@module.EndsAt" /></Suffix>
+                                    </CourseRow>
+                                }
                             }
-                        }
-                        </ListCard>
+                            </ul>
+                            </Section>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <ListCard Title="Kommande aktiviteter">
+                            @if (upcomingActivities == null || upcomingActivities.Count() == 0)
+                            {
+                                        <p class="p-3">Aktiviteter saknas för denna kurs. Kontakta kursansvarig för att kontrollera tillgänglighet eller status.</p>
+                            }
+                            else
+                            {
+                                @foreach (var itm in upcomingActivities)
+                                {
+                                        <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-activity'></i>"))"
+                                                      Title="@itm.Name" Subtitle="@itm.ActivityType.Name"
+                                                      Meta="@(builder => builder.AddContent(1, $"{itm.StartsAt:g}  -  {itm.EndsAt:g}"))"
+                                                    Actions="@(builder => builder.AddMarkupContent(0,""))" />
+
+                                }
+                            }
+                            </ListCard>
                             
-                    </div>
-                        <ListCard Title="Inlämningar">
-                        @if (upcomingAssignments == null || upcomingAssignments.Count() == 0)
-                        {
-                                <p class="p-3">Inga ilämningsuppgifter.</p>
-                        }
-                        else
-                        {
-                            @foreach (var itm in upcomingAssignments)
+                        </div>
+                            <ListCard Title="Inlämningar">
+                            @if (upcomingAssignments == null || upcomingAssignments.Count() == 0)
                             {
-                                    <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-activity'></i>"))"
-                                                  Title="@itm.Name" Subtitle="@itm.ModuleName"                                                 
-                                                  Meta="@(builder => builder.AddContent(1, $"{itm.EndDate:g}"))"
-                                                  Actions="@(builder => builder.AddMarkupContent(0,""))" />
-
+                                    <p class="p-3">Inga ilämningsuppgifter.</p>
                             }
-                        }
-                        </ListCard>
+                            else
+                            {
+                                @foreach (var itm in upcomingAssignments)
+                                {
+                                        <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-activity'></i>"))"
+                                                      Title="@itm.Name" Subtitle="@itm.ModuleName"                                                 
+                                                      Meta="@(builder => builder.AddContent(1, $"{itm.EndDate:g}"))"
+                                                      Actions="@(builder => builder.AddMarkupContent(0,""))" />
+                                }
+                            }
+                            </ListCard>
                         
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-}
-else
-{
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col p-4">
-                <h2>Ingen kurs tilldelad</h2>
-                <p>Du har för närvarande ingen kurs kopplad till ditt konto. Vänligen kontakta en administratör.</p>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+    }
+    else
+    {
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col p-4">
+                    <h2>Ingen kurs tilldelad</h2>
+                    <p>Du har för närvarande ingen kurs kopplad till ditt konto. Vänligen kontakta en administratör.</p>
+                </div>
             </div>
         </div>
-    </div>
-}
+    }
 }

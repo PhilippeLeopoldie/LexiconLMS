@@ -11,6 +11,8 @@ using System.Security.Claims;
 namespace LMS.Blazor.Client.Pages.Home;
 public partial class TeacherHome
 {
+    private bool isLoading = true;
+    private string? errorMessage;
     private TeacherDashboardStatsDto? stats = new();
     private IEnumerable<CourseDto>? courses = [];
     private IEnumerable<DocumentDto>? documents = [];
@@ -19,19 +21,31 @@ public partial class TeacherHome
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var authUser = authState.User;
-        if (authUser.Identity?.IsAuthenticated == true)
+        try
         {
-            var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != null)
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var authUser = authState.User;
+            if (authUser.Identity?.IsAuthenticated == true)
             {
-                User = await ApiService.CallApiAsync<UserDto>($"api/users/{userId}");
+                var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId != null)
+                {
+                    User = await ApiService.CallApiAsync<UserDto>($"api/users/{userId}");
+                }
             }
+            await GetStats();
+            await GetCourses();
+            await GetRecentDocuments();
         }
-        await GetStats();
-        await GetCourses();
-        await GetRecentDocuments();
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Ett fel uppstod när data skulle hämtas: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task GetStats()

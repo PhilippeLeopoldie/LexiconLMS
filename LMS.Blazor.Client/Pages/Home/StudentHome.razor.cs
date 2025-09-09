@@ -11,6 +11,8 @@ using System.Security.Claims;
 namespace LMS.Blazor.Client.Pages.Home;
 public partial class StudentHome
 {
+    private bool isLoading = true;
+    private string? errorMessage;
     private StudentDashboardStatsDto? stats = new StudentDashboardStatsDto();
     private IEnumerable<ActivityDto>? upcomingActivities = [];
     private IEnumerable<AssignmentDto>? upcomingAssignments = [];
@@ -21,31 +23,41 @@ public partial class StudentHome
 
     protected override async Task OnInitializedAsync()
     {
-
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var authUser = authState.User;
-        if (authUser.Identity?.IsAuthenticated == true)
+        try
         {
-            var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != null)
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var authUser = authState.User;
+            if (authUser.Identity?.IsAuthenticated == true)
             {
-                User = await ApiService.CallApiAsync<UserDto>($"api/users/{userId}");
-                if (User != null && User.CourseId.HasValue)
-                    courseId = User.CourseId.Value;
+                var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId != null)
+                {
+                    User = await ApiService.CallApiAsync<UserDto>($"api/users/{userId}");
+                    if (User != null && User.CourseId.HasValue)
+                        courseId = User.CourseId.Value;
+                }
             }
+            var requestParams = new RequestParams() { OrderBy = OrderByParams.DateAsc, PageSize = 100 };
+            var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
+            modules = await ApiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module{queryString}");
+            if (modules != null && modules.Any())
+            {
+                currentModule = modules.FirstOrDefault(m => m.EndsAt > DateTime.Now);
+            }
+
+            await GetStats();
+            await GetUpcomingActivities();
+            await GetUpcomingAssignments();
         }
-        var requestParams = new RequestParams() { OrderBy = OrderByParams.DateAsc, PageSize = 100 };
-        var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
-        modules = await ApiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{courseId}/Module{queryString}");
-        if (modules != null && modules.Any())
+        catch (HttpRequestException ex)
         {
-            currentModule = modules.FirstOrDefault(m => m.EndsAt > DateTime.Now);
+            errorMessage = $"Ett fel uppstod när data skulle hämtas: {ex.Message}";
         }
-
-        await GetStats();
-        await GetUpcomingActivities();
-        await GetUpcomingAssignments();
-
+        finally
+        {
+            isLoading = false;
+        }
 
     }
     private async Task GetStats()

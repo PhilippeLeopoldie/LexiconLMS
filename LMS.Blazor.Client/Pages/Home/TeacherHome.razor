@@ -5,6 +5,12 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col p-5">
+            @if(isLoading)
+            {
+                <Spinner EntityName="användare" />
+            }
+            else
+            {
             <h2 class="mb-3">Lärarens dashboard | @(!string.IsNullOrEmpty(User?.FullName) ? User.FullName : User!.UserName)</h2>
             <div class="row g-3 mb-3 ">
                 <div class="col-6 col-xl-3">
@@ -71,6 +77,11 @@
                     </ListCard>
                 </div>
             </div>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            }
         </div>
     </div>
 </div>
