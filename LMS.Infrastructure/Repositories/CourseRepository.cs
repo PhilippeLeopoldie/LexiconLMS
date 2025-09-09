@@ -13,7 +13,7 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
         await FindByCondition(course => course.Id.Equals(id), trackChanges)
         .FirstOrDefaultAsync();
 
-    public  async Task<Course?> GetCourseByIdByUserRoleAsync(int courseId, UserRole userRole ,bool trackChanges = false)
+    public async Task<Course?> GetCourseByIdByUserRoleAsync(int courseId, UserRole userRole, bool trackChanges = false)
     {
         var query = FindByCondition(course => course.Id.Equals(courseId), trackChanges);
 
@@ -25,7 +25,7 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
 
         return await query.FirstOrDefaultAsync();
     }
-        
+
 
     public async Task<PagedList<Course>> GetAllCoursesAsync(
         UserRole? includeUsers = null,
@@ -63,6 +63,15 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
 
     public async Task<Course?> GetByStudentIdAsync(string studentUserId) =>
         await FindByCondition(c => c.Students.Any(student => student.Id.Equals(studentUserId))).FirstOrDefaultAsync();
+    public async Task<int> GetActiveCoursesCountAsync() =>
+        await FindByCondition(course => course.Ends >= DateTime.Now, false)
+                .CountAsync();
+    public async Task<int> GetActiveStudentsCountAsync() =>
+        await FindByCondition(course => course.Ends >= DateTime.Now, false)
+                .Select(s => s.Students.Count)
+                .SumAsync();
+
+
 
     private static IQueryable<Course> ApplyOrdering(IQueryable<Course> courses, RequestParams requestParams)
     {
@@ -79,4 +88,5 @@ public class CourseRepository(ApplicationDbContext context) : RepositoryBase<Cou
             _ => courses
         };
     }
+
 }

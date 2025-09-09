@@ -9,4 +9,5 @@ public interface IActivityRepository : IRepositoryBase<Activity>, IInternalRepos
     Task<bool> AnyOverlappingAsync(int moduleId, DateTime startsAt, DateTime endsAt, int? excludeActivityId = null);
     Task<Activity?> GetActivityByIdAsync(Expression<Func<Activity, bool>> expression, bool trackChanges = false);
     Task<IEnumerable<Activity>> GetByCourseIdAndTypeIdAsync(int courseId, int activityTypeId);
+    Task<int> GetAssignmentCountAsync(int activityTypeId, int? courseId);
 }

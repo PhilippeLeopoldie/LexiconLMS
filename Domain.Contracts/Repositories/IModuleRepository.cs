@@ -20,4 +20,6 @@ public interface IModuleRepository : IRepositoryBase<Module>, IInternalRepositor
         int? excludeModuleId = null
         );
     Task<bool> CourseExistAsync(int courseId);
+    Task<int> GetModulesCountAsync(int? courseId);
+    Task<int> GetPassedModulesCountAsync(int? courseId);
 }

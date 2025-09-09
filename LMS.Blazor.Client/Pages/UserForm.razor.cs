@@ -1,5 +1,8 @@
+using LMS.Shared.Common;
+using LMS.Shared.DTOs.CourseDtos;
 using LMS.Shared.DTOs.UserDtos;
 using LMS.Shared.Enums;
+using LMS.Shared.Helpers;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,12 +12,16 @@ public partial class UserForm
     [Parameter]
     public string? userId { get; set; }
 
+    private List<CourseDto>? courses = new();
     private bool isLoading = true;
     private string? errorMessage;
     private UserFormModel user = new();
 
     protected override async Task OnInitializedAsync()
     {
+        var requestParams = new RequestParams() { OrderBy = OrderByParams.DateDesc, PageSize = 10 };
+        var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
+
         var authState = await _auth.GetAuthenticationStateAsync();
         if (!authState.User.IsInRole("Teacher"))
         {
@@ -24,6 +31,8 @@ public partial class UserForm
 
         try
         {
+            courses = await _apiService.CallApiAsync<List<CourseDto>>($"api/courses/{queryString}");
+
             var existing = await _apiService.CallApiAsync<UserBasicDto>($"api/users/{userId}");
             if (existing != null)
             {

@@ -47,6 +47,14 @@ public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<A
                     .ToListAsync();
     }
 
+    public async Task<int> GetAssignmentCountAsync(int activityTypeId, int? courseId)
+    {
+        var query = FindByCondition(a => a.ActivityTypeId == activityTypeId
+                                && a.EndsAt > DateTime.Now);
+        query = courseId.HasValue ? query.Where(a => a.Module.CourseId == courseId) : query;
+        return await query.CountAsync();
+    }
+
     private static IQueryable<Activity> ApplyOrdering(IQueryable<Activity> activities, RequestParams requestParams)
     {
         if (requestParams.OrderBy == null) return activities.OrderBy(a => a.StartsAt).ThenBy(a => a.Name);
@@ -60,4 +68,5 @@ public class ActivityRepository(ApplicationDbContext context) : RepositoryBase<A
             _ => activities
         };
     }
+
 }

@@ -43,16 +43,17 @@
     }
 
 .lms-listcard__left {
-    display: flex;
-    gap: 12px;
+    gap: .8em;
     align-items: center;
     min-width: 0;
+    display: grid;
+    grid-template-columns: 2rem auto;
 }
 
 .lms-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .7rem;
     display: grid;
     place-items: center;
     background: color-mix(in srgb, var(--lms-border) 50%, transparent);
@@ -67,7 +68,7 @@
     font-size: 13px;
     font-weight: 600;
     color: var(--lms-text);
-    white-space: nowrap;
+    white-space:normal;
     overflow: hidden;
     text-overflow: ellipsis;
 }
