@@ -40,6 +40,7 @@ else
     private string? errorMessage;
     private bool isLoading { get; set; } = true;
     private CourseDto? Course {get;set;} = new();
+    [Inject] private CourseStateService _courseState { get; set; } = default!;
 
     [Inject] private IApiService _apiService { get; set; } = default!;
     protected override async Task OnInitializedAsync()
@@ -56,7 +57,7 @@ else
     }
     private async Task<Result<CourseDto>> ApiCall()
     {
-        
+
         try
         {
             var response = await _apiService.CallApiAsync<CourseDto>($"api/courses/{courseId}");
@@ -83,6 +84,7 @@ else
         if (result.Success)
         {
             Course = result.Data;
+            _courseState.Course = Course;
         }
         else
         {
