@@ -3,6 +3,7 @@ using Domain.Models.Configurations;
 using Domain.Models.Entities;
 using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.AuthDtos;
+using Microsoft.AspNetCore.Hosting.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -14,26 +15,14 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace LMS.Services;
-public class AuthService : IAuthService
+public class AuthService(
+    IMapper mapper,
+    UserManager<ApplicationUser> userManager,
+    IOptions<JwtSettings> jwtSettings
+        ) : IAuthService
 {
-    private readonly IMapper mapper;
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly RoleManager<IdentityRole> roleManager;
-    private readonly JwtSettings jwtSettings;
+    private readonly JwtSettings jwtSettings = jwtSettings.Value;
     private ApplicationUser? user;
-
-    public AuthService(
-        IMapper mapper,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-        IOptions<JwtSettings> jwtSettings
-        )
-    {
-        this.mapper = mapper;
-        this.userManager = userManager;
-        this.roleManager = roleManager;
-        this.jwtSettings = jwtSettings.Value;
-    }
 
     public async Task<TokenDto> CreateTokenAsync(bool addTime)
     {
@@ -54,7 +43,7 @@ public class AuthService : IAuthService
         return new TokenDto(jwt, user.RefreshToken!);
     }
 
-    private string? GenerateRefreshToken()
+    private static string? GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
         using var rng = RandomNumberGenerator.Create();
@@ -80,9 +69,14 @@ public class AuthService : IAuthService
 
         var claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, user.UserName!),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            new (ClaimTypes.Name, user.UserName!),
+            new (ClaimTypes.NameIdentifier, user.Id.ToString())
         };
+
+        if (await userManager.IsInRoleAsync(user, "Student"))
+        {
+            claims.Add(new ("CourseId", user.CourseId?.ToString() ?? string.Empty));
+        }
 
         var roles = await userManager.GetRolesAsync(user);
 
@@ -151,11 +145,8 @@ public class AuthService : IAuthService
     public async Task<TokenDto> RefreshTokenAsync(TokenDto token)
     {
         ClaimsPrincipal principal = GetPrincipalFromExpiredToken(token.AccessToken);
-        ApplicationUser? user = await userManager.FindByNameAsync(principal.Identity?.Name!);
-
-        if (user == null)
-            throw new TokenValidationException("User not found", StatusCodes.Status400BadRequest);
-
+        ApplicationUser? user = await userManager.FindByNameAsync(principal.Identity?.Name!) 
+            ?? throw new TokenValidationException("User not found", StatusCodes.Status400BadRequest);
         if (user!.RefreshToken != token.RefreshToken)
             throw new TokenValidationException("Refresh token do not match");
 
