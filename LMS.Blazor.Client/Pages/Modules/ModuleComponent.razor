@@ -1,6 +1,9 @@
-﻿@using LMS.Shared.DTOs.ModuleDtos
+@using LMS.Blazor.Client.Models
+@using LMS.Shared.DTOs.ModuleDtos
 @using LMS.Blazor.Client.Shared.Components
 @using LMS.Shared.Helpers
+@using System.Text.Json
+
 
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -73,55 +76,4 @@ else
             </ul>
         </div>
     };
-
-    private List<ModuleDto>? modules { get; set; } = [];
-    [Parameter]
-    public int CourseId { get; set; }
-
-    [Inject] private IApiService _apiService { get; set; } = default!;
-    [Inject] private NavigationManager _navigationManager { get; set; } = default!;
-    [Inject] private ModuleStateService _moduleState { get; set; } = default!;
-
-    private string? errorMessage;
-    private bool isLoading { get; set; } = true;
-
-    private void Edit(ModuleDto module)
-    {
-        _moduleState.Module = module;
-        _navigationManager.NavigateTo($"/courses/{CourseId}/module/{module.Id}/edit");
-    }
-
-    private void Delete()
-    {
-        _navigationManager.NavigateTo($"/courses/{CourseId}/modules");// temporary route
-    }
-
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        var requestParams = new ModuleRequestParams()
-        {
-            OrderBy = OrderByParams.DateAsc,
-            PageSize = 100,
-            IncludeActivities = true
-        };
-        var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
-
-        isLoading = true;
-        try
-        {
-            var response = await _apiService.CallApiAsync<IEnumerable<ModuleDto>>($"api/courses/{CourseId}/Module?{queryString}");
-            modules = response?.ToList();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-        }
-
-    }    
 }

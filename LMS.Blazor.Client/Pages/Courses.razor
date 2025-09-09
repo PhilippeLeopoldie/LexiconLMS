@@ -71,11 +71,7 @@ else
                     <button class="dropdown-item btn btn-link" @onclick="() => Edit(course)">
                         <i class="bi bi-pencil-square"></i> Redigera
                     </button>
-
-                    <!-- Delete -->
-                    <button class="dropdown-item btn btn-link text-danger" @onclick="() => Delete()">
-                        <i class="bi bi-trash"></i> Ta bort
-                    </button>
+                    
                 </ul>
             </div>
         };
@@ -101,8 +97,4 @@ else
         _navigationManager.NavigateTo($"/courses/editcourse/{course.Id}");
     }
 
-    private void Delete()
-    {
-        _navigationManager.NavigateTo($"/courses");   // temporary route
-    }
 }
