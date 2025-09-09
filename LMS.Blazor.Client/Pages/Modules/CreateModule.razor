@@ -7,6 +7,7 @@
 @page "/courses/{courseId:int}/modules/create"
 
 
+
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
         <h3>@($"Skapa ny module för kurs: {Course?.Name} ({Course?.Starts:d} - {Course?.Ends:d})")</h3>
