@@ -34,8 +34,14 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var authUser = authState.User;
-        var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
+        /*var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
         User = await UserManager.FindByIdAsync(userId);
-        CourseId = User.CourseId ?? 0;
+        CourseId = User.CourseId ?? 0;*/
+        var courseId = authUser.FindFirst("courseId")?.Value; // doesn't work
+        if (int.TryParse(courseId, out int number))
+        {
+            CourseId = number;
+        };
+            
     }
 }
