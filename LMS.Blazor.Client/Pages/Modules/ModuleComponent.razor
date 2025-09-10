@@ -59,21 +59,24 @@ else
 @code {
     private RenderFragment ModuleMenu(ModuleDto module) => __builder =>
     {
-        <div class="dropstart dropup flex-shrink-0" style="width:5%">
-            <button class="btn btn-link w-100" data-bs-toggle="dropdown">
-                <i class="bi bi-three-dots-vertical"></i>
-            </button>
-            <ul class="manage-actions dropdown-menu" data-popper-placement="left-start">
-                <!-- Edit -->
-                <button class="dropdown-item btn btn-link" @onclick="() => Edit(module)">
-                    <i class="bi bi-pencil-square"></i> Redigera
+        <AuthorizeView Roles="Teacher">
+            <div class="dropstart dropup flex-shrink-0" style="width:5%">
+                <button class="btn btn-link w-100" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical"></i>
                 </button>
+                <ul class="manage-actions dropdown-menu" data-popper-placement="left-start">
+                    <!-- Edit -->
+                    <button class="dropdown-item btn btn-link" @onclick="() => Edit(module)">
+                        <i class="bi bi-pencil-square"></i> Redigera
+                    </button>
 
-                <!-- Delete -->
-                <button class="dropdown-item btn btn-link text-danger" @onclick="() => Delete()">
-                    <i class="bi bi-trash"></i> Ta bort
-                </button>
-            </ul>
-        </div>
+                    <!-- Delete -->
+                    <button class="dropdown-item btn btn-link text-danger" @onclick="() => Delete()">
+                        <i class="bi bi-trash"></i> Ta bort
+                    </button>
+                </ul>
+            </div>
+        </AuthorizeView>
+        
     };
 }
