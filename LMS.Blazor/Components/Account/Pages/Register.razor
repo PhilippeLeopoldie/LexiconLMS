@@ -1,4 +1,6 @@
 ﻿@page "/Account/CompleteRegistration"
+@using System.ComponentModel.DataAnnotations
+@using LMS.Shared.DTOs.AuthDtos
 @rendermode InteractiveServer 
 
 @inject ILogger<Login> logger
@@ -7,61 +9,62 @@
 @inject UserManager<ApplicationUser> userManager
 
 <PageTitle>Slutför registrering</PageTitle>
-<Section Title="Slutför registrering" >
-<h2>Välkommen! Slutför din registrering genom att ange ditt lösenord.</h2>
 
-<Section>
-        <div class="row">
-            <div class="col-md-4">
-        <StatusMessage Message="@errorMessage" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="CompleteRegistration" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Slutför din registrering</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" disabled="true" />
-                <label for="email">E-post</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            @if (!string.IsNullOrEmpty(InvitedUserName))
-            {
+<div class="register-form">
+    <div class="row h-100 d-flex justify-content-center align-items-center">
+        <div class="col-md-4 lms-register-form">
+        <Section Title="Slutför registrering" >
+            <div class="lms-section_register_body">
+            <StatusMessage Message="@errorMessage" />
+            <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="CompleteRegistration" FormName="register">
+                <DataAnnotationsValidator />
+                <h2>Slutför din registrering</h2>
+                <hr />
+                <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
-                    <input type="text" value="@InvitedUserName" class="form-control" disabled />
-                    <label for="name">Namn</label>
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" disabled="true" />
+                    <label for="email">E-post</label>
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
                 </div>
-            }
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="Förnamn" />
-                <label for="firstName">Förnamn</label>
-                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+                @if (!string.IsNullOrEmpty(InvitedUserName))
+                {
+                    <div class="form-floating mb-3">
+                        <input type="text" value="@InvitedUserName" class="form-control" disabled />
+                        <label for="name">Namn</label>
+                    </div>
+                }
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="Förnamn" />
+                    <label for="firstName">Förnamn</label>
+                    <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Efternamn" />
+                    <label for="lastName">Efternamn</label>
+                    <ValidationMessage For="() => Input.LastName" class="text-danger" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.PhoneNumber" class="form-control" autocomplete="tel" placeholder="Telefonnummer" />
+                    <label for="phoneNumber">Telefonnummer</label>
+                    <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                    <label for="password">Lösenord</label>
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="lösenord" />
+                    <label for="confirm-password">Bekräfta lösenord</label>
+                    <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+                </div>
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Slutför registrering</button>
+            </EditForm> 
             </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Efternamn" />
-                <label for="lastName">Efternamn</label>
-                <ValidationMessage For="() => Input.LastName" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control" autocomplete="tel" placeholder="Telefonnummer" />
-                <label for="phoneNumber">Telefonnummer</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Lösenord</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="lösenord" />
-                <label for="confirm-password">Bekräfta lösenord</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Slutför registrering</button>
-        </EditForm>
+            </Section>
+        </div>
     </div>
 </div>
-</Section>
-</Section>
 
 @code {
     private string? errorMessage;
