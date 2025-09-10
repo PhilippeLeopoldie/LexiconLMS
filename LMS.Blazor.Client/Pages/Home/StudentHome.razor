@@ -26,7 +26,7 @@ else
                             </StatTile>
                         </div>
                         <div class="col-12 col-lg-3">
-                            <StatTile Label="Kommande aktiviteter" Value="@stats.UpcomingActivitiesCount" Subtext="Nästa 7 dagar">
+                            <StatTile Label="Kommande aktiviteter" Value="@stats.UpcomingActivitiesCount" Subtext="Närmaste dagar">
                                 <Icon><i class="bi bi-calendar-event"></i></Icon>
                             </StatTile>
                         </div>
@@ -79,7 +79,7 @@ else
                                 {
                                         <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-activity'></i>"))"
                                                       Title="@itm.Name" Subtitle="@itm.ActivityType.Name"
-                                                      Meta="@(builder => builder.AddContent(1, $"{itm.StartsAt:g}  -  {itm.EndsAt:g}"))"
+                                                      Meta="@(builder => builder.AddContent(1, $"{itm.StartsAt.ToString("yyyy-MM-dd")}  -  {itm.EndsAt.ToString("yyyy-MM-dd")}"))"
                                                     Actions="@(builder => builder.AddMarkupContent(0,""))" />
 
                                 }
@@ -97,8 +97,8 @@ else
                                 @foreach (var itm in upcomingAssignments)
                                 {
                                         <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-activity'></i>"))"
-                                                      Title="@itm.Name" Subtitle="@itm.ModuleName"                                                 
-                                                      Meta="@(builder => builder.AddContent(1, $"{itm.EndDate:g}"))"
+                                                      Title="@itm.Name" Subtitle="@itm.ModuleName"
+                                                  Meta="@(builder => builder.AddContent(1, $"{itm.EndDate.ToString("yyyy-MM-dd")}"))"
                                                       Actions="@(builder => builder.AddMarkupContent(0,""))" />
                                 }
                             }
