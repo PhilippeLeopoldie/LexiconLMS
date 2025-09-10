@@ -40,7 +40,7 @@ else
                                                 var studentCount = course.Students?.Count() ?? 0;
 
                                                 <NavLink class="nav-link mt-1" href=@($"/courses/{course.Id}/modules") Match=@NavLinkMatch.All>
-                                                    <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")">
+                                                    <CourseRow Title="@course.Name" Sub="@($"{studentCount} studenter • {moduleCount} moduler")" MenuContent="@CourseMenu(course)">
                                                         <Icon><i class="bi bi-journal-code"></i></Icon>
                                                         <Suffix><DateBadge Start="@course.Starts" End="@course.Ends"/></Suffix>
                                                     </CourseRow>
