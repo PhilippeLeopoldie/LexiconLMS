@@ -1,4 +1,8 @@
+using LMS.Shared.Common;
 using LMS.Shared.DTOs.ActivityDtos;
+using LMS.Shared.DTOs.DocumentDtos;
+using LMS.Shared.Enums;
+using LMS.Shared.Helpers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -16,17 +20,26 @@ public partial class ActivityDetails
     private bool isLoading = true;
     private bool isDownloading = false;
     private bool isUploading = false;
+    private bool isSubmitting = false;
     private bool showUploadForm = false;
+    private bool showSubmissionForm = false;
     private bool isTeacher = false;
     private int? downloadingDocumentId = null;
     private string errorMessage = string.Empty;
     private IBrowserFile? selectedFile = null;
     private string selectedFileName = string.Empty;
+    private IBrowserFile? selectedSubmissionFile = null;
+    private string selectedSubmissionFileName = string.Empty;
+    private List<DocumentDto> submissions = new();
+    private List<DocumentDto> userSubmissions = new();
+    private string? currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         await CheckUserRole();
         await LoadActivity();
+        if (activity?.ActivityType.Id == 4) // Inlämningsuppgift
+            await LoadSubmissions();
     }
 
     private async Task CheckUserRole()
@@ -35,6 +48,7 @@ public partial class ActivityDetails
         if (authState.User.Identity?.IsAuthenticated == true)
         {
             isTeacher = authState.User.IsInRole("Teacher");
+            currentUserId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         }
     }
 
@@ -53,6 +67,30 @@ public partial class ActivityDetails
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task LoadSubmissions()
+    {
+        var requestParams = new RequestParams() { OrderBy = OrderByParams.DateAsc, PageSize = 100 };
+        var queryString = QueryStringHelper.ObjectToQueryString(requestParams);
+
+        try
+        {
+            if (isTeacher)
+            {
+                var allSubmissions = await ApiService.CallApiAsync<IEnumerable<DocumentDto>>($"api/documents/submissions/{ActivityId}/{queryString}");
+                submissions = allSubmissions.ToList();
+            }
+            else if (currentUserId != null)
+            {
+                var mySubmissions = await ApiService.CallApiAsync<IEnumerable<DocumentDto>>($"api/documents/user/{currentUserId}/{queryString}");
+                userSubmissions = mySubmissions.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ett fel uppstod när inlämningar laddades: {ex.Message}";
         }
     }
 
@@ -92,10 +130,26 @@ public partial class ActivityDetails
         }
     }
 
+    private void ToggleSubmissionForm()
+    {
+        showSubmissionForm = !showSubmissionForm;
+        if (!showSubmissionForm)
+        {
+            CancelSubmission();
+        }
+    }
+
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
         selectedFileName = e.File.Name;
+        errorMessage = string.Empty;
+    }
+
+    private void OnSubmissionFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedSubmissionFile = e.File;
+        selectedSubmissionFileName = e.File.Name;
         errorMessage = string.Empty;
     }
 
@@ -143,12 +197,69 @@ public partial class ActivityDetails
         }
     }
 
+    private async Task SubmitAssignment()
+    {
+        if (selectedSubmissionFile == null) return;
+
+        try
+        {
+            isSubmitting = true;
+            StateHasChanged();
+
+            // Validate file size (10MB limit)
+            const long maxFileSize = 10 * 1024 * 1024;
+            if (selectedSubmissionFile.Size > maxFileSize)
+            {
+                errorMessage = "Filen är för stor. Maximal storlek är 10MB.";
+                return;
+            }
+
+            var formData = new Dictionary<string, string>
+            {
+                ["activityId"] = ActivityId.ToString()
+            };
+
+            using var stream = selectedSubmissionFile.OpenReadStream(maxFileSize);
+            var contentType = selectedSubmissionFile.ContentType ?? GetMimeType(selectedSubmissionFile.Name);
+
+            var result = await ApiService.UploadFileAsync<int>($"api/documents/upload?activityId={activity.Id}", stream, selectedSubmissionFile.Name, contentType, formData);
+
+            await LoadSubmissions();
+
+            CancelSubmission();
+
+            errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ett fel uppstod när uppgiften lämnades in: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
     private void CancelUpload()
     {
         selectedFile = null;
         selectedFileName = string.Empty;
         showUploadForm = false;
         errorMessage = string.Empty;
+    }
+
+    private void CancelSubmission()
+    {
+        selectedSubmissionFile = null;
+        selectedSubmissionFileName = string.Empty;
+        showSubmissionForm = false;
+        errorMessage = string.Empty;
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo($"/courses/{CourseId}/modules/{ModuleId}/activities");
     }
 
     private static string GetMimeType(string fileName)
@@ -171,11 +282,6 @@ public partial class ActivityDetails
             ".rar" => "application/x-rar-compressed",
             _ => "application/octet-stream"
         };
-    }
-
-    private void NavigateBack()
-    {
-        NavigationManager.NavigateTo($"/courses/{CourseId}/modules/{ModuleId}/activities");
     }
 
     private static string GetActivityTypeIcon(int activityTypeId)
