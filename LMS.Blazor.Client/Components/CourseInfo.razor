@@ -42,6 +42,6 @@
             return end.Value.ToString("- d MMM, yyyy");
 
         bool isSameStartAndEndYear = start.Value.Year == end.Value.Year;
-        return start.Value.ToString("d MMM" + (isSameStartAndEndYear ? "" : ", YYYY")) + end.Value.ToString(" - d MMM, yyyy");
+        return start.Value.ToString("d MMM" + (isSameStartAndEndYear ? "" : ", yyyy")) + end.Value.ToString(" - d MMM, yyyy");
     }
 }

@@ -23,7 +23,9 @@ else if (isLoading)
 else
 {
     <AuthorizeView Context="authContext">
-        <Section Title="@($"Moduler från kurse: {Course?.Name}  ({Course?.Starts:d} - {Course?.Ends:d})")"
+
+        <Section Title="@($"Moduler från kurs: {Course?.Name}  ({Course?.Starts.ToString("yyyy-MM-dd")} - {Course?.Ends.ToString("yyyy-MM-dd")})")"
+
                  Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-journal-code'></i>"))"
                  HeaderActions="@(authContext.User.IsInRole("Teacher")
                                                             ? (builder => builder.AddMarkupContent(0, $"<a href='/courses/{courseId}/modules/create' class='btn btn-primary'>+ Skapa modul</a>"))
