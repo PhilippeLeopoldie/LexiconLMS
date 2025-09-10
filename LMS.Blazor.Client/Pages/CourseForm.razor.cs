@@ -10,7 +10,7 @@ public partial class CourseForm
     public int? courseId { get; set; }
 
     private CourseDto? course;
-    private CourseFormModel courseDto = new() { Name = string.Empty, StartsAtText = DateTime.Now.ToString("yyyy-MM-ddTHH:mm"), EndsAtText = DateTime.Now.AddMonths(1).ToString("yyyy-MM-ddTHH:mm") };
+    private CourseFormModel courseDto = new() { Name = string.Empty, StartsAtText = DateTime.Now.ToString("yyyy-MM-dd HH:mm"), EndsAtText = DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd HH:mm") };
 
     private bool isLoading = true;
     private string? errorMessage;
