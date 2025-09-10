@@ -7,7 +7,7 @@
 
 @if(module is not null)
 {
-    <h3>Aktiviteter i Modul: @module.Name</h3>
+    <h3 class="p-3">Aktiviteter i Modul: @module.Name</h3>
 }
 
 @if (activities == null)
@@ -74,7 +74,7 @@ else
                                                 BodyFragment="@(builder => builder.AddMarkupContent(0, @$"{bodyFragment}"))">
                                     <Actions>
                                         <div class="card-actions">
-                                            <NavLink class="card-link btn btn-link " href="@($"/module/{moduleId}/activity/{activity.Id}")">
+                                                    <NavLink class="card-link btn btn-link " href="@($"/courses/{courseId}/modules/{moduleId}/activities/{activity.Id}")">
                                                 Gå till aktivitet
                                             </NavLink>
 
@@ -140,7 +140,7 @@ else
                                                         BodyFragment="@(builder => builder.AddMarkupContent(0, @$"{bodyFragment}"))">
                                             <Actions>
                                                 <div class="card-actions">
-                                                            <NavLink class="card-link btn btn-link " href="@($"/module/{moduleId}/activity/{activity.Id}")">
+                                                            <NavLink class="card-link btn btn-link " href="@($"/courses/{courseId}/modules/{moduleId}/activities/{activity.Id}")">
                                                         Gå till aktivitet
                                                     </NavLink>
                                                        

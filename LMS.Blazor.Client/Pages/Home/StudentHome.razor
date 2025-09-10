@@ -57,7 +57,7 @@ else
                             {
                                 @foreach (var module in modules)
                                 {
-                                    <CourseRow Title="@module.Name" Sub="@($"{module.StartsAt:d}  -  {module.EndsAt:d}")" HasMenu="false" >
+                                            <CourseRow Title="@module.Name" Sub="@($"{module.StartsAt.ToString("yyyy-MM-dd")}  -  {module.EndsAt.ToString("yyyy-MM-dd")}")" HasMenu="false">
                                         <Icon><i class="bi bi-grid-1x2"></i></Icon>
                                         <Suffix><DateBadge Start="@module.StartsAt" End="@module.EndsAt" /></Suffix>
                                     </CourseRow>

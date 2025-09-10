@@ -77,4 +77,10 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     {
         await SendAsync(HttpMethod.Delete, endpoint, null, cancellationToken);
     }
+
+    public async Task<byte[]> DownloadFileAsync(string endpoint, CancellationToken cancellationToken = default)
+    {
+        var response = await SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
+        return await response.Content.ReadAsByteArrayAsync();
+    }
 }

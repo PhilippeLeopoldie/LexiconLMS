@@ -1,4 +1,5 @@
 using LMS.Blazor.Client.Services;
+using Microsoft.AspNetCore.Components;
 using System.Text.Json;
 
 namespace LMS.Blazor.Services;
@@ -8,6 +9,7 @@ public class ServerApiService : IApiService
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    private NavigationManager navigationManager;
 
     public ServerApiService(IHttpClientFactory httpClientFactory)
     {
@@ -18,7 +20,12 @@ public class ServerApiService : IApiService
     {
 
         var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+          || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            var unauthorizedMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(unauthorizedMessage) ? "Access denied" : unauthorizedMessage, null, response.StatusCode);
+        }
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -95,6 +102,27 @@ public class ServerApiService : IApiService
             var message = string.IsNullOrWhiteSpace(errorBody) ? response.ReasonPhrase : errorBody;
             throw new HttpRequestException(message, null, response.StatusCode);
         }
+    }
+
+    public async Task<byte[]> DownloadFileAsync(string endpoint, CancellationToken cancellationToken = default)
+    {
+
+        var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+          || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            var unauthorizedMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(unauthorizedMessage) ? "Access denied" : unauthorizedMessage, null, response.StatusCode);
+        }
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var message = string.IsNullOrWhiteSpace(errorBody) ? response.ReasonPhrase : errorBody;
+            throw new HttpRequestException(message, null, response.StatusCode);
+        }
+
+
+        return await response.Content.ReadAsByteArrayAsync();
     }
 }
 

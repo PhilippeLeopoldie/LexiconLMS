@@ -1,0 +1,66 @@
+﻿@page "/courses/{CourseId:int}/modules/{ModuleId:int}/activities/{ActivityId:int}"
+
+@inject IApiService ApiService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<PageTitle>Aktivitetsdetaljer</PageTitle>
+
+@if (isLoading)
+{
+    <Spinner EntityName="aktivitet" />
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (activity != null)
+{
+    var time = $"{activity.StartsAt.ToString("yyyy-MM-dd HH:mm")} - {activity.StartsAt.ToString("yyyy-MM-dd HH:mm")}";
+    <Section Title="@activity.ActivityType.Name"  
+             SubTitle="@time"
+             Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-{GetActivityTypeIcon(activity.ActivityType.Id)}'></i>"))" >
+             
+             <HeaderActions>
+            <button @onclick="NavigateBack" class="btn btn-secondary">
+                Tillbaka till modulen
+            </button>
+             </HeaderActions>
+             <ChildContent>
+                 <h3>@activity.Name</h3>
+                 <p class="px-3">@activity.Description</p>
+             </ChildContent>
+    </Section>
+    <div class="mt-3">
+    <ListCard Title="Dokument">
+        @if (activity.Documents != null && activity.Documents.Any())
+        {
+            <ul class="list-group">
+                @foreach (var document in activity.Documents)
+                {
+                    <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-file-earmark-bar-graph'></i>"))"
+                                  Title="@document.Name"
+                                      Subtitle="@document.CreatedAt.ToString("yyyy-MM-dd HH:mm")">
+                        <Actions>
+                            <button @onclick="() => DownloadDocument(document.Id, document.Name)" class="btn btn-primary" disabled="@isDownloading">
+                                @if (isDownloading && downloadingDocumentId == document.Id)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                }
+                                <i class='bi bi-download'></i> Ladda ner fil
+                            </button>
+                        </Actions>
+                    </ListCardItem>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Inga dokument kopplade till denna aktivitet.</p>
+        }
+    </ListCard>
+    </div>
+}
