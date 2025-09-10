@@ -175,7 +175,7 @@ public partial class ActivityDetails
 
     private void NavigateBack()
     {
-        NavigationManager.NavigateTo($"/courses/{CourseId}/modules/{ModuleId}");
+        NavigationManager.NavigateTo($"/courses/{CourseId}/modules/{ModuleId}/activities");
     }
 
     private static string GetActivityTypeIcon(int activityTypeId)
