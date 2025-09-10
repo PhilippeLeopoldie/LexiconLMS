@@ -8,6 +8,69 @@ public class ProxyController(IHttpClientFactory httpClientFactory) : ControllerB
 {
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
+    [HttpPost("upload")]
+    public async Task<IActionResult> Upload(string endpoint, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(endpoint);
+
+        var client = _httpClientFactory.CreateClient("LmsAPIClient");
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, endpoint);
+
+        if (Request.HasFormContentType)
+        {
+            var formContent = new MultipartFormDataContent();
+
+            var form = await Request.ReadFormAsync(cancellationToken);
+
+            foreach (var file in form.Files)
+            {
+                if (file.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream, cancellationToken);
+                    var fileBytes = memoryStream.ToArray();
+
+                    var fileContent = new ByteArrayContent(fileBytes);
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "application/octet-stream");
+                    formContent.Add(fileContent, "file", file.FileName);
+                }
+            }
+
+            foreach (var field in form)
+            {
+                if (field.Key != "endpoint")
+                {
+                    foreach (var value in field.Value)
+                    {
+                        formContent.Add(new StringContent(value), field.Key);
+                    }
+                }
+            }
+
+            requestMessage.Content = formContent;
+        }
+
+
+        var response = await client.SendAsync(requestMessage, cancellationToken);
+
+        foreach (var header in response.Headers)
+        {
+            Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        foreach (var header in response.Content.Headers)
+        {
+            Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        Response.Headers.Remove("transfer-encoding");
+
+        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+
+        Response.StatusCode = (int)response.StatusCode;
+        return File(contentStream, contentType);
+    }
+
     public async Task<IActionResult> Proxy(string endpoint, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(endpoint);

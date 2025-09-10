@@ -124,5 +124,59 @@ public class ServerApiService : IApiService
 
         return await response.Content.ReadAsByteArrayAsync();
     }
+
+    public async Task<T?> UploadFileAsync<T>(string endpoint, Stream fileStream, string fileName, string contentType, Dictionary<string, string>? formData = null, CancellationToken cancellationToken = default)
+    {
+        using var content = new MultipartFormDataContent();
+
+        // Add file content
+        var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+        content.Add(fileContent, "file", fileName);
+
+        // Add form data if provided
+        if (formData != null)
+        {
+            foreach (var kvp in formData)
+            {
+                content.Add(new StringContent(kvp.Value), kvp.Key);
+            }
+        }
+
+        var response = await SendMultipartAsync(endpoint, content, cancellationToken);
+
+        if (typeof(T) == typeof(string))
+        {
+            return (T)(object)await response.Content.ReadAsStringAsync();
+        }
+
+        return await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, cancellationToken);
+    }
+    private async Task<HttpResponseMessage> SendMultipartAsync(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default)
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"proxy?endpoint={endpoint}")
+        {
+            Content = content
+        };
+
+        var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+           || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            navigationManager.NavigateTo("/Account/AccessDenied");
+            var unauthorizedMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(unauthorizedMessage) ? "Access denied" : unauthorizedMessage, null, response.StatusCode);
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync();
+            var message = string.IsNullOrWhiteSpace(errorBody) ? response.ReasonPhrase : errorBody;
+            throw new HttpRequestException(message, null, response.StatusCode);
+        }
+
+        return response;
+    }
 }
 

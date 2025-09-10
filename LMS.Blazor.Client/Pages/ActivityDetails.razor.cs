@@ -1,62 +1,59 @@
 using LMS.Shared.DTOs.ActivityDtos;
-using LMS.Shared.DTOs.DocumentDtos;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
-using System.Net;
 
 namespace LMS.Blazor.Client.Pages;
+
 public partial class ActivityDetails
 {
-    [Parameter] public int ActivityId { get; set; }
-    [Parameter] public int ModuleId { get; set; }
     [Parameter] public int CourseId { get; set; }
+    [Parameter] public int ModuleId { get; set; }
+    [Parameter] public int ActivityId { get; set; }
 
-    private bool isLoading = true;
-    private string? errorMessage;
     private ActivityDto? activity;
-    private DocumentDto? document;
+    private bool isLoading = true;
     private bool isDownloading = false;
+    private bool isUploading = false;
+    private bool showUploadForm = false;
+    private bool isTeacher = false;
     private int? downloadingDocumentId = null;
+    private string errorMessage = string.Empty;
+    private IBrowserFile? selectedFile = null;
+    private string selectedFileName = string.Empty;
+
     protected override async Task OnInitializedAsync()
+    {
+        await CheckUserRole();
+        await LoadActivity();
+    }
+
+    private async Task CheckUserRole()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            isTeacher = authState.User.IsInRole("Teacher");
+        }
+    }
+
+    private async Task LoadActivity()
     {
         try
         {
+            isLoading = true;
+            errorMessage = string.Empty;
             activity = await ApiService.CallApiAsync<ActivityDto>($"api/modules/{ModuleId}/activities/{ActivityId}");
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            if (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                errorMessage = "Aktiviteten kunde inte hittas.";
-            }
-            else
-            {
-                errorMessage = $"Ett fel uppstod vid hämtning av data: {ex.Message}";
-            }
+            errorMessage = $"Ett fel uppstod när aktiviteten laddades: {ex.Message}";
         }
         finally
         {
             isLoading = false;
         }
-    }
-
-    private void NavigateBack()
-    {
-        NavigationManager.NavigateTo($"/courses/{CourseId}/modules/{ModuleId}/activities");
-    }
-
-    private string GetActivityTypeIcon(int? activityTypeId)
-    {
-        if (!activityTypeId.HasValue) return "braces";
-
-        return activityTypeId.Value switch
-        {
-            1 => "book",
-            2 => "globe",
-            3 => "code-slash",
-            4 => "feather",
-            _ => "braces",
-        };
     }
 
     private async Task DownloadDocument(int documentId, string fileName)
@@ -86,6 +83,74 @@ public partial class ActivityDetails
         }
     }
 
+    private void ToggleUploadForm()
+    {
+        showUploadForm = !showUploadForm;
+        if (!showUploadForm)
+        {
+            CancelUpload();
+        }
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        selectedFileName = e.File.Name;
+        errorMessage = string.Empty;
+    }
+
+    private async Task UploadDocument()
+    {
+        if (selectedFile == null) return;
+
+        try
+        {
+            isUploading = true;
+            StateHasChanged();
+
+            // Validate file size (10MB limit)
+            const long maxFileSize = 10 * 1024 * 1024;
+            if (selectedFile.Size > maxFileSize)
+            {
+                errorMessage = "Filen är för stor. Maximal storlek är 10MB.";
+                return;
+            }
+
+            var formData = new Dictionary<string, string>
+            {
+                ["activityId"] = ActivityId.ToString()
+            };
+
+            using var stream = selectedFile.OpenReadStream(maxFileSize);
+            var contentType = selectedFile.ContentType ?? GetMimeType(selectedFile.Name);
+
+            var result = await ApiService.UploadFileAsync<int>($"api/documents/upload?activityId={activity.Id}", stream, selectedFile.Name, contentType, formData);
+
+            await LoadActivity();
+
+            CancelUpload();
+
+            errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ett fel uppstod när filen laddades upp: {ex.Message}";
+        }
+        finally
+        {
+            isUploading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CancelUpload()
+    {
+        selectedFile = null;
+        selectedFileName = string.Empty;
+        showUploadForm = false;
+        errorMessage = string.Empty;
+    }
+
     private static string GetMimeType(string fileName)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
@@ -105,6 +170,23 @@ public partial class ActivityDetails
             ".zip" => "application/zip",
             ".rar" => "application/x-rar-compressed",
             _ => "application/octet-stream"
+        };
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo($"/courses/{CourseId}/modules/{ModuleId}");
+    }
+
+    private static string GetActivityTypeIcon(int activityTypeId)
+    {
+        return activityTypeId switch
+        {
+            1 => "book", // Föreläsning
+            2 => "laptop", // E-learning
+            3 => "code-slash",
+            4 => "pencil-square", // Uppgift
+            _ => "calendar-event"
         };
     }
 }

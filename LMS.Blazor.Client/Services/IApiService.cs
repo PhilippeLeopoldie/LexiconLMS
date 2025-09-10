@@ -9,4 +9,5 @@ public interface IApiService
     Task DeleteAsync(string endpoint, CancellationToken cancellationToken = default);
     Task<(T? Data, string? PaginationHeader)> CallApiWithPaginationAsync<T>(string endpoint, CancellationToken cancellationToken = default);
     Task<byte[]> DownloadFileAsync(string endpoint, CancellationToken cancellationToken = default);
+    Task<T?> UploadFileAsync<T>(string endpoint, Stream fileStream, string fileName, string contentType, Dictionary<string, string>? formData = null, CancellationToken cancellationToken = default);
 }

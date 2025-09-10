@@ -11,4 +11,5 @@ public class ServerNoopApiService : IApiService
     public Task PostAsync(string endpoint, object data, CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task<T?> PostWithResponseAsync<T>(string endpoint, object data, CancellationToken cancellationToken = default) => Task.FromResult<T?>(default);
     public Task PutAsync(string endpoint, object data, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task<T?> UploadFileAsync<T>(string endpoint, Stream fileStream, string fileName, string contentType, Dictionary<string, string>? formData = null, CancellationToken cancellationToken = default) => Task.FromResult<T?>(default);
 }

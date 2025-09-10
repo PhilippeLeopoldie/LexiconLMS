@@ -37,7 +37,6 @@ public partial class ModuleActivities : ComponentBase
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Fel vid hämtning av modul: {ex.Message}");
             activities = [];
         }
         await LoadActivities();
@@ -69,7 +68,6 @@ public partial class ModuleActivities : ComponentBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ett fel uppstod: {ex.Message}");
             activities = [];
 
             upcomingActivities = [];
@@ -100,7 +98,6 @@ public partial class ModuleActivities : ComponentBase
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Fel vid borttagning: {ex.Message}");
         }
     }
 
