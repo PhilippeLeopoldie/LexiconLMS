@@ -1,14 +1,19 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JS
 
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable lms-section" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        <AuthorizeView Roles="Student">
+        <AuthorizeView Roles="Student" Context="authContext">
             <NavItem Href="/" Icon="bi-speedometer2" Text="Översikt" />
-            <NavItem Href="/modules" Icon="bi-list-ul" Text="Moduler" />            
+            <NavItem Href=@($"/courses/{CourseId}/modules") Icon="bi-list-ul" Text="Moduler" />
             <NavItem Href="/documents" Icon="bi-file-earmark-check" Text="Inlämningar" />
         </AuthorizeView>
         <AuthorizeView Roles="Teacher">
@@ -18,3 +23,15 @@
         </AuthorizeView>
     </nav>
 </div>
+@code {
+    public int? CourseId { get; set; }
+    public ApplicationUser? User { get; set; } = null!;
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authUser = authState.User;
+        var userId = authUser.FindFirstValue(ClaimTypes.NameIdentifier);
+        User = await UserManager.FindByIdAsync(userId);
+        CourseId = User.CourseId ?? 0;
+    }
+}
