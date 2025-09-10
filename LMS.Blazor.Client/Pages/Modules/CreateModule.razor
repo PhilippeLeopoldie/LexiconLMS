@@ -9,7 +9,7 @@
 
 <AuthorizeView Context="authContext" Roles="Teacher">
     <Authorized>
-        <h3>@($"Skapa ny module för kurs: {Course?.Name} ({Course?.Starts:d} - {Course?.Ends:d})")</h3>
+        <h3>@($"Skapa ny modul för kurs: {Course?.Name} ({Course?.Starts:d} - {Course?.Ends:d})")</h3>
         <ModuleForm 
             FormModel="@formModel"
                     OnValidSubmit="@OnSubmit"

@@ -11,7 +11,7 @@ public class ConflictException : Exception
 
 public class ModuleOverlappingException : ConflictException
 {
-    public ModuleOverlappingException(string moduleRange) : base($"Tidsintervallet: {moduleRange} överlappar med en annan module i denna kurs.")
+    public ModuleOverlappingException(string moduleRange) : base($"Tidsintervallet: {moduleRange} överlappar med en annan modul i denna kurs.")
     {
     }
 
@@ -23,7 +23,7 @@ public class ModuleOverlappingException : ConflictException
 }
 
 public class ActivityOverlapException(string range)
-    : ConflictException($"Tidsintervallet: {range} överlappar med en annan aktivitet i denna module.")
+    : ConflictException($"Tidsintervallet: {range} överlappar med en annan aktivitet i denna modul.")
 { }
 
 public class DuplicateStudentInCourseException : ConflictException
