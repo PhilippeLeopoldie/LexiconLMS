@@ -112,7 +112,7 @@ public class DocumentService(IUnitOfWork unitOfWork, IMapper mapper, UserManager
         var document = new Document
         {
             UploadedByUserId = userId,
-            Name = uniqueFileName,
+            Name = file.FileName,
             StoragePath = filePath,
             Size = (int)file.Length,
             FileType = file.ContentType,

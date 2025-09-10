@@ -1,4 +1,4 @@
-﻿.login-form {
+﻿.register-form {
     width: 95vw;
     height: 80vh;
     position: relative;
@@ -6,10 +6,10 @@
     justify-content: inherit;
     padding-top: 10vh;
 }
-.lms-login-form {
+.lms-register-form {
     max-width: 30rem;
 }
 
-.lms-section_login_body{
+.lms-section_register_body {
     padding-inline: 2rem;
 }

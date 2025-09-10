@@ -1,0 +1,106 @@
+﻿@page "/courses/{CourseId:int}/modules/{ModuleId:int}/activities/{ActivityId:int}"
+
+@inject IApiService ApiService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<PageTitle>Aktivitetsdetaljer</PageTitle>
+
+@if (isLoading)
+{
+    <Spinner EntityName="aktivitet" />
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (activity != null)
+{
+    var time = $"{activity.StartsAt.ToString("yyyy-MM-dd HH:mm")} - {activity.StartsAt.ToString("yyyy-MM-dd HH:mm")}";
+    <Section Title="@activity.ActivityType.Name"  
+             SubTitle="@time"
+             Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-{GetActivityTypeIcon(activity.ActivityType.Id)}'></i>"))" >
+             
+             <HeaderActions>
+            <button @onclick="NavigateBack" class="btn btn-secondary">
+                Tillbaka till modulen
+            </button>
+             </HeaderActions>
+             <ChildContent>
+                 <h3>@activity.Name</h3>
+                 <p class="px-3">@activity.Description</p>
+             </ChildContent>
+    </Section>
+    <div class="mt-3">
+        <ListCard Title="Dokument">
+            <HeaderActions>
+                @if (isTeacher)
+                {
+                    <button @onclick="ToggleUploadForm" class="btn btn-success me-2" disabled="@isUploading">
+                        <i class="bi bi-plus-circle"></i> Ladda upp dokument
+                    </button>
+                }
+            </HeaderActions>
+            <ChildContent>
+                @if (showUploadForm && isTeacher)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">Ladda upp nytt dokument</h6>
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label">Välj fil</label>
+                                <InputFile id="fileInput" class="form-control" OnChange="OnFileSelected" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar" />
+                                @if (!string.IsNullOrEmpty(selectedFileName))
+                                {
+                                    <div class="form-text">Vald fil: @selectedFileName</div>
+                                }
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button @onclick="UploadDocument" class="btn btn-primary" disabled="@(isUploading || selectedFile == null)">
+                                    @if (isUploading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    }
+                                    <i class="bi bi-upload"></i> Ladda upp
+                                </button>
+                                <button @onclick="CancelUpload" class="btn btn-secondary" disabled="@isUploading">
+                                    Avbryt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+                
+                @if (activity.Documents != null && activity.Documents.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var document in activity.Documents)
+                        {
+                            <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-file-earmark-bar-graph'></i>"))"
+                                          Title="@document.Name"
+                                          Subtitle="@document.CreatedAt.ToString("yyyy-MM-dd HH:mm")">
+                                <Actions>
+                                    <button @onclick="() => DownloadDocument(document.Id, document.Name)" class="btn btn-primary" disabled="@isDownloading">
+                                        @if (isDownloading && downloadingDocumentId == document.Id)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        }
+                                        <i class='bi bi-download'></i> Ladda ner fil
+                                    </button>
+                                </Actions>
+                            </ListCardItem>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>Inga dokument kopplade till denna aktivitet.</p>
+                }
+            </ChildContent>
+        </ListCard>
+    </div>
+}

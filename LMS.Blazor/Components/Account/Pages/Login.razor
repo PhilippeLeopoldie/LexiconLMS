@@ -20,8 +20,9 @@
 
 <div class="login-form">
     <div class="row h-100 d-flex justify-content-center align-items-center">
-        <div class="col-md-4">
+        <div class="col-md-4 lms-login-form">
             <Section Title="Logga in">
+                <div class="lms-section_login_body">
                 <StatusMessage Message="@errorMessage" />
                 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                     <DataAnnotationsValidator />
@@ -48,6 +49,7 @@
                         <button type="submit" class="w-100 btn btn-lg btn-primary">Logga in</button>
                     </div>
                 </EditForm>
+                </div>
             </Section>
         </div>
     </div>
@@ -91,7 +93,7 @@
         ApplicationUser? user = await UserManager.FindByEmailAsync(Input.Email);
         if (user == null)
         {
-            errorMessage = "E-post eller lösenord är felaktig";
+            errorMessage = " Fel: E-post eller lösenord är felaktig";
             return;
         }
 
@@ -104,13 +106,13 @@
 
             if (tokens is null)
             {
-                errorMessage = "Misslyckades att logga in. Vänligen försök igen.";
+                errorMessage = "Fel: Misslyckades att logga in. Vänligen försök igen.";
                 return;
             }
         }
         catch (HttpRequestException)
         {
-            errorMessage = "Misslyckades att logga in. Vänligen försök igen.";
+            errorMessage = "Fel: Misslyckades att logga in. Vänligen försök igen.";
             return;
         }
 

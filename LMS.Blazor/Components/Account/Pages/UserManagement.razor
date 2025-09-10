@@ -34,13 +34,15 @@
                         <ValidationSummary class="text-danger" role="alert" />
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-12">
                                 <div class="form-floating mb-3">
                                     <InputText @bind-Value="InviteInput.Email" class="form-control" placeholder="E-post" />
                                     <label for="email">E-post</label>
                                     <ValidationMessage For="() => InviteInput.Email" class="text-danger" />
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <InputText @bind-Value="InviteInput.FirstName" class="form-control" placeholder="Förnamn" />
@@ -48,9 +50,7 @@
                                     <ValidationMessage For="() => InviteInput.FirstName" class="text-danger" />
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <InputText @bind-Value="InviteInput.LastName" class="form-control" placeholder="Efternamn" />
@@ -58,6 +58,8 @@
                                     <ValidationMessage For="() => InviteInput.LastName" class="text-danger" />
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <InputSelect @bind-Value="InviteInput.Role" class="form-control">
@@ -70,9 +72,7 @@
                                     <ValidationMessage For="() => InviteInput.Role" class="text-danger" />
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <InputSelect @bind-Value="InviteInput.CourseId" class="form-control">

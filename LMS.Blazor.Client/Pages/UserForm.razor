@@ -23,41 +23,41 @@ else
                 <DataAnnotationsValidator />
                 <ValidationSummary />
 
-                <div class="mb-3">
+                <div class="mb-3 col-12 col-md-6">
                     <label class="form-label">Fullständigt namn</label>
                     <InputText class="form-control" @bind-Value="user.FullName" disabled="true" />
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 col-12 col-md-6">
                     <label class="form-label">Användarnamn</label>
                     <InputText class="form-control" @bind-Value="user.UserName" disabled="true" />
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 col-12">
                     <label class="form-label">Email</label>
                     <InputText class="form-control" @bind-Value="user.Email" disabled="true" />
                     <ValidationMessage For="@(() => user.Email)" />
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 col-12 col-md-6">
                     <label class="form-label">Förnamn</label>
                     <InputText class="form-control" @bind-Value="user.FirstName" />
                     <ValidationMessage For="() => user.FirstName" />
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 col-12 col-md-6">
                     <label class="form-label">Efternamn</label>
                     <InputText class="form-control" @bind-Value="user.LastName" />
                     <ValidationMessage For="() => user.LastName" />
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 col-12 col-md-6">
                     <label class="form-label">Telefonnummer</label>
                     <InputText class="form-control" @bind-Value="user.PhoneNumber" />
                     <ValidationMessage For="() => user.PhoneNumber" />
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 col-12 col-md-6">
                     <label class="form-label">Roll</label>
                     <InputSelect class="form-select" @bind-Value="user.Role">
                         <option value="Student">Student</option>

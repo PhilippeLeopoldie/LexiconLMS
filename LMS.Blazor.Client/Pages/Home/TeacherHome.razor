@@ -70,7 +70,7 @@
                             {
                                 <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, $"<i class='bi bi-file-earmark'></i>"))"
                                 Title="@itm.Name" Subtitle="@itm.Description"
-                                Meta="@(builder => builder.AddContent(0, itm.CreatedAt))"
+                                                  Meta="@(builder => builder.AddContent(0, itm.CreatedAt.ToString("yyyy-MM-dd HH:mm")))"
                                 Actions="@(builder => builder.AddMarkupContent(0,""))" />
                             }
                         }
