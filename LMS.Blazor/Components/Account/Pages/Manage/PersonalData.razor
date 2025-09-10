@@ -5,23 +5,24 @@
 <PageTitle>Personlig Data</PageTitle>
 
 <StatusMessage />
-<h3>Personlig Data</h3>
+<Section title="Personlig Data">
 
-<div class="row">
-    <div class="col-md-6">
-        <p>Ditt konto innehåller personlig data som du delat med oss. Denna sida låter dig ladda ner och radera denna data</p>
-        <p>
-            <strong>Radering av denna data medför definitiv radering av ditt konto och detta kan inte återskapas.</strong>
-        </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
-            <AntiforgeryToken />
-            <button class="btn btn-primary" type="submit">Ladda ner</button>
-        </form>
-        <p>
-            <a href="Account/Manage/DeletePersonalData" class="btn btn-danger">Radera</a>
-        </p>
+    <div class="row">
+        <div class="col-md-6">
+            <p>Ditt konto innehåller personlig data som du delat med oss. Denna sida låter dig ladda ner och radera denna data</p>
+            <p>
+                <strong>Radering av denna data medför definitiv radering av ditt konto och detta kan inte återskapas.</strong>
+            </p>
+            <form action="Account/Manage/DownloadPersonalData" method="post">
+                <AntiforgeryToken />
+                <button class="w-100 btn btn-lg btn-primary" type="submit">Ladda ner</button>
+            </form>
+            <p>
+                <a href="Account/Manage/DeletePersonalData" class="w-100 btn btn-lg btn-danger">Radera</a>
+            </p>
+        </div>
     </div>
-</div>
+</Section>
 
 @code {
     [CascadingParameter]
