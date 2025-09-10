@@ -35,16 +35,28 @@ else
                                             {
                                                 var activityCount = module.Activities?.Count() ?? 0;
                                                 <div class="d-flex w-100">
-                                                    <NavLink class="nav-link flex-grow-1 mt-1" href="@($"/courses/{CourseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
-                                                        <CourseRow 
-                                                            Title="@($"{module.Name}   ({module.StartsAt:d}  -  {module.EndsAt:d})")" 
+                                                    
+                                                        
+                                                        <ModuleRow 
+                                                            
+                                                            
                                                             Sub="@($"{activityCount} Aktiviteter")"
+                                                            MenuContentSecondary="@ModuleInfo(module)"
                                                             MenuContent="@ModuleMenu(module)"
+                                                            
                                                         >
+                                                        
                                                             <Icon><i class="bi bi-cpu"></i></Icon>
+                                                    <Title>
+                                                        <NavLink href="@($"/courses/{CourseId}/modules/{module.Id}/activities")" Match="@NavLinkMatch.All">
+                                                            @module.Name (@module.StartsAt:d - @module.EndsAt:d)
+                                                        </NavLink>
+                                                    </Title>
                                                             <Suffix><DateBadge Start="@module.StartsAt" End="@module.EndsAt" /></Suffix>
-                                                        </CourseRow>
-                                                    </NavLink>
+                                                            
+                                                        </ModuleRow>
+                                                        
+                                                    
                                         </div>
                                     }
                                 }
@@ -77,6 +89,33 @@ else
                 </ul>
             </div>
         </AuthorizeView>
-        
+
     };
+
+    // track which module's info is expanded
+    private HashSet<int> expandedModules = new();
+
+    private RenderFragment ModuleInfo(ModuleDto module) => __builder =>
+    {
+        <div>
+            <button class="btn btn-link"
+                    @onclick="() => ToggleModuleInfo(module.Id)">
+                @(expandedModules.Contains(module.Id) ? "Dölj" : "Visa mer")
+            </button>
+
+            @if (expandedModules.Contains(module.Id))
+            {
+                <ModuleDescription Module="@module" />
+            }
+        </div>
+;
+    };
+
+    private void ToggleModuleInfo(int moduleId)
+    {
+        if (expandedModules.Contains(moduleId))
+            expandedModules.Remove(moduleId);
+        else
+            expandedModules.Add(moduleId);
+    }
 }

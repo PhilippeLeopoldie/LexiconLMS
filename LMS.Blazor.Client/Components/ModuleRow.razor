@@ -1,0 +1,45 @@
+﻿<li class="lms-module">
+    <div class="lms-module__left">
+        <span class="lms-module__icon">@Icon</span>
+        <div>
+            <div class="lms-module__title">@Title</div>
+            @if (!string.IsNullOrWhiteSpace(Sub))
+            {
+                <div class="lms-module__sub">@Sub</div>
+            }
+        </div>
+    </div>
+    @if (MenuContentSecondary != null)
+    {
+        <div class="custom-menu">
+            @MenuContentSecondary
+        </div>
+    }
+    <div class="lms-module__right">
+        @Suffix
+        @if (MenuContent != null)
+        {
+            <div class="custom-menu">
+                @MenuContent
+            </div>
+        }
+        else if (HasMenu)
+        {
+            <button class="btn btn-sm btn-link lms-module__menu" @onclick="OnMenuClick">
+                <i class="bi bi-three-dots"></i>
+            </button>
+        }
+    </div>
+</li>
+
+@code {
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public RenderFragment? Title { get; set; }
+    [Parameter] public string? Sub { get; set; }
+    [Parameter] public bool HasMenu { get; set; } = true;
+    [Parameter] public RenderFragment? Suffix { get; set; }
+    [Parameter] public EventCallback OnMenuClick { get; set; }
+    [Parameter] public RenderFragment? MenuContent { get; set; }
+    [Parameter] public RenderFragment? MenuContentSecondary { get; set; }
+}
+
