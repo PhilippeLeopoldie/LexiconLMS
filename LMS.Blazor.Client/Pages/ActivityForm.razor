@@ -22,7 +22,8 @@
         }
         else
         {
-            <h3>@(IsEditMode ? "Redigera aktivitet" : "Skapa aktivitet") för @module?.Name</h3>
+                <h3>@(IsEditMode ? "Redigera aktivitet" : "Skapa aktivitet") 
+                    för @module?.Name (@module?.StartsAt.ToString("yyyy-MM-dd") - @module?.EndsAt.ToString("yyyy-MM-dd"))</h3>
             <hr />
 
             <EditForm Model="@activityDto" OnValidSubmit="HandleSubmit" FormName="ActivityForm">
