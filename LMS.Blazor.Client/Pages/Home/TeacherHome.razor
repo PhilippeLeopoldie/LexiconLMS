@@ -49,7 +49,7 @@
                             {
                                 @foreach (var course in courses)
                                 {
-                                        <CourseRow Title="@($"{course.Name} ({course.Starts:d} - {course.Ends:d})")" Sub="@($"{course.Students?.Count()} studenter • {course.Modules?.Count()} moduler")" HasMenu="false">
+                                        <CourseRow Title="@($"{course.Name} ({course.Starts.ToString("yyyy-MM-dd")} - {course.Ends.ToString("yyyy-MM-dd")})")" Sub="@($"{course.Students?.Count()} studenter • {course.Modules?.Count()} moduler")" HasMenu="false">
                                         <Icon><i class="bi bi-journal-code"></i></Icon>
                                         <Suffix><DateBadge Start="@course.Starts" End="@course.Ends"/></Suffix>
                                     </CourseRow>

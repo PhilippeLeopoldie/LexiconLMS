@@ -8,7 +8,7 @@ public record UserBasicDto(string Id,
                           string? FirstName,
                           string? LastName,
                           string? PhoneNumber,
-                          UserRole Role = UserRole.Student,
-                          int? CourseId = null,
-                          bool HasPassword = false
+                          UserRole Role,
+                          int? CourseId,
+                          bool HasPassword
                          );

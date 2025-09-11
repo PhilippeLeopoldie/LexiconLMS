@@ -9,7 +9,7 @@ public class RequestParams
     public int Page { get; set; } = 1;
 
     [Range(2, 100)]
-    public int PageSize { get; set; } = 5;
+    public int PageSize { get; set; } = 20;
 
     public OrderByParams? OrderBy { get; set; }
     public string? SearchTerm { get; set; }

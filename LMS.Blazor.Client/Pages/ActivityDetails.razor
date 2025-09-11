@@ -36,6 +36,7 @@ else if (activity != null)
              </ChildContent>
     </Section>
     <div class="mt-3">
+        @* Teacher documents section *@
         <ListCard Title="Dokument">
             <HeaderActions>
                 @if (isTeacher)
@@ -102,5 +103,112 @@ else if (activity != null)
                 }
             </ChildContent>
         </ListCard>
+
+        @* Assignment submissions section - only for "Inlämningsuppgift" activities *@
+        @if (activity.ActivityType.Id == 4)
+        {
+            <div class="mt-3">
+                <ListCard Title="@(isTeacher ? "Inlämnade uppgifter" : "Min inlämning")">
+                    <HeaderActions>
+                        @if (!isTeacher)
+                        {
+                            <button @onclick="ToggleSubmissionForm" class="btn btn-outline-success me-2" disabled="@isSubmitting">
+                                <i class="bi bi-upload"></i> Lämna in uppgift
+                            </button>
+                        }
+                    </HeaderActions>
+                    <ChildContent>
+                        @if (showSubmissionForm && !isTeacher)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">Lämna in uppgift</h6>
+                                    <div class="mb-3">
+                                        <label for="submissionInput" class="form-label">Välj fil att lämna in</label>
+                                        <InputFile id="submissionInput" class="form-control" OnChange="OnSubmissionFileSelected" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar" />
+                                        @if (!string.IsNullOrEmpty(selectedSubmissionFileName))
+                                        {
+                                            <div class="form-text">Vald fil: @selectedSubmissionFileName</div>
+                                        }
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button @onclick="SubmitAssignment" class="btn btn-success" disabled="@(isSubmitting || selectedSubmissionFile == null)">
+                                            @if (isSubmitting)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            }
+                                            <i class="bi bi-check-circle"></i> Lämna in
+                                        </button>
+                                        <button @onclick="CancelSubmission" class="btn btn-secondary" disabled="@isSubmitting">
+                                            Avbryt
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @* Show submissions based on user role *@
+                        @if (isTeacher)
+                        {
+                            @* Teachers see all submissions *@
+                            @if (submissions != null && submissions.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var submission in submissions)
+                                    {
+                                        <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-file-earmark-check'></i>"))"
+                                                      Title="@submission.Name"
+                                                      Subtitle="@($"Inlämnad: {submission.CreatedAt.ToString("yyyy-MM-dd HH:mm")}")">
+                                            <Actions>
+                                                <button @onclick="() => DownloadDocument(submission.Id, submission.Name)" class="btn btn-primary" disabled="@isDownloading">
+                                                    @if (isDownloading && downloadingDocumentId == submission.Id)
+                                                    {
+                                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                    }
+                                                    <i class='bi bi-download'></i> Ladda ner
+                                                </button>
+                                            </Actions>
+                                        </ListCardItem>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>Inga inlämningar ännu.</p>
+                            }
+                        }
+                        else
+                        {
+                            @* Students see only their own submissions *@
+                            @if (userSubmissions != null && userSubmissions.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var submission in userSubmissions)
+                                    {
+                                        <ListCardItem Icon="@(builder => builder.AddMarkupContent(0, "<i class='bi bi-file-earmark-check'></i>"))"
+                                                      Title="@submission.Name"
+                                                      Subtitle="@($"Inlämnad: {submission.CreatedAt.ToString("yyyy-MM-dd HH:mm")}")">
+                                            <Actions>
+                                                <button @onclick="() => DownloadDocument(submission.Id, submission.Name)" class="btn btn-primary" disabled="@isDownloading">
+                                                    @if (isDownloading && downloadingDocumentId == submission.Id)
+                                                    {
+                                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                    }
+                                                    <i class='bi bi-download'></i> Ladda ner
+                                                </button>
+                                            </Actions>
+                                        </ListCardItem>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>Du har inte lämnat in någon uppgift ännu.</p>
+                            }
+                        }
+                    </ChildContent>
+                </ListCard>
+            </div>
+        }
     </div>
 }

@@ -17,7 +17,27 @@ namespace LMS.Services
 
             PagedList<ApplicationUser> pagedUsers = await unitOfWork.UserRepository.GetAllUsersAsync(parameter, includeDocuments, trackChanges);
 
-            var usersDto = mapper.Map<IEnumerable<UserBasicDto>>(pagedUsers.Items);
+            var usersDto = new List<UserBasicDto>();
+            foreach (var user in pagedUsers.Items)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault();
+                var userRole = Enum.TryParse<UserRole>(role, out var parsedRole) ? parsedRole : UserRole.Student;
+                
+                var userDto = new UserBasicDto(
+                    user.Id,
+                    user.UserName ?? string.Empty,
+                    user.Email ?? string.Empty,
+                    user.FirstName,
+                    user.LastName,
+                    user.PhoneNumber,
+                    userRole,
+                    user.CourseId,
+                    !string.IsNullOrEmpty(user.PasswordHash)
+                );
+                
+                usersDto.Add(userDto);
+            }
 
             return (usersDto, pagedUsers.MetaData);
         }
@@ -27,7 +47,27 @@ namespace LMS.Services
             ArgumentNullException.ThrowIfNull(parameter, nameof(parameter));
             var pagedUsers = await unitOfWork.UserRepository.GetStudentsByCourseAsync(parameter, courseId, includeDocuments, trackChanges);
 
-            var usersDto = mapper.Map<IEnumerable<UserBasicDto>>(pagedUsers.Items);
+            var usersDto = new List<UserBasicDto>();
+            foreach (var user in pagedUsers.Items)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault();
+                var userRole = Enum.TryParse<UserRole>(role, out var parsedRole) ? parsedRole : UserRole.Student;
+                
+                var userDto = new UserBasicDto(
+                    user.Id,
+                    user.UserName ?? string.Empty,
+                    user.Email ?? string.Empty,
+                    user.FirstName,
+                    user.LastName,
+                    user.PhoneNumber,
+                    userRole,
+                    user.CourseId,
+                    !string.IsNullOrEmpty(user.PasswordHash)
+                );
+                
+                usersDto.Add(userDto);
+            }
 
             return (usersDto, pagedUsers.MetaData);
         }
@@ -36,7 +76,22 @@ namespace LMS.Services
         {
             var user = await userManager.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException($"User with ID {id} was not found");
-            return mapper.Map<UserBasicDto>(user);
+            
+            var roles = await userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+            var userRole = Enum.TryParse<UserRole>(role, out var parsedRole) ? parsedRole : UserRole.Student;
+            
+            return new UserBasicDto(
+                user.Id,
+                user.UserName ?? string.Empty,
+                user.Email ?? string.Empty,
+                user.FirstName,
+                user.LastName,
+                user.PhoneNumber,
+                userRole,
+                user.CourseId,
+                !string.IsNullOrEmpty(user.PasswordHash)
+            );
         }
 
         public async Task<UserBasicDto> InviteAsync(UserInviteDto userInviteDto)
@@ -70,7 +125,21 @@ namespace LMS.Services
             await emailSender.SendPasswordResetLinkAsync(user, user.Email!, registrationUrl);
 
             await unitOfWork.CompleteAsync();
-            return mapper.Map<UserBasicDto>(user);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+            var userRole = Enum.TryParse<UserRole>(role, out var parsedRole) ? parsedRole : UserRole.Student;
+            
+            return new UserBasicDto(
+                user.Id,
+                user.UserName ?? string.Empty,
+                user.Email ?? string.Empty,
+                user.FirstName,
+                user.LastName,
+                user.PhoneNumber,
+                userRole,
+                user.CourseId,
+                !string.IsNullOrEmpty(user.PasswordHash)
+            );
         }
 
 
@@ -111,7 +180,21 @@ namespace LMS.Services
             {
                 throw new InvalidOperationException($"Failed to update user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
-            return mapper.Map<UserBasicDto>(updatedUser);
+            var roles = await userManager.GetRolesAsync(updatedUser);
+            var role = roles.FirstOrDefault();
+            var userRole = Enum.TryParse<UserRole>(role, out var parsedRole) ? parsedRole : UserRole.Student;
+            
+            return new UserBasicDto(
+                updatedUser.Id,
+                updatedUser.UserName ?? string.Empty,
+                updatedUser.Email ?? string.Empty,
+                updatedUser.FirstName,
+                updatedUser.LastName,
+                updatedUser.PhoneNumber,
+                userRole,
+                updatedUser.CourseId,
+                !string.IsNullOrEmpty(updatedUser.PasswordHash)
+            );
         }
 
         public async Task DeleteAsync(string id)
