@@ -7,6 +7,7 @@ It provides scheduling, course materials, assignments, and submissions all in on
 
 ## 📑 Table of Contents
 - [📌 Project Overview](#-project-overview)
+- [🏠 App Home Page](#-app-home-page)
 - [📐 Clean Architecture Overview](#-clean-architecture-overview)
 - [📋 Core Features](#-core-features)
   - [👥 Users](#-users)
@@ -15,6 +16,7 @@ It provides scheduling, course materials, assignments, and submissions all in on
   - [📄 Documents & Submissions](#-documents--submissions)
 - [🛠️ Technologies Used](#-technologies-used)
 - [🚀 Getting Started](#-getting-started)
+- [🧪 Testing](#-testing) onGoing
 - [🌀 Scrum Process](#-scrum-process)
 
 ---
@@ -45,7 +47,7 @@ The solution follows **Clean Architecture** for scalability and maintainability:
   Communicates with the API via `HttpClient`.
 
 - 🧪 **Tests**  
-  Unit tests for services and controllers (xUnit, optional TDD).
+  Ongoing Unit tests for services and controllers (xUnit, optional TDD).
 
 ---
 
@@ -98,3 +100,10 @@ The solution follows **Clean Architecture** for scalability and maintainability:
    ```bash
    git clone https://github.com/YourUser/LexiconLMS.git
    cd LexiconLMS
+
+
+## 🧪 Testing
+- Unit tests with xUnit: Ongoing.
+- Mocks for Infrastructure to ensure isolated testing.
+
+  
