@@ -15,8 +15,6 @@ It provides scheduling, course materials, assignments, and submissions all in on
   - [📄 Documents & Submissions](#-documents--submissions)
 - [🛠️ Technologies Used](#-technologies-used)
 - [🚀 Getting Started](#-getting-started)
-- [🧪 Testing](#-testing)
-- [🌐 Deployment](#-deployment)
 - [🌀 Scrum Process](#-scrum-process)
 
 ---
