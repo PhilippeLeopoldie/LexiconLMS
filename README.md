@@ -6,7 +6,7 @@ It provides scheduling, course materials, assignments, and submissions all in on
 ---
 
 ## 📑 Table of Contents
-- [📌 Project Overview](#project-overview)
+- [📌 Project Overview](#-project-overview)
 - [📐 Clean Architecture Overview](#-clean-architecture-overview)
 - [📋 Core Features](#-core-features)
   - [👥 Users](#-users)
