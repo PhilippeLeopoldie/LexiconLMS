@@ -7,7 +7,6 @@ It provides scheduling, course materials, assignments, and submissions all in on
 
 ## 📑 Table of Contents
 - [📌 Project Overview](#project-overview)
-- [🏠 App Home Page](#-app-home-page)
 - [📐 Clean Architecture Overview](#-clean-architecture-overview)
 - [📋 Core Features](#-core-features)
   - [👥 Users](#-users)
@@ -22,16 +21,11 @@ It provides scheduling, course materials, assignments, and submissions all in on
 
 ---
 
-## Project Overview
+## 📌 Project Overview
 Lexicon LMS (LexNET) is designed to:
 - Give **students** quick access to courses, modules, schedules, and assignments.
 - Allow **teachers** to easily manage classes, modules, activities, and documents.
 - Keep the system **lightweight, user-friendly, and responsive** compared to traditional heavy LMS platforms.
-
----
-
-## 🏠 App Home Page
-![LMS Homepage](wwwroot/Images/HomePage.png)
 
 ---
 
